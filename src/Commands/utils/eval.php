@@ -33,7 +33,10 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
+            $messages = array();
+            $prev = null;
+            
+            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args, &$messages, &$prev) {
                 $code = $args['script'];
                 if(\mb_substr($code, -1) !== ';') {
                     $code .= ';';
@@ -45,7 +48,7 @@ return function ($client) {
                     $code = \implode(';', $code);
                 }
                 
-                \React\Promise\resolve()->then(function () use ($code, $message) {
+                \React\Promise\resolve()->then(function () use ($code, $message, &$messages, &$prev) {
                     $messages = array();
                     $time = null;
                     
@@ -123,8 +126,8 @@ return function ($client) {
                     });
                 })->then(function ($pr) {
                     return $pr;
-                }, function ($e) use ($code, $message, &$messages) {
-                    while(@\ob_end_clean());
+                }, function ($e) use ($code, $message, &$messages, &$prev) {
+                    \set_error_handler($prev);
                     
                     $e = (string) $e;
                     $len = \mb_strlen($e);
