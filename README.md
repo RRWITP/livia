@@ -26,10 +26,10 @@ The following commands are coming with Livia:
 * load (load new commands)
 * reload (reload command(s))
 * unload (unload a command)
-* eval (evaluates PHP code) (it has a callback function on `$doCallback` (yes, it's an anonymous function) which takes whatever value you give, inspects it and sends it as reply to Discord)
-* help (Displays a help message in DM)
-* ping (Calculates the bot's latency)
-* prefix (Gets or sets the bot's prefix in the guild/globally)
+* eval (evaluates PHP code, all PHP errors get thrown - defines randomized eval namespace for eval execution - it has a callback function on `$doCallback` which takes whatever value you give, inspects it and sends it as reply to Discord))
+* help (displays a help message in DM)
+* ping (calculates the bot's latency)
+* prefix (gets or sets the bot's prefix in the guild/globally)
 
 # Making Commands
 Livia features Commands Reloading, which requires you to return an anonymous function in your command file, which returns a new anonymous class.
