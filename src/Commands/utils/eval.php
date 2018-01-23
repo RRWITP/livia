@@ -75,12 +75,7 @@ return function ($client) {
                     };
                     
                     $prev = \set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-                        if(\error_reporting() == 0) {
-                            return true;
-                        }
-                        
-                        $error = new \ErrorException($errstr, 0, $errno, $errfile, $errline);
-                        throw $error;
+                        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
                     });
                     
                     $endtime = null;
