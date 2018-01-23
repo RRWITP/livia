@@ -74,6 +74,15 @@ return function ($client) {
                         $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed after '.$exectime.$this->timeformats[$format].' (callback).'.PHP_EOL.PHP_EOL.'```php'.PHP_EOL.$result.PHP_EOL.'```'.($len > $maxlen ? PHP_EOL.'Original length: '.$len : ''));
                     };
                     
+                    $prev = \set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+                        if(\error_reporting() == 0) {
+                            return true;
+                        }
+                        
+                        $error = new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+                        throw $error;
+                    });
+                    
                     $endtime = null;
                     $time = \microtime(true);
                     
@@ -86,6 +95,8 @@ return function ($client) {
                         $endtime = \microtime(true);
                         $result = \React\Promise\resolve($result);
                     }
+                    
+                    \set_error_handler($prev);
                     
                     return $result->then(function ($result) use ($code, $message, &$messages, $endtime, $time) {
                         if($endtime === null) {
