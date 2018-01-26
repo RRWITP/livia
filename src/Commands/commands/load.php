@@ -36,7 +36,7 @@ return function ($client) {
                             try {
                                 $this->client->registry->resolveCommandPath($value[0], $value[1]);
                                 return true;
-                            } catch(\Exception $e) {
+                            } catch(\InvalidArgumentException $e) {
                                 return false;
                             }
                         },

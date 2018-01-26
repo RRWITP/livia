@@ -169,13 +169,7 @@ class CommandDispatcher {
                     $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, array());
                     $resolve();
                 }
-            } catch(\Throwable $error) {
-                $this->client->emit('error', $error);
-                throw $error;
-            } catch(\Exception $error) {
-                $this->client->emit('error', $error);
-                throw $error;
-            } catch(\ErrorException $error) {
+            } catch(\Throwable | \Exception | \Error $error) {
                 $this->client->emit('error', $error);
                 throw $error;
             }

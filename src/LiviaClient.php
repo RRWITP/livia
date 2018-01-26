@@ -42,7 +42,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @param array                           $options  Any Client Options.
      * @param \React\EventLoop\LoopInterface  $loop
      */
-    function __construct(array $options, \React\EventLoop\LoopInterface $loop = null) {
+    function __construct(array $options = array(), ?\React\EventLoop\LoopInterface $loop = null) {
         if(!\array_key_exists('commandPrefix', $options)) {
             $options['commandPrefix'] = 'l$';
         }
@@ -190,7 +190,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @param \CharlotteDunois\Yasmin\Models\Guild|null  $guild
      * @return string|null
      */
-    function getGuildPrefix(\CharlotteDunois\Yasmin\Models\Guild $guild = null) {
+    function getGuildPrefix(?\CharlotteDunois\Yasmin\Models\Guild $guild = null) {
         if($guild !== null && $this->provider !== null) {
             try {
                 $prefix = $this->provider->get($guild, 'commandPrefix', 404);
@@ -211,7 +211,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @param string|null                                $prefix
      * @return bool
      */
-    function setGuildPrefix(\CharlotteDunois\Yasmin\Models\Guild $guild, string $prefix = null) {
+    function setGuildPrefix(?\CharlotteDunois\Yasmin\Models\Guild $guild, string $prefix = null) {
         $this->emit('commandPrefixChange', $guild, $prefix);
         return true;
     }

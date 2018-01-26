@@ -458,7 +458,7 @@ class CommandRegistry {
      * @param string  $groupID
      * @param string  $command
      * @return string
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     function resolveCommandPath(string $groupID, string $command) {
         $paths = array($this->commandsPath.'/'.\mb_strtolower($groupID), __DIR__.'/Commands/'.\mb_strtolower($groupID));
