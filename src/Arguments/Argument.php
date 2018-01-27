@@ -103,6 +103,7 @@ class Argument {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -110,10 +111,11 @@ class Argument {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Arguments\Argument::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Arguments\Argument::'.$name);
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __call($name, $args) {
@@ -124,7 +126,7 @@ class Argument {
             }
         }
         
-        throw new \Exception('Unknown method \CharlotteDunois\Livia\Arguments\Argument::'.$name);
+        throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\Arguments\Argument::'.$name);
     }
     
     /**

@@ -211,6 +211,7 @@ abstract class Command {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -224,7 +225,7 @@ abstract class Command {
             break;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Commands\Command::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Commands\Command::'.$name);
     }
     
     /**

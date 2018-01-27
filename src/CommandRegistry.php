@@ -38,6 +38,7 @@ class CommandRegistry {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -45,7 +46,7 @@ class CommandRegistry {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\CommandRegistry::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandRegistry::'.$name);
     }
     
     /**

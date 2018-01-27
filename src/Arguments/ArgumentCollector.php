@@ -59,6 +59,7 @@ class ArgumentCollector {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -66,7 +67,7 @@ class ArgumentCollector {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Arguments\ArgumentCollector::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Arguments\ArgumentCollector::'.$name);
     }
     
     /**

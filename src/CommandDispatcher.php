@@ -38,6 +38,7 @@ class CommandDispatcher {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -45,7 +46,7 @@ class CommandDispatcher {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\CommandDispatcher::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandDispatcher::'.$name);
     }
     
     /**

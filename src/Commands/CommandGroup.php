@@ -53,6 +53,7 @@ class CommandGroup {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -60,7 +61,7 @@ class CommandGroup {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Commands\CommandGroup::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Commands\CommandGroup::'.$name);
     }
     
     /**

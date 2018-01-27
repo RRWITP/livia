@@ -28,6 +28,7 @@ abstract class ArgumentType {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -35,7 +36,7 @@ abstract class ArgumentType {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Types\ArgumentType::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Types\ArgumentType::'.$name);
     }
     
     /**

@@ -43,6 +43,7 @@ class CommandMessage {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -58,10 +59,11 @@ class CommandMessage {
             /* Continue regardless of error */
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\CommandMessage::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandMessage::'.$name);
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __call($name, $args) {
@@ -69,7 +71,7 @@ class CommandMessage {
             return $this->message->$name(...$args);
         }
         
-        throw new \Exception('Unknown method \CharlotteDunois\Livia\CommandMessage::'.$name);
+        throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\CommandMessage::'.$name);
     }
     
     /**
