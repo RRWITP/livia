@@ -138,7 +138,7 @@ class Argument {
      * @return \React\Promise\Promise
      */
     function obtain(\CharlotteDunois\Livia\CommandMessage $message, $value, $promptLimit = \INF, array $prompts = array(), array $answers = array(), $valid = null) {
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $promptLimit, $prompts, $answers, $valid) {
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $promptLimit, &$prompts, &$answers, $valid) {
             $empty = ($this->emptyChecker !== null ? $this->emptyChecker($value, $message, $this) : ($this->type !== null ? $this->type->isEmpty($value, $message, $this) : $value === null));
             if($empty && $this->default !== null) {
                 return $resolve(array(
@@ -166,7 +166,7 @@ class Argument {
                     $validate = \React\Promise\resolve($validate);
                 }
                 
-                return $validate->then(function ($valid) use ($message, $value, $promptLimit, $prompts, $answers) {
+                return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$prompts, &$answers) {
                     if($valid !== true) {
                         return $this->obtain($message, $value, $promptLimit, $prompts, $answers, $valid);
                     }
@@ -176,7 +176,7 @@ class Argument {
                         $parse = \React\Promise\resolve($parse);
                     }
                     
-                    return $parse->then(function ($value) use ($prompts, $answers) {
+                    return $parse->then(function ($value) use (&$prompts, &$answers) {
                         return array(
                             'value' => $value,
                             'cancelled' => null,
@@ -210,7 +210,7 @@ class Argument {
             }
             
             // Prompt the user for a new value
-            $reply->then(function ($msg) use ($message, $promptLimit, $prompts, $answers, $resolve, $reject) {
+            $reply->then(function ($msg) use ($message, $promptLimit, &$prompts, &$answers, $resolve, $reject) {
                             if($msg !== null) {
                                 $prompts[] = $msg;
                             }
@@ -221,7 +221,7 @@ class Argument {
                             }, array(
                                 'max' => 1,
                                 'time' => $this->wait
-                            ))->then(function ($messages) use ($message, $promptLimit, $prompts, $answers) {
+                            ))->then(function ($messages) use ($message, $promptLimit, &$prompts, &$answers) {
                                 if($messages->count() === 0) {
                                     return array(
                                         'value' => null,
@@ -250,7 +250,7 @@ class Argument {
                                     $validate = \React\Promise\resolve($validate);
                                 }
                                 
-                                return $validate->then(function ($valid) use ($message, $value, $promptLimit, $prompts, $answers) {
+                                return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$prompts, &$answers) {
                                     if($valid !== true) {
                                         return $this->obtain($message, $value, $promptLimit, $prompts, $answers, $valid);
                                     }
@@ -260,7 +260,7 @@ class Argument {
                                         $parse = \React\Promise\resolve($parse);
                                     }
                                     
-                                    return $parse->then(function ($value) use ($prompts, $answers) {
+                                    return $parse->then(function ($value) use (&$prompts, &$answers) {
                                         return array(
                                             'value' => $value,
                                             'cancelled' => null,
@@ -269,13 +269,17 @@ class Argument {
                                         );
                                     });
                                 });
-                            }, function () use ($prompts, $answers) {
-                                return array(
-                                    'value' => null,
-                                    'cancelled' => 'time',
-                                    'prompts' => $prompts,
-                                    'answers' => $answers
-                                );
+                            }, function ($error) use (&$prompts, &$answers) {
+                                if($error instanceof \RangeException) {
+                                    return array(
+                                        'value' => null,
+                                        'cancelled' => 'time',
+                                        'prompts' => $prompts,
+                                        'answers' => $answers
+                                    );
+                                }
+                                
+                                throw $error;
                             })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
                         }, $reject);
         }));
@@ -390,13 +394,17 @@ class Argument {
                     
                     return ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
                 });
-            }, function () {
-                return array(
-                    'value' => null,
-                    'cancelled' => 'time',
-                    'prompts' => array(),
-                    'answers' => array()
-                );
+            }, function ($error) use(&$prompts, &$answers) {
+                if($error instanceof \RangeException) {
+                    return array(
+                        'value' => null,
+                        'cancelled' => 'time',
+                        'prompts' => $prompts,
+                        'answers' => $answers
+                    );
+                }
+                
+                throw $error;
             });
         });
     }
