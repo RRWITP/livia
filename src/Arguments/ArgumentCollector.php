@@ -82,24 +82,24 @@ class ArgumentCollector {
             $promptLimit = $this->promptLimit;
         }
         
-        return (new \React\Promise\Promise(function (callable $resolve) use ($message, $provided, $promptLimit) {
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $provided, $promptLimit) {
             $this->client->dispatcher->awaiting[] = $message->message->author->id.$message->message->channel->id;
             
             $values = array();
             $results = array();
             
             try {
-                $this->obtainNext($message, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($message, &$values, &$results, $resolve) {
+                $this->obtainNext($message, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($message, &$values, &$results) {
                     $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
                     if($key !== false) {
                         unset($this->client->dispatcher->awaiting[$key]);
                     }
                     
                     if($result !== null) {
-                        return $resolve($result);
+                        return $result;
                     }
                     
-                    $resolve(array(
+                    return array(
                         'values' => $values,
                         'cancelled' => null,
                         'prompts' => \array_merge(array(), ...\array_map(function ($res) {
@@ -108,7 +108,7 @@ class ArgumentCollector {
                         'answers' => \array_merge(array(), ...\array_map(function ($res) {
                             return $res['answers'];
                         }, $results))
-                    ));
+                    );
                 }, function ($error) use ($message) {
                     $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
                     if($key !== false) {
@@ -116,7 +116,7 @@ class ArgumentCollector {
                     }
                     
                     throw $error;
-                })->done(null, array($this->client, 'handlePromiseRejection'));
+                })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
             } catch(\Throwable | \Exception | \Error $error) {
                 $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
                 if($key !== false) {

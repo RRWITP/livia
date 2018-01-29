@@ -281,7 +281,7 @@ class Argument {
                                 
                                 throw $error;
                             })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
-                        }, $reject);
+                        }, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
         }));
     }
     
