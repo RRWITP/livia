@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -103,6 +103,7 @@ class Argument {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -110,10 +111,11 @@ class Argument {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Arguments\Argument::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Arguments\Argument::'.$name);
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __call($name, $args) {
@@ -124,7 +126,7 @@ class Argument {
             }
         }
         
-        throw new \Exception('Unknown method \CharlotteDunois\Livia\Arguments\Argument::'.$name);
+        throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\Arguments\Argument::'.$name);
     }
     
     /**
@@ -148,7 +150,12 @@ class Argument {
             }
             
             if($this->infinite) {
-                $this->obtainInfinite($message, ($value === null ? array() : (\is_array($value) ? $value : array($value))), $promptLimit)->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                if(!$empty && $value !== null) {
+                    $this->parseInfiniteProvided($message, (\is_array($value) ? $value : array($value)), $promptLimit)->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    return;
+                }
+                
+                $this->obtainInfinite($message, array(), $promptLimit)->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
                 return;
             }
             
@@ -279,16 +286,19 @@ class Argument {
      * @param \CharlotteDunois\Livia\CommandMessage  $message      Message that triggered the command.
      * @param string[]                               $values       Pre-provided values.
      * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
+     * @param array                                  $prompts
+     * @param array                                  $answers
+     * @param bool                                   $valid
      * @return \React\Promise\Promise
      */
-    protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, array &$prompts = array(), array &$answers = array()) {
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $values, $promptLimit, $prompts, $answers) {
+    protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, array &$prompts = array(), array &$answers = array(), bool $valid = null) {
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $values, $promptLimit, $prompts, $answers, $valid) {
             $value = null;
             if(!empty($values)) {
                 $value = $values[(\count($values) - 1)];
             }
             
-            $this->infiniteObtain($message, $value, $values, $promptLimit, $prompts, $answers)->then(function ($value) use ($message, $values, $promptLimit, $prompts, $answers, $resolve) {
+            $this->infiniteObtain($message, $value, $values, $promptLimit, $prompts, $answers, $valid)->then(function ($value) use ($message, $values, $promptLimit, $prompts, $answers, $resolve) {
                 if(\is_array($value)) {
                     return $resolve($value);
                 }
@@ -307,9 +317,8 @@ class Argument {
         } elseif($valid === false) {
             $escaped = \str_replace('@', "@\u{200B}", \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($value));
             
-            $reply = $message->reply('You provided an invalid '.$this->label.','.PHP_EOL.
-                '"'.(\mb_strlen($escaped) < 1850 ? $escaped : '[too long to show]').'".'.PHP_EOL.
-                'Please try again.');
+            $reply = $message->reply('You provided an invalid '.$this->label.', "'.(\mb_strlen($escaped) < 1850 ? $escaped : '[too long to show]').'". '.
+                                        'Please try again.');
         } elseif(\is_string($valid)) {
             $reply = $message->reply($valid.PHP_EOL.
                 'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.PHP_EOL.
@@ -390,5 +399,59 @@ class Argument {
                 );
             });
         });
+    }
+    
+    /**
+     * Parses the provided infinite arguments.
+     * @param \CharlotteDunois\Livia\CommandMessage  $message      Message that triggered the command.
+     * @param string[]                               $values       Pre-provided values.
+     * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
+     * @param int                                    $i            Current index of current argument value.
+     * @return \React\Promise\Promise
+     */
+    protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit, int $i = 0) {
+        if(empty($values)) {
+            return $this->obtainInfinite($message, array(), $promptLimit);
+        }
+        
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, &$values, $promptLimit, $i) {
+            $value = $values[$i];
+            $val = null;
+            
+            $validate = ($this->validate ? array($this, 'validate') : array($this->type, 'validate'))($value, $message, $this);
+            if(!($validate instanceof \React\Promise\PromiseInterface)) {
+                $validate = \React\Promise\resolve($validate);
+            }
+            
+            return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$val) {
+                if($valid !== true) {
+                    $val = $valid;
+                    $prompts = array();
+                    $answers = array();
+                    
+                    return $this->obtainInfinite($message, array($value), $promptLimit, $prompts, $answers, $valid);
+                }
+                
+                return ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
+            })->then(function ($value) use ($message, &$values, $promptLimit, $i, &$val) {
+                if($val !== null) {
+                    return $value;
+                }
+                
+                $values[$i] = $value;
+                $i++;
+                
+                if($i < \count($values)) {
+                    return $this->parseInfiniteProvided($message, $values, $promptLimit, $i);
+                }
+                
+                return array(
+                    'value' => $values,
+                    'cancelled' => null,
+                    'prompts' => array(),
+                    'answers' => array()
+                );
+            })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+        }));
     }
 }

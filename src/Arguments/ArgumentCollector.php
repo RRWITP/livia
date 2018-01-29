@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -59,6 +59,7 @@ class ArgumentCollector {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -66,7 +67,7 @@ class ArgumentCollector {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Arguments\ArgumentCollector::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Arguments\ArgumentCollector::'.$name);
     }
     
     /**
@@ -116,7 +117,7 @@ class ArgumentCollector {
                     
                     throw $error;
                 })->done(null, array($this->client, 'handlePromiseRejection'));
-            } catch(\Exception $error) {
+            } catch(\Throwable | \Exception | \Error $error) {
                 $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
                 if($key !== false) {
                     unset($this->client->dispatcher->awaiting[$key]);
@@ -142,7 +143,7 @@ class ArgumentCollector {
             return \React\Promise\resolve();
         }
         
-        return $this->args[$current]->obtain($message, (!empty($provided[$current]) ? (!empty($this->args[$current]->infinite) ? \array_slice($provided, $current) : $provided[$current]) : null), $promptLimit)->then(function ($result) use ($message, &$provided, $promptLimit, &$values, &$results, $current)  {
+        return $this->args[$current]->obtain($message, (!empty($provided[$current]) ? ($this->args[$current]->infinite ? \array_slice($provided, $current) : $provided[$current]) : null), $promptLimit)->then(function ($result) use ($message, &$provided, $promptLimit, &$values, &$results, $current)  {
             $results[] = $result;
             
             if($result['cancelled']) {

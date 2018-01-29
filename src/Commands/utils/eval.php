@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -33,7 +33,10 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
+            $messages = array();
+            $prev = null;
+            
+            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args, &$messages, &$prev) {
                 $code = $args['script'];
                 if(\mb_substr($code, -1) !== ';') {
                     $code .= ';';
@@ -45,7 +48,7 @@ return function ($client) {
                     $code = \implode(';', $code);
                 }
                 
-                \React\Promise\resolve()->then(function () use ($code, $message) {
+                \React\Promise\resolve()->then(function () use ($code, $message, &$messages, &$prev) {
                     $messages = array();
                     $time = null;
                     
@@ -74,15 +77,24 @@ return function ($client) {
                         $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed after '.$exectime.$this->timeformats[$format].' (callback).'.PHP_EOL.PHP_EOL.'```php'.PHP_EOL.$result.PHP_EOL.'```'.($len > $maxlen ? PHP_EOL.'Original length: '.$len : ''));
                     };
                     
+                    $prev = \set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+                        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+                    });
+                    
                     $endtime = null;
                     $time = \microtime(true);
                     
-                    $result = eval($code);
+                    $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
+                                    PHP_EOL.$code;
                     
-                    if(!($result instanceof \React\Promise\Promise)) {
+                    $result = eval($evalcode);
+                    
+                    if(!($result instanceof \React\Promise\PromiseInterface)) {
                         $endtime = \microtime(true);
                         $result = \React\Promise\resolve($result);
                     }
+                    
+                    \set_error_handler($prev);
                     
                     return $result->then(function ($result) use ($code, $message, &$messages, $endtime, $time) {
                         if($endtime === null) {
@@ -114,8 +126,8 @@ return function ($client) {
                     });
                 })->then(function ($pr) {
                     return $pr;
-                }, function ($e) use ($code, $message, &$messages) {
-                    while(@\ob_end_clean());
+                }, function ($e) use ($code, $message, &$messages, &$prev) {
+                    \set_error_handler($prev);
                     
                     $e = (string) $e;
                     $len = \mb_strlen($e);

@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -38,6 +38,7 @@ class CommandDispatcher {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -45,7 +46,7 @@ class CommandDispatcher {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\CommandDispatcher::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandDispatcher::'.$name);
     }
     
     /**
@@ -169,13 +170,7 @@ class CommandDispatcher {
                     $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, array());
                     $resolve();
                 }
-            } catch(\Throwable $error) {
-                $this->client->emit('error', $error);
-                throw $error;
-            } catch(\Exception $error) {
-                $this->client->emit('error', $error);
-                throw $error;
-            } catch(\ErrorException $error) {
+            } catch(\Throwable | \Exception | \Error $error) {
                 $this->client->emit('error', $error);
                 throw $error;
             }

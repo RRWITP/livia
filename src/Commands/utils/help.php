@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -75,10 +75,16 @@ return function ($client) {
                             $help .= PHP_EOL.'**Examples:**'.PHP_EOL.\implode(PHP_EOL, $command->examples);
                         }
                         
-                        $message->direct($help)->then(function () use ($message) {
-                            return $message->reply('Sent you a DM with information.');
+                        $message->direct($help)->then(function ($msg) use ($message) {
+                            if($message->message->channel->type !== 'dm') {
+                                return $message->reply('Sent you a DM with information.');
+                            }
+                            
+                            return $msg;
                         }, function () use ($message) {
-                            return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+                            if($message->message->channel->type !== 'dm') {
+                                return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+                            }
                         })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
                     } elseif($countCommands > 15) {
                         $resolve($message->reply('Multiple commands found. Please be more specific.'));
@@ -122,8 +128,16 @@ return function ($client) {
                                 return false;
                             })->all())));
                     
-                    $message->direct($help, array('split' => true))->otherwise(function () use ($message) {
-                        return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+                    $message->direct($help, array('split' => true))->then(function ($msg) use ($message) {
+                        if($message->message->channel->type !== 'dm') {
+                            return $message->reply('Sent you a DM with information.');
+                        }
+                        
+                        return $msg;
+                    }, function () use ($message) {
+                        if($message->message->channel->type !== 'dm') {
+                            return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+                        }
                     })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
                 }
             }));

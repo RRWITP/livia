@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -28,6 +28,7 @@ abstract class ArgumentType {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -35,7 +36,7 @@ abstract class ArgumentType {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Types\ArgumentType::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Types\ArgumentType::'.$name);
     }
     
     /**
@@ -64,7 +65,11 @@ abstract class ArgumentType {
      * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg    Argument the value obtained from.
      * @return bool
      */
-    function isEmpty($value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function isEmpty($value, \CharlotteDunois\Livia\CommandMessage $msg, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+        if(\is_array($value) || \is_object($value)) {
+            return (empty($value));
+        }
+        
         return (\mb_strlen(\trim(((string) $value))) === 0);
     }
 }

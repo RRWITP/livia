@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -10,7 +10,7 @@
 namespace CharlotteDunois\Livia;
 
 /**
- * The Command Client, the heart of the framework.
+ * The Livia Client, the heart of the framework.
  *
  * @property \CharlotteDunois\Livia\CommandDispatcher                 $dispatcher     The client's command dispatcher.
  * @property \CharlotteDunois\Livia\CommandRegistry                   $registry       The client's command registry.
@@ -29,7 +29,9 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * <pre>
      * array(
      *   'commandPrefix' => string|null, (Default command prefix, null means only mentions will trigger the handling, defaults to l$)
+     *   'commandBlockedMessagePattern' => bool, (Whether command pattern maatches will send command blocked messages, defaults to true)
      *   'commandEditableDuration' => int, (Time in seconds that command messages should be editable, defaults to 30)
+     *   'commandThrottlingMessagePattern' => bool, (Whether command pattern matches will send command throttling messages, defaults to true)
      *   'nonCommandEditable' => bool, (Whether messages without commands can be edited to a command, defaults to true)
      *   'unknownCommandResponse' => bool, (Whether the bot should respond to an unknown command, defaults to true)
      *   'owners' => string[], (array of user IDs)
@@ -40,7 +42,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @param array                           $options  Any Client Options.
      * @param \React\EventLoop\LoopInterface  $loop
      */
-    function __construct(array $options, \React\EventLoop\LoopInterface $loop = null) {
+    function __construct(array $options = array(), ?\React\EventLoop\LoopInterface $loop = null) {
         if(!\array_key_exists('commandPrefix', $options)) {
             $options['commandPrefix'] = 'l$';
         }
@@ -188,7 +190,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @param \CharlotteDunois\Yasmin\Models\Guild|null  $guild
      * @return string|null
      */
-    function getGuildPrefix(\CharlotteDunois\Yasmin\Models\Guild $guild = null) {
+    function getGuildPrefix(?\CharlotteDunois\Yasmin\Models\Guild $guild = null) {
         if($guild !== null && $this->provider !== null) {
             try {
                 $prefix = $this->provider->get($guild, 'commandPrefix', 404);
@@ -209,7 +211,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @param string|null                                $prefix
      * @return bool
      */
-    function setGuildPrefix(\CharlotteDunois\Yasmin\Models\Guild $guild, string $prefix = null) {
+    function setGuildPrefix(?\CharlotteDunois\Yasmin\Models\Guild $guild, string $prefix = null) {
         $this->emit('commandPrefixChange', $guild, $prefix);
         return true;
     }

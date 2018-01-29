@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -38,11 +38,12 @@ class CommandMessage {
         $this->message = $message;
         $this->command = $command;
         
-        $this->argString = $argString;
+        $this->argString = ($argString !== null ? \trim($argString) : $argString);
         $this->patternMatches = $patternMatches;
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -58,10 +59,11 @@ class CommandMessage {
             /* Continue regardless of error */
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\CommandMessage::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandMessage::'.$name);
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __call($name, $args) {
@@ -69,7 +71,7 @@ class CommandMessage {
             return $this->message->$name(...$args);
         }
         
-        throw new \Exception('Unknown method \CharlotteDunois\Livia\CommandMessage::'.$name);
+        throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\CommandMessage::'.$name);
     }
     
     /**
@@ -79,10 +81,10 @@ class CommandMessage {
     function parseCommandArgs() {
         switch($this->command->argsType) {
             case 'single':
-                $args = \trim($this->argString);
+                $args = $this->argString;
                 return \preg_replace(($this->command->argsSingleQuotes ? '/^("|\')(.*)\1$/u' : '/^(")(.*)"$/u'), '$2', $args);
             case 'multiple':
-                return self::parseArgs(\trim($this->argString), $this->command->argsCount, $this->command->argsSingleQuotes);
+                return self::parseArgs($this->argString, $this->command->argsCount, $this->command->argsSingleQuotes);
             default:
                 throw new \RangeException('Unknown argsType "'.$this->command->argsType.'".');
         }
@@ -121,6 +123,11 @@ class CommandMessage {
             $perms = $this->command->hasPermission($this);
             if($perms === false || \is_string($perms)) {
                 $this->client->emit('commandBlocked', $this, 'permission');
+                
+                if($this->patternMatches !== null && !((bool) $this->client->getOption('commandBlockedMessagePattern', true))) {
+                    return $resolve();
+                }
+                
                 if($perms === false) {
                     $perms = 'You do not have permission to use the `'.$this->command->name.'` command.';
                 }
@@ -143,6 +150,10 @@ class CommandMessage {
                 if(\count($missing) > 0) {
                     $this->client->emit('commandBlocked', $this, 'clientPermissions');
                     
+                    if($this->patternMatches !== null && !((bool) $this->client->getOption('commandBlockedMessagePattern', true))) {
+                        return $resolve();
+                    }
+                    
                     if(\count($missing) === 1) {
                         $msg = 'I need the permissions `'.$missing[0].'` permission for the `'.$this->command->name.'` command to work.';
                     } else {
@@ -158,10 +169,14 @@ class CommandMessage {
             }
             
             // Throttle the command
-            $throttle = &$this->command->throttle($this->message->author->id);
+            $throttle = $this->command->throttle($this->message->author->id);
             if($throttle && ($throttle['usages'] + 1) > ($this->command->throttling['usages'])) {
                 $remaining = $throttle['start'] + $this->command->throttling['duration'] - \time();
                 $this->client->emit('commandBlocked', $this, 'throttling');
+                
+                if($this->patternMatches !== null && !((bool) $this->client->getOption('commandThrottlingMessagePattern', true))) {
+                    return $resolve();
+                }
                 
                 $this->message->reply('You may not use the `'.$this->command->name.'` command again for another '.$remaining.' seconds.')->then($resolve, $reject);
                 return;
@@ -173,7 +188,7 @@ class CommandMessage {
             
             if(!$args && $countArgs > 0) {
                 $count = (!empty($this->command->args[($countArgs - 1)]['infinite']) ? \INF : $countArgs);
-                $provided = self::parseArgs(\trim($this->argString), $count, $this->command->argsSingleQuotes);
+                $provided = self::parseArgs($this->argString, $count, $this->command->argsSingleQuotes);
                 
                 $promises[] = $this->command->argsCollector->obtain($this, $provided)->then(function ($result) use (&$args) {
                     if($result['cancelled']) {
@@ -194,7 +209,7 @@ class CommandMessage {
             
             // Run the command
             if($throttle) {
-                $throttle['usages']++;
+                $this->command->updateThrottle($this->message->author->id);
             }
             
             $typingCount = $this->message->channel->typingCount();
@@ -213,8 +228,8 @@ class CommandMessage {
                 $this->client->emit('commandRun', $this->command, $promise, $this, $args, ($this->patternMatches !== null));
                 
                 return $promise->then(function($response) {
-                    if(!($response instanceof \CharlotteDunois\Yasmin\Models\Message || \is_array($response) || $response === null)) {
-                        throw new \RuntimeException('Command '.$this->command->name.'\'s run() resolved with an unknown type ('.\gettype($response).'). Command run methods must return a Promise that resolve with a Message, an array of Messages, or null.');
+                    if(!($response instanceof \CharlotteDunois\Yasmin\Models\Message || $response instanceof \CharlotteDunois\Yasmin\Utils\Collection || \is_array($response) || $response === null)) {
+                        throw new \RuntimeException('Command '.$this->command->name.'\'s run() resolved with an unknown type ('.\gettype($response).'). Command run methods must return a Promise that resolve with a Message, an array of Messages, a Collection of Messages, or null.');
                     }
                     
                     if(!\is_array($response)) {
@@ -508,6 +523,8 @@ class CommandMessage {
         $regex = ($allowSingleQuotes ? '/\s*(?:("|\')(.*?)\1|(\S+))\s*/u' : '/\s*(?:(")(.*?)"|(\S+))\s*/u');
         $results = array();
         
+        $argString = \trim($argString);
+        
         if($argCount === null) {
             $argCount = \mb_strlen($argString); // Large enough to get all items
         }
@@ -523,12 +540,18 @@ class CommandMessage {
             $val = \trim((!empty($matches[2][$key]) ? $matches[2][$key] : $matches[3][$key]));
             $results[] = $val;
             
-            $content = \preg_replace('/'.\preg_quote($val, '/').'/u', '', $content, 1);
+            $content = \trim(\preg_replace('/'.\preg_quote($val, '/').'/u', '', $content, 1));
         }
         
         // If text remains, push it to the array as-is (except for wrapping quotes, which are removed)
         if(\mb_strlen($content) > 0) {
             $results[] = \preg_replace(($allowSingleQuotes ? '/^("|\')(.*)\1$/u' : '/^(")(.*)"$/u'), '$2', $content);
+        }
+        
+        if(\count($results) > 0) {
+            $results = \array_filter($results, function ($val) {
+                return (\mb_strlen(\trim($val)) > 0);
+            });
         }
         
         return $results;

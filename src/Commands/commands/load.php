@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -36,7 +36,7 @@ return function ($client) {
                             try {
                                 $this->client->registry->resolveCommandPath($value[0], $value[1]);
                                 return true;
-                            } catch(\Exception $e) {
+                            } catch(\InvalidArgumentException $e) {
                                 return false;
                             }
                         },

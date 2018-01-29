@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -38,6 +38,7 @@ class CommandRegistry {
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -45,7 +46,7 @@ class CommandRegistry {
             return $this->$name;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\CommandRegistry::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandRegistry::'.$name);
     }
     
     /**
@@ -458,7 +459,7 @@ class CommandRegistry {
      * @param string  $groupID
      * @param string  $command
      * @return string
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     function resolveCommandPath(string $groupID, string $command) {
         $paths = array($this->commandsPath.'/'.\mb_strtolower($groupID), __DIR__.'/Commands/'.\mb_strtolower($groupID));

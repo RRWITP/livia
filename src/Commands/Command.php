@@ -1,7 +1,7 @@
 <?php
 /**
  * Livia
- * Copyright 2017 Charlotte Dunois, All Rights Reserved
+ * Copyright 2017-2018 Charlotte Dunois, All Rights Reserved
  *
  * Website: https://charuru.moe
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
@@ -49,7 +49,7 @@ abstract class Command {
     protected $guildOnly = false;
     protected $ownerOnly = false;
     protected $clientPermissions;
-    protected $userPermission;
+    protected $userPermissions;
     protected $nsfw = false;
     protected $throttling = array();
     protected $defaultHandling = true;
@@ -103,33 +103,40 @@ abstract class Command {
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $info) {
         $this->client = $client;
         
-        if(empty($info['name']) || !\is_string($info['name'])) {
-            throw new \InvalidArgumentException('Command name must be specified and must be a string');
-        }
-        if(\mb_strtolower($info['name']) !== $info['name'] || \mb_strpos($info['name'], ' ') !== false) {
-            throw new \InvalidArgumentException('Command name must be lowercase, without any whitespaces');
-        }
+        $validator = \CharlotteDunois\Validation\Validator::make($info, array(
+            'name' => 'required|string|lowercase|nowhitespace',
+            'group' => 'required|string',
+            'description' => 'required|string',
+            'aliases' => 'array:string',
+            'autoAliases' => 'boolean',
+            'details' => 'string',
+            'format' => 'string',
+            'examples' => 'array:string',
+            'guildOnly' => 'boolean',
+            'ownerOnly' => 'boolean',
+            'clientPermissions' => 'array',
+            'userPermissions' => 'array',
+            'nsfw' => 'boolean',
+            'throttling' => 'array',
+            'defaultHandling' => 'boolean',
+            'args' => 'array',
+            'argsType' => 'string|in:single,multiple',
+            'argsPromptLimit' => 'integer|float',
+            'argsCount' => 'integer|min:2',
+            'patterns' => 'array:string',
+            'guarded' => 'boolean'
+        ));
         
-        if(empty($info['group']) || !\is_string($info['group'])) {
-            throw new \InvalidArgumentException('Invalid command group specified');
-        }
-        
-        if(empty($info['description']) || !\is_string($info['description'])) {
-            throw new \InvalidArgumentException('Invalid command description specified');
-        }
+        $validator->throw();
         
         $this->name = $info['name'];
         $this->groupID = $info['group'];
         $this->description = $info['description'];
         
-        if(!empty($info['aliases']) && \is_array($info['aliases'])) {
+        if(!empty($info['aliases'])) {
             $this->aliases = $info['aliases'];
             
             foreach($this->aliases as $alias) {
-                if(!\is_string($alias)) {
-                    throw new \InvalidArgumentException('Command aliases must be an array of strings');
-                }
-                
                 if(\mb_strtolower($alias) !== $alias) {
                     throw new \InvalidArgumentException('Command aliases must be lowercase');
                 }
@@ -148,54 +155,19 @@ abstract class Command {
             }
         }
         
-        if(!empty($info['details'])) {
-            if(!\is_string($info['details'])) {
-                throw new \InvalidArgumentException('Invalid command details specified');
-            }
-            
-            $this->details = $info['details'];
-        }
+        $this->details = $info['details'] ?? $this->details;
+        $this->format = $info['format'] ?? $this->format;
+        $this->examples = $info['examples'] ?? $this->examples;
         
-        if(!empty($info['format'])) {
-            if(!\is_string($info['format'])) {
-                throw new \InvalidArgumentException('Invalid command format specified');
-            }
-            
-            $this->format = $info['format'];
-        }
+        $this->guildOnly = $info['guildOnly'] ?? $this->guildOnly;
+        $this->ownerOnly = $info['ownerOnly'] ?? $this->ownerOnly;
         
-        if(!empty($info['examples']) && \is_array($info['examples'])) {
-            $this->examples = $info['examples'];
-            
-            foreach($this->examples as $example) {
-                if(!\is_string($example)) {
-                    throw new \InvalidArgumentException('Command examples must be an array of strings');
-                }
-            }
-        }
+        $this->clientPermissions = $info['clientPermissions'] ?? $this->clientPermissions;
+        $this->userPermissions = $info['userPermissions'] ?? $this->userPermissions;
         
-        $this->guildOnly = (bool) ($info['guildOnly'] ?? $this->guildOnly);
-        $this->ownerOnly = (bool) ($info['ownerOnly'] ?? $this->ownerOnly);
+        $this->nsfw = $info['nsfw'] ?? $this->nsfw;
         
-        if(!empty($info['clientPermissions'])) {
-            if(!\is_array($info['clientPermissions'])) {
-                throw new \InvalidArgumentException('Client Permissions must be an array of strings');
-            }
-            
-            $this->clientPermissions = $info['clientPermissions'];
-        }
-        
-        if(!empty($info['userPermissions'])) {
-            if(!\is_array($info['userPermissions'])) {
-                throw new \InvalidArgumentException('User Permissions must be an array of strings');
-            }
-            
-            $this->userPermissions = $info['userPermissions'];
-        }
-        
-        $this->nsfw = (bool) ($info['nsfw'] ?? $this->nsfw);
-        
-        if(isset($info['throttling']) && \is_array($info['throttling'])) {
+        if(isset($info['throttling'])) {
             if(empty($info['throttling']['usages']) || empty($info['throttling']['duration'])) {
                 throw new \InvalidArgumentException('Throttling array is missing elements or its elements are empty');
             }
@@ -211,7 +183,7 @@ abstract class Command {
             $this->throttling = $info['throttling'];
         }
         
-        $this->defaultHandling = (bool) ($info['defaultHandling'] ?? $this->defaultHandling);
+        $this->defaultHandling = $info['defaultHandling'] ?? $this->defaultHandling;
         
         $this->args = $info['args'] ?? array();
         if(!empty($this->args)) {
@@ -227,44 +199,19 @@ abstract class Command {
             }
         }
         
-        if(!empty($info['argsType']) && !in_array($info['argsType'], array('single', 'multiple'))) {
-            throw new \InvalidArgumentException('Command argsType must be one of "single" or "multiple"');
-        }
-        
-        if(isset($info['argsPromptLimit']) && $info['argsPromptLimit'] !== \INF && (!\is_int($info['argsPromptLimit']) || $info['argsPromptLimit'] <= 0)) {
-            throw new \InvalidArgumentException('Command argsPromptLimit must be an integer (or INF) and greater than 0');
-        }
-        
         $this->argsSingleQuotes = (bool) ($info['argsSingleQuotes'] ?? $this->argsSingleQuotes);
         $this->argsType = $info['argsType'] ?? $this->argsType;
         $this->argsPromptLimit = $info['argsPromptLimit'] ?? $this->argsPromptLimit;
-        
-        if(isset($info['argsCount']) && $this->argsType === 'multiple' && ((int) $info['argsCount']) < 2) {
-            throw new \InvalidArgumentException('Command argsCount must be at least 2');
-        }
-        
         $this->argsCount = $info['argsCount'] ?? $this->argsCount;
         
-        if(!empty($info['patterns'])) {
-            if(!\is_array($info['patterns'])) {
-                throw new \InvalidArgumentException('Command patterns must be an array of strings');
-            }
-            
-            $this->patterns = $info['patterns'];
-            
-            foreach($this->patterns as $pattern) {
-                if(!\is_string($pattern)) {
-                    throw new \InvalidArgumentException('Command patterns must be an array of strings');
-                }
-            }
-        }
-        
-        $this->guarded = (bool) ($info['guarded'] ?? $this->guarded);
+        $this->patterns = $info['patterns'] ?? $this->patterns;
+        $this->guarded = $info['guarded'] ?? $this->guarded;
         
         $this->throttles = new \CharlotteDunois\Yasmin\Utils\Collection();
     }
     
     /**
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -278,7 +225,7 @@ abstract class Command {
             break;
         }
         
-        throw new \Exception('Unknown property \CharlotteDunois\Livia\Commands\Command::'.$name);
+        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Commands\Command::'.$name);
     }
     
     /**
@@ -332,9 +279,9 @@ abstract class Command {
     
     /**
      * Runs the command. The method must return null, an array of Message instances or an instance of Message, a Promise that resolves to an instance of Message, or an array of Message instances. The array can contain Promises which each resolves to an instance of Message.
-     * @param \CharlotteDunois\Livia\CommandMessage $message      The message the command is being run for
+     * @param \CharlotteDunois\Livia\CommandMessage $message      The message the command is being run for.
      * @param \ArrayObject                          $args         The arguments for the command, or the matches from a pattern. If args is specified on the command, thise will be the argument values object. If argsType is single, then only one string will be passed. If multiple, an array of strings will be passed. When fromPattern is true, this is the matches array from the pattern match.
-     * @param bool                                  $fromPattern  Whether or not the command is being run from a pattern match
+     * @param bool                                  $fromPattern  Whether or not the command is being run from a pattern match.
      * @return \React\Promise\Promise
      */
     abstract function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern);
@@ -359,10 +306,9 @@ abstract class Command {
      * @return array|null
      * @internal
      */
-    final function &throttle(string $userID) {
-        if($this->throttling === null || $this->client->isOwner($userID)) {
-            $null = null;
-            return $null;
+    final function throttle(string $userID) {
+        if(empty($this->throttling) || $this->client->isOwner($userID)) {
+            return null;
         }
         
         if(!$this->throttles->has($userID)) {
@@ -376,6 +322,34 @@ abstract class Command {
         }
         
         return $this->throttles->get($userID);
+    }
+    
+    /**
+     * Increments the usage of the throttle object for a user, if necessary (owners are excluded).
+     * @param string  $userID
+     * @internal
+     */
+    final function updateThrottle(string $userID) {
+        if(empty($this->throttling) || $this->client->isOwner($userID)) {
+            return;
+        }
+        
+        if(!$this->throttles->has($userID)) {
+            $this->throttles->set($userID, array(
+                'start' => \time(),
+                'usages' => 1,
+                'timeout' => $this->client->addTimer($this->throttling['duration'], function () use ($userID) {
+                    $this->throttles->delete($userID);
+                })
+            ));
+            
+            return;
+        }
+        
+        $throttle = $this->throttles->get($userID);
+        $throttle['usages']++;
+        
+        $this->throttles->set($userID, $throttle);
     }
     
     /**
