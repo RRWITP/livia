@@ -191,13 +191,13 @@ class Argument {
             
             if($empty && $value === null) {
                 $reply = $message->reply($this->prompt.PHP_EOL.
-                    'Respond with `cancel` to cancel the command. The command will automatically be cancelled in  '.$this->wait.' seconds.');
+                    'Respond with `cancel` to cancel the command. The command will automatically be cancelled in '.$this->wait.' seconds.');
             } elseif($valid === false) {
                 $reply = $message->reply('You provided an invalid '.$this->label.'.'.PHP_EOL.
-                    'Please try again. Respond with `cancel` to cancel the command. The command will automatically be cancelled in  '.$this->wait.' seconds.');
+                    'Please try again. Respond with `cancel` to cancel the command. The command will automatically be cancelled in '.$this->wait.' seconds.');
             } elseif(\is_string($valid)) {
                 $reply = $message->reply($valid.PHP_EOL.
-                    'Please try again. Respond with `cancel` to cancel the command. The command will automatically be cancelled in  '.$this->wait.' seconds.');
+                    'Please try again. Respond with `cancel` to cancel the command. The command will automatically be cancelled in '.$this->wait.' seconds.');
             } else {
                 $reply = \React\Promise\resolve(null);
             }
