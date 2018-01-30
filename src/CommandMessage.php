@@ -516,7 +516,7 @@ class CommandMessage {
      * @return string[]
      */
     static function parseArgs(string $argString, $argCount = null, bool $allowSingleQuotes = true) {
-        if(empty($argString)) {
+        if(\mb_strlen($argString) === 0) {
             return array();
         }
         

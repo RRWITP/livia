@@ -25,7 +25,7 @@ class FloatArgumentType extends ArgumentType {
      * @inheritDoc
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
-        $value = \filter_var($value, FILTER_VALIDATE_FLOAT);
+        $value = \filter_var($value, \FILTER_VALIDATE_FLOAT);
         if($value === false) {
             return false;
         }
