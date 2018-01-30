@@ -25,11 +25,10 @@ class IntegerArgumentType extends ArgumentType {
      * @inheritDoc
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
-        if(!\filter_var($value, FILTER_VALIDATE_INT)) {
+        $value = \filter_var($value, FILTER_VALIDATE_INT);
+        if($value === false) {
             return false;
         }
-        
-        $value = (int) $value;
         
         if($arg->min !== null && $value < $arg->min) {
             return 'Please enter a number above or exactly '.$arg->min.'.';

@@ -25,11 +25,10 @@ class FloatArgumentType extends ArgumentType {
      * @inheritDoc
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
-        if(!\filter_var($value, FILTER_VALIDATE_FLOAT)) {
+        $value = \filter_var($value, FILTER_VALIDATE_FLOAT);
+        if($value === false) {
             return false;
         }
-        
-        $value = (float) $value;
         
         if($arg->min !== null && $value < $arg->min) {
             return 'Please enter a number above or exactly '.$arg->min.'.';
