@@ -234,7 +234,7 @@ class CommandRegistry {
      * @return $this
      * @throws \RuntimeException
      */
-    function registerCommandsIn(string $path, bool $ignoreSameLevelFiles = false) {
+    function registerCommandsIn(string $path, $ignoreSameLevelFiles = false) {
         $path = \realpath($path);
         if(!$path) {
             throw new \RuntimeException('Invalid path specified');
