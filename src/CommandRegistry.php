@@ -193,7 +193,7 @@ class CommandRegistry {
         foreach($command as $cmd) {
             if(!($cmd instanceof \CharlotteDunois\Livia\Commands\Command)) {
                 if(!\is_string($cmd)) {
-                    throw new \InvalidArgumentException('Passed argument, '.\var_export($oldCmd, true).', is not a string or an instance of Command');
+                    throw new \InvalidArgumentException('Passed argument, '.\var_export($cmd, true).', is not a string or an instance of Command');
                 }
                 
                 $oldCmd = $cmd;
