@@ -142,7 +142,7 @@ class CommandRegistry {
      * Resolves a given command, command name or command message to the command.
      * @param string|\CharlotteDunois\Livia\Commands\Command|\CharlotteDunois\Livia\CommandMessage  $resolvable
      * @return \CharlotteDunois\Livia\Commands\Command
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     function resolveCommand($resolvable) {
         if($resolvable instanceof \CharlotteDunois\Livia\Commands\Command) {
@@ -158,13 +158,13 @@ class CommandRegistry {
             return $commands[0];
         }
         
-        throw new \Exception('Unable to resolve command');
+        throw new \RuntimeException('Unable to resolve command');
     }
     /**
      * Resolves a given commandgroup, command group name or command message to the command group.
      * @param string|\CharlotteDunois\Livia\Commands\CommandGroup|\CharlotteDunois\Livia\CommandMessage  $resolvable
      * @return \CharlotteDunois\Livia\Commands\CommandGroup
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     function resolveGroup($resolvable) {
         if($resolvable instanceof \CharlotteDunois\Livia\Commands\CommandGroup) {
@@ -180,30 +180,37 @@ class CommandRegistry {
             return $groups[0];
         }
         
-        throw new \Exception('Unable to resolve command group');
+        throw new \RuntimeException('Unable to resolve command group');
     }
     
     /**
      * Registers a command. Emits a commandRegister event for each command.
      * @param string|\CharlotteDunois\Livia\Commands\Command  ...$command  The full qualified command name (groupID:name) or an initiated instance of it.
      * @return $this
-     * @throws \Exception
+     * @throws \RuntimeException|\InvalidArgumentException
      */
     function registerCommand(...$command) {
         foreach($command as $cmd) {
             if(!($cmd instanceof \CharlotteDunois\Livia\Commands\Command)) {
+                if(!\is_string($cmd)) {
+                    throw new \InvalidArgumentException('Passed argument, '.\var_export($oldCmd, true).', is not a string or an instance of Command');
+                }
+                
                 $oldCmd = $cmd;
                 
                 $cmd = $this->handleCommandSpacing($cmd);
-                $cmd = $cmd($this->client);
+                if(!\is_callable($cmd)) {
+                    throw new \RuntimeException('Unable to resolve '.$oldCmd.' to an anonymous function');
+                }
                 
+                $cmd = $cmd($this->client);
                 if(!($cmd instanceof \CharlotteDunois\Livia\Commands\Command)) {
-                    throw new \Exception('Anonymous function in '.$oldCmd.' does not return an instance of Command');
+                    throw new \RuntimeException('Anonymous function in '.$oldCmd.' does not return an instance of Command');
                 }
             }
             
             if($this->commands->has($cmd->name)) {
-                throw new \Exception('Can not register another command with the name '.$cmd->name);
+                throw new \RuntimeException('Can not register another command with the name '.$cmd->name);
             }
             
             $this->commands->set($cmd->name, $cmd);
@@ -225,12 +232,12 @@ class CommandRegistry {
      * @param string        $path
      * @param bool|string   $ignoreSameLevelFiles  Ignores files in the specified directory and only includes files in sub directories. As string it will ignore the file if the filename matches with the string.
      * @return $this
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     function registerCommandsIn(string $path, bool $ignoreSameLevelFiles = false) {
         $path = \realpath($path);
         if(!$path) {
-            throw new \Exception('Invalid path specified');
+            throw new \RuntimeException('Invalid path specified');
         }
         
         $this->commandsPath = $path;
@@ -247,14 +254,17 @@ class CommandRegistry {
             }
             
             $command = include($file);
-            $cmd = $command($this->client);
+            if(!\is_callable($command)) {
+                throw new \RuntimeException('Command file '.\str_replace($path, '', $file).' does not return an anonymous function');
+            }
             
+            $cmd = $command($this->client);
             if(!($cmd instanceof \CharlotteDunois\Livia\Commands\Command)) {
-                throw new \Exception('Anonymous function in file '.\str_replace($path, '', $file).' does not return an instance of Command');
+                throw new \RuntimeException('Anonymous function in command file '.\str_replace($path, '', $file).' does not return an instance of Command');
             }
             
             if($this->commands->has($cmd->name)) {
-                throw new \Exception('Can not register another command with the name '.$cmd->name);
+                throw new \RuntimeException('Can not register another command with the name '.$cmd->name);
             }
             
             $this->commands->set($cmd->name, $cmd);
@@ -271,24 +281,32 @@ class CommandRegistry {
     
     /**
      * Registers a group. Emits a groupRegister event for each group.
-     * @param \CharlotteDunois\Livia\Commands\CommandGroup|array  ...$group  An instance of CommandGroup or an associative array ('id' => string, 'name' => string).
+     * @param \CharlotteDunois\Livia\Commands\CommandGroup|array  ...$group  An instance of CommandGroup or an associative array ('id' => string, 'name' => string, 'guarded' => bool). Guarded is optional, defaults to false.
      * @return $this
-     * @throws \Exception
+     * @throws \RuntimeException|\InvalidArgumentException
      */
     function registerGroup(...$group) {
         foreach($group as $gr) {
             $oldGr = $gr;
             
             if(!($gr instanceof \CharlotteDunois\Livia\Commands\CommandGroup)) {
+                if(!\is_array($gr)) {
+                    throw new \InvalidArgumentException('Argument, '.\var_export($gr, true).', is not of type array or an instance of CommandGroup');
+                }
+                
+                if(empty($gr['id']) || empty($gr['name'])) {
+                    throw new \InvalidArgumentException('Argument, '.\var_export($gr, true).', is missing at least one require element');
+                }
+                
                 $gr = new \CharlotteDunois\Livia\Commands\CommandGroup($this->client, $gr['id'], $gr['name'], (bool) ($gr['guarded'] ?? false));
             }
             
             if(!($gr instanceof \CharlotteDunois\Livia\Commands\CommandGroup)) {
-                throw new \Exception($oldGr.' is not an instance of CommandGroup');
+                throw new \RuntimeException(\var_export($oldGr, true).' is not an array, with id and name elements, or an instance of CommandGroup');
             }
             
             if($this->groups->has($gr->id)) {
-                throw new \Exception('Can not register another command group with the ID '.$gr->id);
+                throw new \RuntimeException('Can not register another command group with the ID '.$gr->id);
             }
             
             $this->groups->set($gr->id, $gr);
@@ -304,7 +322,7 @@ class CommandRegistry {
      * Registers a type. Emits a typeRegister event for each type.
      * @param \CharlotteDunois\Livia\Types\ArgumentType|string  ...$type  The full qualified class name or an initiated instance of it.
      * @return $this
-     * @throws \Exception
+     * @throws \RuntimeException|\InvalidArgumentException
      */
     function registerType(...$type) {
         foreach($type as $t) {
@@ -315,11 +333,11 @@ class CommandRegistry {
             }
             
             if(!($t instanceof \CharlotteDunois\Livia\Types\ArgumentType)) {
-                throw new \Exception($oldT.' is not an instance of Type');
+                throw new \InvalidArgumentException(\var_export($oldT, true).' is not an instance of ArgumentType');
             }
             
             if($this->types->has($t->id)) {
-                throw new \Exception('Can not register another argument type with the ID '.$t->id);
+                throw new \RuntimeException('Can not register another argument type with the ID '.$t->id);
             }
             
             $this->types->set($t->id, $t);
@@ -336,12 +354,12 @@ class CommandRegistry {
      * @param string       $path
      * @param bool|string  $ignoreSameLevelFiles  Ignores files in the specified directory and only includes files in sub directories. As string it will ignore the file if the filename matches with the string.
      * @return $this
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     function registerTypesIn(string $path, $ignoreSameLevelFiles = false) {
         $path = \realpath($path);
         if(!$path) {
-            throw new \Exception('Invalid path specified');
+            throw new \RuntimeException('Invalid path specified');
         }
         
         $files = \CharlotteDunois\Livia\Utils\FileHelpers::recursiveFileSearch($path, '*.php');
@@ -362,14 +380,14 @@ class CommandRegistry {
             
             preg_match('/namespace(.*?);/i', $code, $matches);
             if(empty($matches[1])) {
-                $this->client->emit('error', $file.' is not a valid type file');
+                throw new \RuntimeException($file.' is not a valid argument type file');
             }
             
             $namespace = \trim($matches[1]);
             
             preg_match('/class(.*?){/i', $code, $matches);
             if(empty($matches[1])) {
-                $this->client->emit('error', $file.' is not a valid type file');
+                throw new \RuntimeException($file.' is not a valid argument type file');
             }
             
             $name = \trim(\explode('implements', \explode('extends', $matches[1])[0])[0]);
@@ -387,6 +405,7 @@ class CommandRegistry {
     
     /**
      * Registers the default argument types, groups, and commands.
+     * @throws \RuntimeException
      */
     function registerDefaults() {
         $this->registerDefaultTypes();
@@ -396,6 +415,7 @@ class CommandRegistry {
     
     /**
      * Registers the default commands.
+     * @throws \RuntimeException
      */
     function registerDefaultCommands() {
         $this->registerCommandsIn(__DIR__.'/Commands', true);
@@ -403,6 +423,7 @@ class CommandRegistry {
     
     /**
      * Registers the default command groups.
+     * @throws \RuntimeException
      */
     function registerDefaultGroups() {
         $this->registerGroup(
@@ -413,6 +434,7 @@ class CommandRegistry {
     
     /**
      * Registers the default argument types.
+     * @throws \RuntimeException
      */
     function registerDefaultTypes() {
         $this->registerTypesIn(__DIR__.'/Types', 'ArgumentType.php');
@@ -422,7 +444,7 @@ class CommandRegistry {
      * Reregisters a command. Emits a commandReregister event.
      * @param \CharlotteDunois\Livia\Commands\Command|string  $command     The full qualified command name (groupID:name) or an initiated instance of it.
      * @param \CharlotteDunois\Livia\Commands\Command         $oldCommand
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     function reregisterCommand($command, \CharlotteDunois\Livia\Commands\Command $oldCommand) {
         $oldCommand->group->commands->delete($oldCommand->name);
@@ -443,7 +465,7 @@ class CommandRegistry {
     /**
      * Unregisters a command. Emits a commandUnregister event.
      * @param \CharlotteDunois\Livia\Commands\Command  $command
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     function unregisterCommand(\CharlotteDunois\Livia\Commands\Command $command) {
         $group = $this->resolveGroup($command->groupID);
@@ -467,14 +489,17 @@ class CommandRegistry {
         
         foreach($paths as $path) {
             $file = $path.$filename;
-            if(file_exists($file)) {
+            if(\file_exists($file)) {
                 return $file;
             }
         }
         
-        throw new \Exception('Unable to resolve command path');
+        throw new \InvalidArgumentException('Unable to resolve command path');
     }
-        
+    
+    /**
+     * @throws \RuntimeException
+     */
     protected function handleCommandSpacing(string $command) {
         $commanddot = \explode(':', $command);
         if(\count($commanddot) === 2) {
@@ -489,6 +514,6 @@ class CommandRegistry {
             return $cmd;
         }
         
-        throw new \Exception('Unable to resolve command');
+        throw new \RuntimeException('Unable to resolve command');
     }
 }

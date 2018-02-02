@@ -77,6 +77,7 @@ class CommandMessage {
     /**
      * Parses the argString into usable arguments, based on the argsType and argsCount of the command.
      * @return string|string[]
+     * @throws \RangeException
      */
     function parseCommandArgs() {
         switch($this->command->argsType) {
@@ -232,7 +233,7 @@ class CommandMessage {
                         throw new \RuntimeException('Command '.$this->command->name.'\'s run() resolved with an unknown type ('.\gettype($response).'). Command run methods must return a Promise that resolve with a Message, an array of Messages, a Collection of Messages, or null.');
                     }
                     
-                    if(!\is_array($response)) {
+                    if(!\is_array($response) && !($response instanceof \CharlotteDunois\Yasmin\Utils\Collection)) {
                         return $response;
                     }
                     
@@ -449,6 +450,16 @@ class CommandMessage {
     }
     
     /**
+     * Shortcut to $this->message->edit.
+     * @param string  $content
+     * @param array   $options  Message Options.
+     * @return \React\Promise\Promise
+     */
+    function edit(string $content, array $options = array()) {
+        return $this->message->edit($content, $options);
+    }
+    
+    /**
      * Finalizes the command message by setting the responses and deleting any remaining prior ones.
      * @param \CharlotteDunois\Yasmin\Models\Message|\CharlotteDunois\Yasmin\Models\Message[]|null  $responses
      * @internal
@@ -555,16 +566,6 @@ class CommandMessage {
         }
         
         return $results;
-    }
-    
-    /**
-     * Shortcut to $this->message->edit.
-     * @param string  $content
-     * @param array   $options  Message Options.
-     * @return \React\Promise\Promise
-     */
-    function edit(string $content, array $options = array()) {
-        return $this->message->edit($content, $options);
     }
     
     /**
