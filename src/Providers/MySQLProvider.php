@@ -20,21 +20,10 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * Constructs a new instance.
-     * @param \React\EventLoop\LoopInterface  $loop
-     * @param string                          $host
-     * @param string                          $user
-     * @param string                          $password
-     * @param string                          $database
-     * @param int                             $port
+     * @param \React\MySQL\Connection  $db
      */
-    function __construct(\React\EventLoop\LoopInterface $loop, string $host, string $user, string $password, string $database, int $port = 3306) {
-        $this->db = new \React\MySQL\Connection($loop, array(
-            'host' => $host,
-            'user' => $user,
-            'passwd' => $password,
-            'dbname' => $database,
-            'port' => $port
-        ));
+    function __construct(\React\MySQL\Connection $db) {
+        $this->db = $db;
         
         $this->settings = new \CharlotteDunois\Yasmin\Utils\Collection();
         
@@ -68,6 +57,14 @@ class MySQLProvider extends SettingProvider {
                 $this->setupGuildGroup($guild, $group, $settings);
             }
         };
+    }
+    
+    /**
+     * Returns the MySQL connection.
+     * @return \React\MySQL\Connection
+     */
+    function getDB() {
+        return $this->db;
     }
     
     /**
