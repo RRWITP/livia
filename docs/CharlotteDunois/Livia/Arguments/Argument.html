@@ -8,10 +8,12 @@
             <link rel="stylesheet" type="text/css" href="../../../css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="../../../css/bootstrap-theme.min.css">
         <link rel="stylesheet" type="text/css" href="../../../css/sami.css">
+        <link rel="stylesheet" type="text/css" href="../../../css/prism.css">
         <script src="../../../js/jquery-1.11.1.min.js"></script>
         <script src="../../../js/bootstrap.min.js"></script>
         <script src="../../../js/typeahead.min.js"></script>
         <script src="../../../sami.js"></script>
+        <script src="../../../js/prism.js"></script>
         <meta name="MobileOptimized" content="width">
         <meta name="HandheldFriendly" content="true">
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
@@ -102,8 +104,6 @@
                 <td><a name="property_client" href="#property_client">$client</a></td>
                 <td class="last">The client which initiated the instance.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_default">
@@ -112,8 +112,6 @@
                 <td><a name="property_default" href="#property_default">$default</a></td>
                 <td class="last">The default value for the argument.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_emptyChecker">
@@ -122,8 +120,6 @@
                 <td><a name="property_emptyChecker" href="#property_emptyChecker">$emptyChecker</a></td>
                 <td class="last">Empty checker function for the argument. (see \CharlotteDunois\Livia\Types\ArgumentType::isEmpty)</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_infinite">
@@ -132,8 +128,6 @@
                 <td><a name="property_infinite" href="#property_infinite">$infinite</a></td>
                 <td class="last">Whether the argument accepts an infinite number of values.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_key">
@@ -142,8 +136,6 @@
                 <td><a name="property_key" href="#property_key">$key</a></td>
                 <td class="last">Key for the argument.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_label">
@@ -152,8 +144,6 @@
                 <td><a name="property_label" href="#property_label">$label</a></td>
                 <td class="last">Label for the argument.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_max">
@@ -162,8 +152,6 @@
                 <td><a name="property_max" href="#property_max">$max</a></td>
                 <td class="last">If type is integer or float, this is the maximum value of the number. If type is string, this is the maximum length of the string.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_min">
@@ -172,8 +160,6 @@
                 <td><a name="property_min" href="#property_min">$min</a></td>
                 <td class="last">If type is integer or float, this is the minimum value of the number. If type is string, this is the minimum length of the string.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_parse">
@@ -182,8 +168,6 @@
                 <td><a name="property_parse" href="#property_parse">$parse</a></td>
                 <td class="last">Parser function to parse a value for the argument. (see \CharlotteDunois\Livia\Types\ArgumentType::parse)</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_prompt">
@@ -192,8 +176,6 @@
                 <td><a name="property_prompt" href="#property_prompt">$prompt</a></td>
                 <td class="last">Question prompt for the argument.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_type">
@@ -202,8 +184,6 @@
                 <td><a name="property_type" href="#property_type">$type</a></td>
                 <td class="last">Type of the argument.</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_validate">
@@ -212,8 +192,6 @@
                 <td><a name="property_validate" href="#property_validate">$validate</a></td>
                 <td class="last">Validator function for validating a value for the argument. (see \CharlotteDunois\Livia\Types\ArgumentType::validate)</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
                     <tr>
                 <td class="type" id="property_wait">
@@ -222,8 +200,6 @@
                 <td><a name="property_wait" href="#property_wait">$wait</a></td>
                 <td class="last">How long to wait for input (in seconds).</td>
                 <td></td>
-                <td>
-                                    </td>
             </tr>
             </table>
 
@@ -324,7 +300,7 @@ array(
             </div>
                     <div class="method-item">
                     <h3 id="method_obtain">
-        <div class="location">at         <a href="https://github.com/CharlotteDunois/Livia/blob/master/src/Arguments/Argument.php#L138">line 138</a></div>
+        <div class="location">at         <a href="https://github.com/CharlotteDunois/Livia/blob/master/src/Arguments/Argument.php#L140">line 140</a></div>
         <code>                    <abbr title="React\Promise\Promise">Promise</abbr>
     <strong>obtain</strong>(<a href="../../../CharlotteDunois/Livia/CommandMessage.html"><abbr title="CharlotteDunois\Livia\CommandMessage">CommandMessage</abbr></a> $message, $value, $promptLimit = \INF, array $prompts = array(), array $answers = array(), $valid = null)
         </code>
