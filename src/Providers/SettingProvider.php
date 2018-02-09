@@ -63,12 +63,12 @@ abstract class SettingProvider {
     
     /**
      * Obtains the ID of the provided guild.
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @param \CharlotteDunois\Yasmin\Models\Guild|string|null  $guild
      * @return string
      * @throws \InvalidArgumentException
      */
     function getGuildID($guild) {
-        if($guild === 'global') {
+        if($guild === null || $guild === 'global') {
             return 'global';
         }
         
