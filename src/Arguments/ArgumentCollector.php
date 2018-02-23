@@ -116,7 +116,7 @@ class ArgumentCollector {
                     }
                     
                     throw $error;
-                })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                })->done($resolve, $reject);
             } catch(\Throwable | \Exception | \Error $error) {
                 $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
                 if($key !== false) {

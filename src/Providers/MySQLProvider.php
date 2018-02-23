@@ -75,7 +75,7 @@ class MySQLProvider extends SettingProvider {
         $guild = $this->getGuildID($guild);
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild) {
-            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($guild))->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($guild))->done($resolve, $reject);
         }));
     }
     
@@ -93,7 +93,7 @@ class MySQLProvider extends SettingProvider {
             $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($command) use ($guild, &$settings, $resolve, $reject) {
                 if(empty($command->resultRows)) {
                     $this->settings->set($guild, $settings);
-                    $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)))->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)))->done($resolve, $reject);
                 } else {
                     $this->loadRow($command->resultRows[0]);
                     $resolve();
@@ -134,7 +134,7 @@ class MySQLProvider extends SettingProvider {
                     $this->client->on($event, $listener);
                 }
                 
-                $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->then(function () {
+                $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
                     return $this->runQuery('SELECT * FROM `settings`')->then(function ($command) {
                         foreach($command->resultRows as $row) {
                             $this->loadRow($row);
@@ -148,8 +148,8 @@ class MySQLProvider extends SettingProvider {
                             return null;
                         });
                     });
-                })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
-            }, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                })->done($resolve, $reject);
+            }, $reject);
         }));
     }
     
@@ -196,7 +196,7 @@ class MySQLProvider extends SettingProvider {
             $settings = $this->settings->get($guild);
             $settings[$key] = $value;
         
-            $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->done($resolve, $reject);
         }));
     }
     
@@ -224,7 +224,7 @@ class MySQLProvider extends SettingProvider {
             $settings = $this->settings->get($guild);
             unset($settings[$key]);
             
-            $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->done($resolve, $reject);
         }));
     }
     

@@ -75,10 +75,10 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
         };
         
         $this->on('message', function ($message) use ($msgError) {
-            $this->dispatcher->handleMessage($message)->otherwise($msgError)->done(null, array($this, 'handlePromiseRejection'));
+            $this->dispatcher->handleMessage($message)->done(null, $msgError);
         });
         $this->on('messageUpdate', function ($message, $oldMessage) use ($msgError) {
-            $this->dispatcher->handleMessage($message, $oldMessage)->otherwise($msgError)->done(null, array($this, 'handlePromiseRejection'));
+            $this->dispatcher->handleMessage($message, $oldMessage)->done(null, $msgError);
         });
         
         if(!empty($options['owners'])) {
@@ -88,10 +88,10 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
                 }
                 
                 foreach($options['owners'] as $owner) {
-                    $this->fetchUser($owner)->otherwise(function ($error) use ($owner) {
+                    $this->fetchUser($owner)->done(null, function ($error) use ($owner) {
                         $this->emit('warn', 'Unable to fetch owner '.$owner);
                         $this->emit('error', $error);
-                    })->done(null, array($this, 'handlePromiseRejection'));
+                    });
                 }
             });
         }
@@ -170,7 +170,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
             
             if($this->readyTimestamp !== null) {
                 $this->emit('debug', 'Provider set to '.$classname.' - initializing...');
-                $this->provider->init($this)->then($resolve, $reject)->done(null, array($this, 'handlePromiseRejection'));
+                $this->provider->init($this)->done($resolve, $reject);
                 return;
             }
             
@@ -178,7 +178,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
             
             $this->once('ready', function () use ($resolve, $reject) {
                 $this->emit('debug', 'Initializing provider...');
-                $this->provider->init($this)->then($resolve, $reject)->done(null, array($this, 'handlePromiseRejection'));
+                $this->provider->init($this)->done($resolve, $reject);
             });
         }))->then(function () {
             $this->emit('debug', 'Provider finished initialization.');

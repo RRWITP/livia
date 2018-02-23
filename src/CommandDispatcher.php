@@ -107,10 +107,10 @@ class CommandDispatcher {
                 }
                 
                 if($cmdMessage) {
-                    $this->inhibit($cmdMessage)->then(function () use ($message, $oldMessage, $cmdMessage, $resolve) {
+                    $this->inhibit($cmdMessage)->done(function () use ($message, $oldMessage, $cmdMessage, $resolve) {
                         if($cmdMessage->command) {
                             if($cmdMessage->command->isEnabledIn($message->guild)) {
-                                $cmdMessage->run()->then(function ($responses = null) use ($message, $oldMessage, $cmdMessage, $resolve) {
+                                $cmdMessage->run()->done(function ($responses = null) use ($message, $oldMessage, $cmdMessage, $resolve) {
                                     if($responses !== null && !\is_array($responses)) {
                                         $responses = array($responses);
                                     }
@@ -118,26 +118,26 @@ class CommandDispatcher {
                                     $cmdMessage->finalize($responses);
                                     $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, $responses);
                                     $resolve();
-                                })->done(null, array($this->client, 'handlePromiseRejection'));
+                                });
                             } else {
-                                $message->reply('The command `'.$cmdMessage->command->name.'` is disabled.')->then(function ($response) use ($message, $oldMessage, $cmdMessage, $resolve) {
+                                $message->reply('The command `'.$cmdMessage->command->name.'` is disabled.')->done(function ($response) use ($message, $oldMessage, $cmdMessage, $resolve) {
                                     $responses = array($response);
                                     $cmdMessage->finalize($responses);
                                     
                                     $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, $responses);
                                     $resolve();
-                                })->done(null, array($this->client, 'handlePromiseRejection'));
+                                });
                             }
                         } else {
                             $this->client->emit('unknownCommand', $cmdMessage);
                             if(((bool) $this->client->getOption('unknownCommandResponse', true))) {
-                                $message->reply('Unknown command. Use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('help').'.')->then(function ($response) use ($message, $oldMessage, $cmdMessage, $resolve) {
+                                $message->reply('Unknown command. Use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('help').'.')->done(function ($response) use ($message, $oldMessage, $cmdMessage, $resolve) {
                                     $responses = array($response);
                                     $cmdMessage->finalize($responses);
                                     
                                     $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, $responses);
                                     $resolve();
-                                })->done(null, array($this->client, 'handlePromiseRejection'));
+                                });
                             }
                         }
                     }, function ($inhibited) use ($message, $oldMessage, $cmdMessage, $resolve) {
@@ -151,7 +151,7 @@ class CommandDispatcher {
                             $inhibited[1] = \React\Promise\resolve($inhibited[1]);
                         }
                         
-                        $inhibited[1]->then(function ($responses) use ($message, $oldMessage, $cmdMessage, $resolve) {
+                        $inhibited[1]->done(function ($responses) use ($message, $oldMessage, $cmdMessage, $resolve) {
                             if($responses !== null) {
                                 $responses = array($responses);
                             }
@@ -159,8 +159,8 @@ class CommandDispatcher {
                             $cmdMessage->finalize($responses);
                             $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, $responses);
                             $resolve();
-                        })->done(null, array($this->client, 'handlePromiseRejection'));
-                    })->done(null, array($this->client, 'handlePromiseRejection'));
+                        });
+                    });
                 } elseif($oldCmdMessage) {
                     $oldCmdMessage->finalize(null);
                     if(!$this->client->getOption('nonCommandEditable')) {
@@ -222,7 +222,7 @@ class CommandDispatcher {
                 $promises[] = $inhibited;
             }
             
-            \React\Promise\all($promises)->then(function ($values) use ($resolve, $reject) {
+            \React\Promise\all($promises)->done(function ($values) use ($resolve, $reject) {
                 foreach($values as $value) {
                     if($value !== false) {
                         return $reject($value);
@@ -230,7 +230,7 @@ class CommandDispatcher {
                 }
                 
                 $resolve();
-            }, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            }, $reject);
         }));
     }
     

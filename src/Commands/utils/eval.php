@@ -139,7 +139,7 @@ return function ($client) {
                     
                     $messages[] = $message->say($message->message->author.PHP_EOL.'```php'.PHP_EOL.$code.PHP_EOL.'```'.PHP_EOL.'Error: ```'.PHP_EOL.$e.PHP_EOL.'```');
                     return $messages;
-                })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                })->done($resolve, $reject);
             }));
         }
         

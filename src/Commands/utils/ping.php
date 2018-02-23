@@ -34,8 +34,8 @@ return function ($client) {
                         $ping = 0;
                     }
                     
-                    $msg->edit($message->author.' Pong! The message round-trip took '.\ceil(($time * 1000)).'ms. The WS heartbeat is '.$ping.'ms.')->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
-                }, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    return $msg->edit($message->author.' Pong! The message round-trip took '.\ceil(($time * 1000)).'ms. The WS heartbeat is '.$ping.'ms.');
+                })->done($resolve, $reject);
             }));
         }
     });

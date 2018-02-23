@@ -85,7 +85,7 @@ return function ($client) {
                             if($message->message->channel->type !== 'dm') {
                                 return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
                             }
-                        })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                        })->done($resolve, $reject);
                     } elseif($countCommands > 15) {
                         $resolve($message->reply('Multiple commands found. Please be more specific.'));
                     } elseif($countCommands > 1) {
@@ -138,7 +138,7 @@ return function ($client) {
                         if($message->message->channel->type !== 'dm') {
                             return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
                         }
-                    })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    })->done($resolve, $reject);
                 }
             }));
         }

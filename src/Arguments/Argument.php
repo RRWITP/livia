@@ -151,11 +151,11 @@ class Argument {
             
             if($this->infinite) {
                 if(!$empty && $value !== null) {
-                    $this->parseInfiniteProvided($message, (\is_array($value) ? $value : array($value)), $promptLimit)->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    $this->parseInfiniteProvided($message, (\is_array($value) ? $value : array($value)), $promptLimit)->done($resolve, $reject);
                     return;
                 }
                 
-                $this->obtainInfinite($message, array(), $promptLimit)->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                $this->obtainInfinite($message, array(), $promptLimit)->done($resolve, $reject);
                 return;
             }
             
@@ -184,7 +184,7 @@ class Argument {
                             'answers' => $answers
                         );
                     });
-                })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                })->done($resolve, $reject);
             }
             
             if(\count($prompts) > $promptLimit) {
@@ -210,7 +210,7 @@ class Argument {
             }
             
             // Prompt the user for a new value
-            $reply->then(function ($msg) use ($message, $promptLimit, &$prompts, &$answers, $resolve, $reject) {
+            $reply->done(function ($msg) use ($message, $promptLimit, &$prompts, &$answers, $resolve, $reject) {
                             if($msg !== null) {
                                 $prompts[] = $msg;
                             }
@@ -280,8 +280,8 @@ class Argument {
                                 }
                                 
                                 throw $error;
-                            })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
-                        }, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                            })->done($resolve, $reject);
+                        }, $reject);
         }));
     }
     
@@ -309,7 +309,7 @@ class Argument {
                 
                 $values[] = $value;
                 return $this->obtainInfinite($message, $values, $promptLimit, $prompts, $answers);
-            })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            })->done($resolve, $reject);
         }));
     }
     
@@ -459,7 +459,7 @@ class Argument {
                     'prompts' => array(),
                     'answers' => array()
                 );
-            })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            })->done($resolve, $reject);
         }));
     }
 }

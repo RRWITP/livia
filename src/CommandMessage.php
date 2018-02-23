@@ -276,7 +276,7 @@ class CommandMessage {
                 return $this->reply('An error occurred while running the command: `'.\get_class($error).': '.\str_replace('`', '', $error->getMessage()).'`'.PHP_EOL.
                         'You shouldn\'t ever receive an error like this.'.PHP_EOL.
                         'Please contact '.$owners.($this->client->getOption('invite') ? ' in this server: '.$this->client->getOption('invite') : '.'));
-            })->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+            })->done($resolve, $reject);
         }));
     }
     

@@ -40,15 +40,15 @@ return function ($client) {
                 if(empty($args['prefix'])) {
                     $prefix = $this->client->getGuildPrefix($message->message->guild);
                     $msg = ($prefix !== null ? 'The command prefix is `'.$prefix.'`.' : 'There is no command prefix set.').PHP_EOL.'To run commands, use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user).'.';
-                    return $message->say($msg)->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    return $message->say($msg)->done($resolve, $reject);
                 }
                 
                 if($message->message->guild !== null) {
                     if($message->message->member->permissions->has('ADMINISTRATOR') === false && $this->client->isOwner($message->message->author) === false) {
-                        return $message->reply('Only administrators may change the command prefix.')->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                        return $message->reply('Only administrators may change the command prefix.')->done($resolve, $reject);
                     }
                 } elseif($this->client->isOwner($message->message->author) === false) {
-                    return $message->reply('Only the bot owner may change the command prefix.')->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                    return $message->reply('Only the bot owner may change the command prefix.')->done($resolve, $reject);
                 }
                 
                 $prefixLc = \mb_strtolower($args['prefix']);
@@ -75,7 +75,7 @@ return function ($client) {
                     $response = ($prefix ? 'Set the command prefix to `'.$prefix.'`.' : 'Removed the command prefix entirely.');
                 }
                 
-                $message->reply($response.' To run commands use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user))->then($resolve, $reject)->done(null, array($this->client, 'handlePromiseRejection'));
+                $message->reply($response.' To run commands use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user))->done($resolve, $reject);
             }));
         }
     });
