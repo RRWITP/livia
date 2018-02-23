@@ -26,7 +26,7 @@ return function ($client) {
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
             return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message) {
-                $message->say('Pinging...')->then(function ($msg) use ($message, $resolve, $reject) {
+                $message->say('Pinging...')->then(function ($msg) use ($message) {
                     $time = \CharlotteDunois\Yasmin\Utils\Snowflake::deconstruct($msg->id)->timestamp - \CharlotteDunois\Yasmin\Utils\Snowflake::deconstruct($message->id)->timestamp;
                     
                     $ping = $this->client->getPing();
