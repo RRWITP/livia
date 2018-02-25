@@ -24,8 +24,8 @@ class UserArgumentType extends ArgumentType {
     /**
      * @inheritDoc
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
-        $prg = \preg_match('/(?:<@!?)?(\d+)>?/', $value, $matches);
+    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+        $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
             return $message->client->fetchUser($matches[1])->then(function () {
                 return true;
@@ -73,7 +73,7 @@ class UserArgumentType extends ArgumentType {
     /**
      * @inheritDoc
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d+)>?/', $value, $matches);
         if($prg === 1) {
             return $this->client->users->get($matches[1]);

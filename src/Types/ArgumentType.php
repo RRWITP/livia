@@ -46,7 +46,7 @@ abstract class ArgumentType {
      * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg    Argument the value obtained from.
      * @return bool|string|\React\Promise\Promise
      */
-    abstract function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null);
+    abstract function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
     
     /**
      * Parses a value into an usable value.
@@ -56,7 +56,7 @@ abstract class ArgumentType {
      * @return mixed|null
      * @throws \RangeException
      */
-    abstract function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, \CharlotteDunois\Livia\Arguments\Argument $arg = null);
+    abstract function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
     
     /**
      * Checks whether a value is considered to be empty. This determines whether the default value for an argument should be used and changes the response to the user under certain circumstances.
@@ -65,7 +65,7 @@ abstract class ArgumentType {
      * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg    Argument the value obtained from.
      * @return bool
      */
-    function isEmpty($value, \CharlotteDunois\Livia\CommandMessage $msg, \CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function isEmpty($value, \CharlotteDunois\Livia\CommandMessage $msg, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         if(\is_array($value) || \is_object($value)) {
             return (empty($value));
         }

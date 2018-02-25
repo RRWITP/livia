@@ -20,7 +20,7 @@ class DataHelpers {
      * @param string|null                                     $property
      * @return string
      */
-    static function disambiguation($items, $label, $property = null) {
+    static function disambiguation($items, string $label, ?string $property = null) {
         if($items instanceof \CharlotteDunois\Yasmin\Utils\Collection) {
             $items = $items->all();
         }
