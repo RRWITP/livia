@@ -71,11 +71,7 @@ class MemberArgumentType extends ArgumentType {
             return 'Multiple members found. Please be more specific.';
         }
         
-        $escapedMembers = \array_map(function ($member) {
-            return \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($member->user->tag);
-        }, $members->all());
-        
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($escapedMembers, 'members', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($members, 'members', null).PHP_EOL;
     }
     
     /**

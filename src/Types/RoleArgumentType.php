@@ -63,11 +63,7 @@ class RoleArgumentType extends ArgumentType {
             return 'Multiple roles found. Please be more specific.';
         }
         
-        $escapedRoles = \array_map(function ($role) {
-            return \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($role->name);
-        }, $roles->all());
-        
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($escapedRoles, 'roles', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($roles, 'roles', null).PHP_EOL;
     }
     
     /**

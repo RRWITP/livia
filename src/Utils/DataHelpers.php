@@ -30,7 +30,7 @@ class DataHelpers {
                 $item = (\is_array($item) ? $item[$property] : $item->$property);
             }
             
-            return '`'.\str_replace(' ', "\u{00A0}", $item).'`';
+            return '`'.\str_replace(' ', "\u{00A0}", \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($item)).'`';
         }, $items);
         
         return 'Multiple '.$label.' found, please be more specific: '.\implode(', ', $itemList);

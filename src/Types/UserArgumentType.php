@@ -67,11 +67,7 @@ class UserArgumentType extends ArgumentType {
             return 'Multiple users found. Please be more specific.';
         }
         
-        $escapedUsers = \array_map(function ($user) {
-            return \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($user->tag);
-        }, $users->all());
-        
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($escapedUsers, 'users', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($users, 'users', null).PHP_EOL;
     }
     
     /**

@@ -63,11 +63,7 @@ class ChannelArgumentType extends ArgumentType {
             return 'Multiple channels found. Please be more specific.';
         }
         
-        $escapedChannels = \array_map(function ($channel) {
-            return \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($channel->name);
-        }, $channels->all());
-        
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($escapedChannels, 'channels', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($channels, 'channels', null).PHP_EOL;
     }
     
     /**

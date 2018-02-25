@@ -113,7 +113,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
             case 'owners':
                 $owners = array();
                 foreach($this->options['owners'] as $owner) {
-                    $owners[] = $this->users->get($owner);
+                    $owners[$owner] = $this->users->get($owner);
                 }
                 
                 return $owners;
