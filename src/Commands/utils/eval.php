@@ -94,12 +94,12 @@ return function ($client) {
                         $result = \React\Promise\resolve($result);
                     }
                     
-                    \set_error_handler($prev);
-                    
-                    return $result->then(function ($result) use ($code, $message, &$messages, $endtime, $time) {
+                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, $endtime, $time) {
                         if($endtime === null) {
                             $endtime = \microtime(true);
                         }
+                        
+                        \set_error_handler($prev);
                         
                         $this->lastResult = $result;
                         $result = $this->invokeDump($result);

@@ -38,7 +38,7 @@ class CommandMessage {
         $this->message = $message;
         $this->command = $command;
         
-        $this->argString = ($argString !== null ? \trim($argString) : $argString);
+        $this->argString = ($argString !== null ? \trim($argString) : null);
         $this->patternMatches = $patternMatches;
     }
     
@@ -111,13 +111,13 @@ class CommandMessage {
             
             if($this->command->guildOnly && $this->message->guild === null) {
                 $this->client->emit('commandBlocked', $this, 'guildOnly');
-                $this->message->reply('The `'.$this->command->name.'` command must be used in a server channel.')->then($resolve, $reject);
+                $this->message->reply('The `'.$this->command->name.'` command must be used in a server channel.')->done($resolve, $reject);
                 return;
             }
             
-            if($this->command->nsfw && $this->message->nsfw === false) {
+            if($this->command->nsfw && !$this->message->nsfw) {
                 $this->client->emit('commandBlocked', $this, 'nsfw');
-                $this->message->reply('The `'.$this->command->name.'` command must be used in NSFW channels.')->then($resolve, $reject);
+                $this->message->reply('The `'.$this->command->name.'` command must be used in NSFW channels.')->done($resolve, $reject);
                 return;
             }
             
@@ -133,7 +133,7 @@ class CommandMessage {
                     $perms = 'You do not have permission to use the `'.$this->command->name.'` command.';
                 }
                 
-                $this->message->reply($perms)->then($resolve, $reject);
+                $this->message->reply($perms)->done($resolve, $reject);
                 return;
             }
             
@@ -164,7 +164,7 @@ class CommandMessage {
                         $msg = 'I need the following permissions for the `'.$this->command->name.'` command to work:'.PHP_EOL.$missing;
                     }
                     
-                    $this->message->reply($msg)->then($resolve, $reject);
+                    $this->message->reply($msg)->done($resolve, $reject);
                     return;
                 }
             }
@@ -179,7 +179,7 @@ class CommandMessage {
                     return $resolve();
                 }
                 
-                $this->message->reply('You may not use the `'.$this->command->name.'` command again for another '.$remaining.' seconds.')->then($resolve, $reject);
+                $this->message->reply('You may not use the `'.$this->command->name.'` command again for another '.$remaining.' seconds.')->done($resolve, $reject);
                 return;
             }
             
