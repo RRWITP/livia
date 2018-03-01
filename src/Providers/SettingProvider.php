@@ -30,7 +30,7 @@ abstract class SettingProvider {
     /**
      * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.
      * @param \CharlotteDunois\Livia\LiviaClient    $client
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     abstract function init(\CharlotteDunois\Livia\LiviaClient   $client);
     

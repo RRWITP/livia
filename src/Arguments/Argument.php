@@ -135,7 +135,7 @@ class Argument {
      * @param string|string[]                        $value        Pre-provided value(s).
      * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
      * @param bool|string|null                       $valid        Whether the last retrieved value was valid.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function obtain(\CharlotteDunois\Livia\CommandMessage $message, $value, $promptLimit = \INF, array $prompts = array(), array $answers = array(), $valid = null) {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $promptLimit, &$prompts, &$answers, $valid) {
@@ -293,7 +293,7 @@ class Argument {
      * @param array                                  $prompts
      * @param array                                  $answers
      * @param bool                                   $valid
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, array &$prompts = array(), array &$answers = array(), bool $valid = null) {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $values, $promptLimit, $prompts, $answers, $valid) {
@@ -415,7 +415,7 @@ class Argument {
      * @param string[]                               $values       Pre-provided values.
      * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
      * @param int                                    $i            Current index of current argument value.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit, int $i = 0) {
         if(empty($values)) {

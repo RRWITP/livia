@@ -160,7 +160,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     /**
      * Sets the setting provider to use, and initializes it once the client is ready
      * @param \CharlotteDunois\Livia\Providers\SettingProvider  $provider
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function setProvider(\CharlotteDunois\Livia\Providers\SettingProvider $provider) {
         $this->provider = $provider;

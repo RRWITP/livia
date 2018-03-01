@@ -93,7 +93,7 @@ class CommandMessage {
     
     /**
      * Runs the command. Resolves with an instance of Message or an array of Message instances.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function run() {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
@@ -286,7 +286,7 @@ class CommandMessage {
      * @param string  $content
      * @param array   $options
      * @param bool    $fromEdit
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      * @throws \RangeException|\InvalidArgumentException
      */
     protected function respond(string $type, string $content, array $options = array(), bool $fromEdit = false) {
@@ -346,7 +346,7 @@ class CommandMessage {
      * @param string                                                                           $type
      * @param string                                                                           $content
      * @param array                                                                            $options
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function editResponse($response, string $type, string $content, array $options = array()) {
         if(!$response) {
@@ -404,7 +404,7 @@ class CommandMessage {
      * @param string  $type
      * @param string  $content
      * @param array   $options
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function editCurrentResponse(string $id, string $type, string $content, array $options = array()) {
         if(empty($this->responses[$id])) {
@@ -423,7 +423,7 @@ class CommandMessage {
      * Responds with a plain message. Resolves with an instance of Message or an array of Message instances.
      * @param string  $content
      * @param array   $options  Message Options.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function say(string $content, array $options = array()) {
         return $this->respond('plain', $content, $options);
@@ -433,7 +433,7 @@ class CommandMessage {
      * Responds with a reply message. Resolves with an instance of Message or an array of Message instances.
      * @param string  $content
      * @param array   $options  Message Options.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function reply(string $content, array $options = array()) {
         return $this->respond('reply', $content, $options);
@@ -443,7 +443,7 @@ class CommandMessage {
      * Responds with a direct message. Resolves with an instance of Message or an array of Message instances.
      * @param string  $content
      * @param array   $options  Message Options.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function direct(string $content, array $options = array()) {
         return $this->respond('direct', $content, $options);
@@ -453,7 +453,7 @@ class CommandMessage {
      * Shortcut to $this->message->edit.
      * @param string  $content
      * @param array   $options  Message Options.
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function edit(string $content, array $options = array()) {
         return $this->message->edit($content, $options);

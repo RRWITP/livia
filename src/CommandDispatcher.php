@@ -80,7 +80,7 @@ class CommandDispatcher {
      * Handles an incoming message.
      * @param \CharlotteDunois\Yasmin\Models\Message       $message
      * @param \CharlotteDunois\Yasmin\Models\Message|null  $oldMessage
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function handleMessage(\CharlotteDunois\Yasmin\Models\Message $message, \CharlotteDunois\Yasmin\Models\Message $oldMessage = null) {
         return (new \React\Promise\Promise(function (callable $resolve) use ($message, $oldMessage) {
@@ -203,7 +203,7 @@ class CommandDispatcher {
     /**
      * Inhibits a command message. Resolves with false or array (reason, ?response (Promise (-> Message), Message instance or null)).
      * @param \CharlotteDunois\Livia\CommandMessage  $message
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function inhibit(\CharlotteDunois\Livia\CommandMessage $message) {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message) {

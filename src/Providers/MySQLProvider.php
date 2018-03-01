@@ -69,7 +69,7 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * @inheritDoc
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function clear($guild) {
         $guild = $this->getGuildID($guild);
@@ -83,7 +83,7 @@ class MySQLProvider extends SettingProvider {
      * Creates a new table row in the db for the guild, if it doesn't exist already - otherwise loads the row.
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
      * @param array|\ArrayObject                           $settings
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      * @throws \InvalidArgumentException
      */
     function create($guild, &$settings = array()) {
@@ -176,7 +176,7 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * @inheritDoc
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function set($guild, string $key, $value) {
         $guild = $this->getGuildID($guild);
@@ -202,7 +202,7 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * @inheritDoc
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function remove($guild, string $key) {
         $guild = $this->getGuildID($guild);
@@ -289,7 +289,7 @@ class MySQLProvider extends SettingProvider {
      * Runs a SQL query. Resolves with the Command instance.
      * @param string  $sql
      * @param array   $parameters  Parameters for the query - these get escaped
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      * @see https://github.com/bixuehujin/reactphp-mysql/blob/master/src/Command.php
      */
     function runQuery(string $sql, array $parameters = array()) {

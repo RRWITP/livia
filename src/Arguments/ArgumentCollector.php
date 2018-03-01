@@ -75,7 +75,7 @@ class ArgumentCollector {
      * @param \CharlotteDunois\Livia\CommandMessage  $message
      * @param array                                  $provided
      * @param int|double                             $promptLimit
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function obtain(\CharlotteDunois\Livia\CommandMessage $message, $provided = array(), $promptLimit = null) {
         if($promptLimit === null) {
@@ -136,7 +136,7 @@ class ArgumentCollector {
      * @param array                                 $values
      * @param array                                 $results
      * @param int                                   $current
-     * @return \React\Promise\Promise
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function obtainNext(\CharlotteDunois\Livia\CommandMessage $message, array &$provided, $promptLimit, array &$values, array &$results, int $current) {
         if(empty($this->args[$current])) {
