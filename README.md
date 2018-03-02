@@ -26,7 +26,12 @@ The following commands are coming with Livia:
 * load (load new commands)
 * reload (reload command(s))
 * unload (unload a command)
-* eval (evaluates PHP code, all PHP errors get thrown - defines randomized eval namespace for eval execution - it has a callback function on `$doCallback` which takes whatever value you give, inspects it and sends it as reply to Discord))
+* eval (evaluates PHP code)
+  * All PHP errors get thrown.
+  * Defines randomized eval namespace for eval execution.
+  * It has an anonymous function called `$doCallback`, which takes whatever value you give, inspects it and sends it as reply to Discord.
+  * You have access to the specific `CommandMessage` instance through `$message`.
+  * The last eval result is accessible through `$this->lastResult`.
 * help (displays a help message in DM)
 * ping (calculates the bot's latency)
 * prefix (gets or sets the bot's prefix in the guild/globally)

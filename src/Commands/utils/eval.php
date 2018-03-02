@@ -87,7 +87,9 @@ return function ($client) {
                     $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
                                     PHP_EOL.$code;
                     
-                    $result = eval($evalcode);
+                    $result = (function () use ($evalcode, &$message, &$doCallback) {
+                        return eval($evalcode);
+                    })();
                     
                     if(!($result instanceof \React\Promise\PromiseInterface)) {
                         $endtime = \microtime(true);
