@@ -52,10 +52,21 @@ return function ($client) {
                     $messages = array();
                     $time = null;
                     
-                    $doCallback = function ($result) use ($code, $message, &$messages, &$time) {
+                    $errorcb = function ($errno, $errstr, $errfile, $errline) {
+                        // Fixing xdebug bug
+                        if(\extension_loaded('xdebug') && \stripos($errstr, 'Cannot modify header information') !== false) {
+                            return true;
+                        }
+                        
+                        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+                    };
+                    
+                    $doCallback = function ($result) use ($code, $message, &$messages, &$time, $errorcb) {
                         $endtime = \microtime(true);
                         
+                        $previous = \set_error_handler($errorcb);
                         $result = $this->invokeDump($result);
+                        \set_error_handler($previous);
                         
                         $len = \mb_strlen($result);
                         $maxlen = 1850 - \mb_strlen($code);
@@ -74,12 +85,10 @@ return function ($client) {
                         }
                         $exectime = \ceil($exectime);
                         
-                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].' (callback).'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
+                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                     };
                     
-                    $prev = \set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-                        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
-                    });
+                    $prev = \set_error_handler($errorcb);
                     
                     $endtime = null;
                     $time = \microtime(true);
@@ -101,10 +110,10 @@ return function ($client) {
                             $endtime = \microtime(true);
                         }
                         
-                        \set_error_handler($prev);
-                        
                         $this->lastResult = $result;
                         $result = $this->invokeDump($result);
+                        
+                        \set_error_handler($prev);
                         
                         $len = \mb_strlen($result);
                         $maxlen = 1850 - \mb_strlen($code);
@@ -153,7 +162,7 @@ return function ($client) {
             
             \var_dump($result);
             \ini_set('xdebug.var_display_max_depth', $old);
-            $result = @\ob_get_clean();
+            $result = \ob_get_clean();
             
             if(\extension_loaded('xdebug')) {
                 $result = \explode("\n", \str_replace("\r", "", $result));
@@ -161,10 +170,8 @@ return function ($client) {
                 $result = \implode(\PHP_EOL, $result);
             }
             
-            while(@\ob_end_clean());
-            
             $email = $this->client->user->email;
-            $tokenregex = preg_quote($this->client->token, '/');
+            $tokenregex = \preg_quote($this->client->token, '/');
             $emailregex = (!empty($email) ? \preg_quote($email, '/') : null);
             
             $result = \preg_replace('/string\(\d+\) "'.$tokenregex.'"'.($emailregex !== null ? '|string\(\d+\) "'.$emailregex.'"' : '').'/iu', 'string(10) "[redacted]"', $result);
