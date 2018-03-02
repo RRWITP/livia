@@ -54,7 +54,7 @@ return function ($client) {
                     
                     $errorcb = function ($errno, $errstr, $errfile, $errline) {
                         // Fixing xdebug bug
-                        if(\extension_loaded('xdebug') && \stripos($errstr, 'Cannot modify header information') !== false) {
+                        if(\extension_loaded('xdebug') && \mb_stripos($errstr, 'Cannot modify header information') !== false) {
                             return true;
                         }
                         
