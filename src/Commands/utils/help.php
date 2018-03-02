@@ -58,21 +58,21 @@ return function ($client) {
                     if($countCommands === 1) {
                         $command = $commands[0];
                         
-                        $help = "__Command **{$command->name}**:__ {$command->description} ".($command->guildOnly ? '(Usable only in servers)' : '').PHP_EOL.PHP_EOL.
-                                '**Format:** '.\CharlotteDunois\Livia\Commands\Command::anyUsage($command->name.(!empty($command->format) ? ' '.$command->format : '')).PHP_EOL;
+                        $help = "__Command **{$command->name}**:__ {$command->description} ".($command->guildOnly ? '(Usable only in servers)' : '').\PHP_EOL.\PHP_EOL.
+                                '**Format:** '.\CharlotteDunois\Livia\Commands\Command::anyUsage($command->name.(!empty($command->format) ? ' '.$command->format : '')).\PHP_EOL;
                                 
                         if(!empty($command->aliases)) {
-                            $help .= PHP_EOL.'**Aliases:** '.\implode(', ', $command->aliases);
+                            $help .= \PHP_EOL.'**Aliases:** '.\implode(', ', $command->aliases);
                         }
                         
-                        $help .= PHP_EOL."**Group:** {$command->group->name} (`{$command->groupID}:{$command->name}`)";
+                        $help .= \PHP_EOL."**Group:** {$command->group->name} (`{$command->groupID}:{$command->name}`)";
                         
                         if(!empty($command->details)) {
-                            $help .= PHP_EOL.'**Details:** '.$command->details;
+                            $help .= \PHP_EOL.'**Details:** '.$command->details;
                         }
                         
                         if(!empty($command->examples)) {
-                            $help .= PHP_EOL.'**Examples:**'.PHP_EOL.\implode(PHP_EOL, $command->examples);
+                            $help .= \PHP_EOL.'**Examples:**'.\PHP_EOL.\implode(\PHP_EOL, $command->examples);
                         }
                         
                         $message->direct($help)->then(function ($msg) use ($message) {
@@ -95,19 +95,19 @@ return function ($client) {
                     $help = 'To run a command in '.($message->message->guild !== null ? $message->message->guild->name : 'any server').', use '.
                             \CharlotteDunois\Livia\Commands\Command::anyUsage('command', $this->client->getGuildPrefix($message->message->guild), $this->client->user).
                             '. For example, '.
-                            \CharlotteDunois\Livia\Commands\Command::anyUsage('prefix', $this->client->getGuildPrefix($message->message->guild), $this->client->user).'.'.PHP_EOL.
-                            'To run a command in this DM, simply use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command').' with no prefix.'.PHP_EOL.PHP_EOL.
-                            'Use '.$this->usage('<command>', null, null).' to view detailed information about a specific command.'.PHP_EOL.
-                            'Use '.$this->usage('all', null, null).' to view a list of *all* commands, not just available ones.'.PHP_EOL.PHP_EOL.
-                            '__**'.($showAll ? 'All commands' : 'Available commands in '.($message->message->guild !== null ? $message->message->guild->name : 'this DM')).'**__'.PHP_EOL.PHP_EOL.
-                            \implode(PHP_EOL.PHP_EOL, \array_map(function ($group) use ($message, $showAll) {
+                            \CharlotteDunois\Livia\Commands\Command::anyUsage('prefix', $this->client->getGuildPrefix($message->message->guild), $this->client->user).'.'.\PHP_EOL.
+                            'To run a command in this DM, simply use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command').' with no prefix.'.\PHP_EOL.\PHP_EOL.
+                            'Use '.$this->usage('<command>', null, null).' to view detailed information about a specific command.'.\PHP_EOL.
+                            'Use '.$this->usage('all', null, null).' to view a list of *all* commands, not just available ones.'.\PHP_EOL.\PHP_EOL.
+                            '__**'.($showAll ? 'All commands' : 'Available commands in '.($message->message->guild !== null ? $message->message->guild->name : 'this DM')).'**__'.\PHP_EOL.\PHP_EOL.
+                            \implode(\PHP_EOL.\PHP_EOL, \array_map(function ($group) use ($message, $showAll) {
                                 $cmds = ($showAll ? $group->commands->filter(function ($cmd) use ($message) {
                                     return (!$cmd->ownerOnly || $this->client->isOwner($message->author));
                                 }) : $group->commands->filter(function ($cmd) use ($message) {
                                     return $cmd->isUsable($message);
                                 }));
                                 
-                                return "__{$group->name}__".PHP_EOL.\implode(PHP_EOL, $cmds->map(function ($cmd) {
+                                return "__{$group->name}__".\PHP_EOL.\implode(\PHP_EOL, $cmds->map(function ($cmd) {
                                     return "**{$cmd->name}:** {$cmd->description}";
                                 })->all());
                             }, ($showAll ? $groups->filter(function ($group) use ($message) {

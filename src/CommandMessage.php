@@ -161,7 +161,7 @@ class CommandMessage {
                         $missing = \implode(', ', \array_map(function ($perm) {
                             return '`'.\CharlotteDunois\Yasmin\Models\Permissions::resolveToName($perm).'`';
                         }, $missing));
-                        $msg = 'I need the following permissions for the `'.$this->command->name.'` command to work:'.PHP_EOL.$missing;
+                        $msg = 'I need the following permissions for the `'.$this->command->name.'` command to work:'.\PHP_EOL.$missing;
                     }
                     
                     $this->message->reply($msg)->done($resolve, $reject);
@@ -273,8 +273,8 @@ class CommandMessage {
                     $owners = 'the bot owner';
                 }
                 
-                return $this->reply('An error occurred while running the command: `'.\get_class($error).': '.\str_replace('`', '', $error->getMessage()).'`'.PHP_EOL.
-                        'You shouldn\'t ever receive an error like this.'.PHP_EOL.
+                return $this->reply('An error occurred while running the command: `'.\get_class($error).': '.\str_replace('`', '', $error->getMessage()).'`'.\PHP_EOL.
+                        'You shouldn\'t ever receive an error like this.'.\PHP_EOL.
                         'Please contact '.$owners.($this->client->getOption('invite') ? ' in this server: '.$this->client->getOption('invite') : '.'));
             })->done($resolve, $reject);
         }));

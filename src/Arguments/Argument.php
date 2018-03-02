@@ -197,13 +197,13 @@ class Argument {
             }
             
             if($empty && $value === null) {
-                $reply = $message->reply($this->prompt.PHP_EOL.
+                $reply = $message->reply($this->prompt.\PHP_EOL.
                     'Respond with `cancel` to cancel the command. The command will automatically be cancelled in '.$this->wait.' seconds.');
             } elseif($valid === false) {
-                $reply = $message->reply('You provided an invalid '.$this->label.'.'.PHP_EOL.
+                $reply = $message->reply('You provided an invalid '.$this->label.'.'.\PHP_EOL.
                     'Please try again. Respond with `cancel` to cancel the command. The command will automatically be cancelled in '.$this->wait.' seconds.');
             } elseif(\is_string($valid)) {
-                $reply = $message->reply($valid.PHP_EOL.
+                $reply = $message->reply($valid.\PHP_EOL.
                     'Please try again. Respond with `cancel` to cancel the command. The command will automatically be cancelled in '.$this->wait.' seconds.');
             } else {
                 $reply = \React\Promise\resolve(null);
@@ -315,8 +315,8 @@ class Argument {
     
     protected function infiniteObtain(\CharlotteDunois\Livia\CommandMessage $message, $value, array &$values, $promptLimit, array &$prompts, array &$answers, $valid = null) {
         if($value === null) {
-            $reply = $message->reply($this->prompt.PHP_EOL.
-                'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.PHP_EOL.
+            $reply = $message->reply($this->prompt.\PHP_EOL.
+                'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.\PHP_EOL.
                 'The command will automatically be cancelled in '.$this->wait.' seconds.');
         } elseif($valid === false) {
             $escaped = \str_replace('@', "@\u{200B}", \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($value));
@@ -324,8 +324,8 @@ class Argument {
             $reply = $message->reply('You provided an invalid '.$this->label.', "'.(\mb_strlen($escaped) < 1850 ? $escaped : '[too long to show]').'". '.
                                         'Please try again.');
         } elseif(\is_string($valid)) {
-            $reply = $message->reply($valid.PHP_EOL.
-                'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.PHP_EOL.
+            $reply = $message->reply($valid.\PHP_EOL.
+                'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.\PHP_EOL.
                 'The command will automatically be cancelled in '.$this->wait.' seconds.');
         } else {
             $reply = \React\Promise\resolve(null);

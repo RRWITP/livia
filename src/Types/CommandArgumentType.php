@@ -34,7 +34,7 @@ class CommandArgumentType extends ArgumentType {
             return false;
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name').PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name').\PHP_EOL;
     }
     
     /**

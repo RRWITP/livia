@@ -267,7 +267,7 @@ abstract class Command {
                     $missing = \implode(', ', \array_map(function ($perm) {
                         return '`'.\CharlotteDunois\Yasmin\Models\Permissions::resolveToName($perm).'`';
                     }, $missing));
-                    $msg = 'The `'.$this->name.'` command requires you to have the following permissions:'.PHP_EOL.$missing;
+                    $msg = 'The `'.$this->name.'` command requires you to have the following permissions:'.\PHP_EOL.$missing;
                 }
                 
                 return $msg;

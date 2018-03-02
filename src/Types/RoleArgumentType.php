@@ -63,7 +63,7 @@ class RoleArgumentType extends ArgumentType {
             return 'Multiple roles found. Please be more specific.';
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($roles, 'roles', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($roles, 'roles', null).\PHP_EOL;
     }
     
     /**

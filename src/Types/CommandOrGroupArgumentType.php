@@ -39,7 +39,7 @@ class CommandOrGroupArgumentType extends ArgumentType {
             return false;
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name').PHP_EOL.\CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($groups, 'groups', 'name');
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name').\PHP_EOL.\CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($groups, 'groups', 'name');
     }
     
     /**

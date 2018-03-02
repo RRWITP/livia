@@ -34,7 +34,7 @@ class GroupArgumentType extends ArgumentType {
             return false;
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($groups, 'groups', 'name').PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($groups, 'groups', 'name').\PHP_EOL;
     }
     
     /**

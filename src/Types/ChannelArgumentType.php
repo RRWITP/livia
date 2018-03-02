@@ -63,7 +63,7 @@ class ChannelArgumentType extends ArgumentType {
             return 'Multiple channels found. Please be more specific.';
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($channels, 'channels', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($channels, 'channels', null).\PHP_EOL;
     }
     
     /**

@@ -44,7 +44,7 @@ return function ($client) {
                 
                 if(\mb_strpos($code, 'return') === false && \mb_strpos($code, 'echo') === false) {
                     $code = \explode(';', $code);
-                    $code[(\count($code) - 2)] = PHP_EOL.'return '.\trim($code[(\count($code) - 2)]);
+                    $code[(\count($code) - 2)] = \PHP_EOL.'return '.\trim($code[(\count($code) - 2)]);
                     $code = \implode(';', $code);
                 }
                 
@@ -61,7 +61,7 @@ return function ($client) {
                         $maxlen = 1850 - \mb_strlen($code);
                         
                         if($len > $maxlen) {
-                            $result = \mb_substr($result, 0, $maxlen).PHP_EOL.'...';
+                            $result = \mb_substr($result, 0, $maxlen).\PHP_EOL.'...';
                         }
                         
                         $sizeformat = \count($this->timeformats) - 1;
@@ -74,7 +74,7 @@ return function ($client) {
                         }
                         $exectime = \ceil($exectime);
                         
-                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed after '.$exectime.$this->timeformats[$format].' (callback).'.PHP_EOL.PHP_EOL.'```php'.PHP_EOL.$result.PHP_EOL.'```'.($len > $maxlen ? PHP_EOL.'Original length: '.$len : ''));
+                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].' (callback).'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                     };
                     
                     $prev = \set_error_handler(function ($errno, $errstr, $errfile, $errline) {
@@ -85,7 +85,7 @@ return function ($client) {
                     $time = \microtime(true);
                     
                     $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
-                                    PHP_EOL.$code;
+                                    \PHP_EOL.$code;
                     
                     $result = (function () use ($evalcode, &$message, &$doCallback) {
                         return eval($evalcode);
@@ -110,7 +110,7 @@ return function ($client) {
                         $maxlen = 1850 - \mb_strlen($code);
                         
                         if($len > $maxlen) {
-                            $result = \mb_substr($result, 0, $maxlen).PHP_EOL.'...';
+                            $result = \mb_substr($result, 0, $maxlen).\PHP_EOL.'...';
                         }
                         
                         $sizeformat = \count($this->timeformats) - 1;
@@ -123,7 +123,7 @@ return function ($client) {
                         }
                         $exectime = \ceil($exectime);
                         
-                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.PHP_EOL.PHP_EOL.'```php'.PHP_EOL.$result.PHP_EOL.'```'.($len > $maxlen ? PHP_EOL.'Original length: '.$len : ''));
+                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                         return $messages;
                     });
                 })->then(function ($pr) {
@@ -136,10 +136,10 @@ return function ($client) {
                     $maxlen = 1900 - \mb_strlen($code);
                     
                     if($len > $maxlen) {
-                        $e = \mb_substr($e, 0, $maxlen).PHP_EOL.'...';
+                        $e = \mb_substr($e, 0, $maxlen).\PHP_EOL.'...';
                     }
                     
-                    $messages[] = $message->say($message->message->author.PHP_EOL.'```php'.PHP_EOL.$code.PHP_EOL.'```'.PHP_EOL.'Error: ```'.PHP_EOL.$e.PHP_EOL.'```');
+                    $messages[] = $message->say($message->message->author.\PHP_EOL.'```php'.\PHP_EOL.$code.\PHP_EOL.'```'.\PHP_EOL.'Error: ```'.\PHP_EOL.$e.\PHP_EOL.'```');
                     return $messages;
                 })->done($resolve, $reject);
             }));
@@ -158,7 +158,7 @@ return function ($client) {
             if(\extension_loaded('xdebug')) {
                 $result = \explode("\n", \str_replace("\r", "", $result));
                 \array_shift($result);
-                $result = \implode(PHP_EOL, $result);
+                $result = \implode(\PHP_EOL, $result);
             }
             
             while(@\ob_end_clean());

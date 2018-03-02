@@ -71,7 +71,7 @@ class MemberArgumentType extends ArgumentType {
             return 'Multiple members found. Please be more specific.';
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($members, 'members', null).PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($members, 'members', null).\PHP_EOL;
     }
     
     /**
