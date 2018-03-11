@@ -96,7 +96,7 @@ return function ($client) {
                     $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
                                     \PHP_EOL.$code;
                     
-                    $result = (function () use ($evalcode, &$message, &$doCallback) {
+                    $result = (function () use ($evalcode, $message, &$doCallback) {
                         return eval($evalcode);
                     })();
                     
@@ -105,7 +105,7 @@ return function ($client) {
                         $result = \React\Promise\resolve($result);
                     }
                     
-                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, $endtime, $time) {
+                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time) {
                         if($endtime === null) {
                             $endtime = \microtime(true);
                         }
