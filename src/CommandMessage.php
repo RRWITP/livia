@@ -222,7 +222,12 @@ class CommandMessage {
                 throw $error;
             })->then(function () use (&$args) {
                 $promise = $this->command->run($this, $args, ($this->patternMatches !== null));
-                if(!($promise instanceof \React\Promise\PromiseInterface)) {
+                
+                if($promise instanceof \GuzzleHttp\Promise\PromiseInterface) {
+                    $promise = new \React\Promise\Promise(function (callable $resolve, callable $reject) use (&$promise) {
+                        $promise->then($resolve, $reject);
+                    });
+                } elseif(!($promise instanceof \React\Promise\PromiseInterface)) {
                     $promise = \React\Promise\resolve($promise);
                 }
                 
