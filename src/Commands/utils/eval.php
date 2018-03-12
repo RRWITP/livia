@@ -78,9 +78,9 @@ return function ($client) {
                         $sizeformat = \count($this->timeformats) - 1;
                         $format = 0;
                         
-                        $exectime = ($endtime - $time) * 1000;
-                        while($exectime < 1.0 && $format < $sizeformat) {
-                            $exectime *= 1000;
+                        $exectime = ($endtime - $time) * 1000000;
+                        while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
+                            $exectime /= 1000;
                             $format++;
                         }
                         $exectime = \ceil($exectime);
@@ -129,9 +129,9 @@ return function ($client) {
                         $sizeformat = \count($this->timeformats) - 1;
                         $format = 0;
                         
-                        $exectime = ($endtime - $time) * 1000;
-                        while($exectime < 1.0 && $format < $sizeformat) {
-                            $exectime *= 1000;
+                        $exectime = ($endtime - $time) * 1000000;
+                        while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
+                            $exectime /= 1000;
                             $format++;
                         }
                         $exectime = \ceil($exectime);
