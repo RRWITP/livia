@@ -78,7 +78,7 @@ return function ($client) {
                         $sizeformat = \count($this->timeformats) - 1;
                         $format = 0;
                         
-                        $exectime = $endtime - $time;
+                        $exectime = ($endtime - $time) * 1000;
                         while($exectime < 1.0 && $format < $sizeformat) {
                             $exectime *= 1000;
                             $format++;
@@ -100,7 +100,11 @@ return function ($client) {
                         return eval($evalcode);
                     })();
                     
-                    if(!($result instanceof \React\Promise\PromiseInterface)) {
+                    if($result instanceof \GuzzleHttp\Promise\PromiseInterface) {
+                        $result = new \React\Promise\Promise(function (callable $resolve, callable $reject) use (&$result) {
+                            $result->then($resolve, $reject);
+                        });
+                    } elseif(!($result instanceof \React\Promise\PromiseInterface)) {
                         $endtime = \microtime(true);
                         $result = \React\Promise\resolve($result);
                     }
@@ -125,7 +129,7 @@ return function ($client) {
                         $sizeformat = \count($this->timeformats) - 1;
                         $format = 0;
                         
-                        $exectime = $endtime - $time;
+                        $exectime = ($endtime - $time) * 1000;
                         while($exectime < 1.0 && $format < $sizeformat) {
                             $exectime *= 1000;
                             $format++;
