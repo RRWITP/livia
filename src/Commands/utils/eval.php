@@ -9,8 +9,9 @@
 
 return function ($client) {
     return (new class($client) extends \CharlotteDunois\Livia\Commands\Command {
-        protected $timeformats = array('µs', 'ms');
+        protected $timeformats = array('ns', 'µs', 'ms');
         protected $lastResult;
+        protected $hrtime;
         
         function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
             parent::__construct($client, array(
@@ -30,6 +31,8 @@ return function ($client) {
                 ),
                 'guarded' => true
             ));
+            
+            $this->hrtime = \class_exists('\\CharlotteDunois\\Timing\\HRTimer', true);
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
@@ -51,6 +54,30 @@ return function ($client) {
                 \React\Promise\resolve()->then(function () use ($code, $message, &$messages, &$prev) {
                     $messages = array();
                     $time = null;
+                    $multiplier = 1000000;
+                    
+                    if($this->hrtime) {
+                        $hrtime = null;
+                        
+                        $timer = function (bool $callback = false) use (&$hrtime, &$multiplier) {
+                            if(!$hrtime) {
+                                $hrtime = new \CharlotteDunois\Timing\HRTimer();
+                                $multiplier = 1000000000 / $hrtime->getResolution();
+                                
+                                return ($hrtime->start() ?? 0);
+                            }
+                            
+                            if($callback) {
+                                return $hrtime->time();
+                            }
+                            
+                            return $hrtime->stop();
+                        };
+                    } else {
+                        $timer = function () {
+                            return \microtime(true);
+                        };
+                    }
                     
                     $errorcb = function ($errno, $errstr, $errfile, $errline) {
                         // Fixing xdebug bug
@@ -61,8 +88,8 @@ return function ($client) {
                         throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
                     };
                     
-                    $doCallback = function ($result) use ($code, $message, &$messages, &$time, $errorcb) {
-                        $endtime = \microtime(true);
+                    $doCallback = function ($result) use ($code, $message, &$messages, &$time, &$timer, $multiplier, $errorcb) {
+                        $endtime = $timer(true);
                         
                         $previous = \set_error_handler($errorcb);
                         $result = $this->invokeDump($result);
@@ -76,9 +103,9 @@ return function ($client) {
                         }
                         
                         $sizeformat = \count($this->timeformats) - 1;
-                        $format = 0;
+                        $format = ($multiplier === 1000000 ? 1 : 0);
                         
-                        $exectime = ($endtime - $time) * 1000000;
+                        $exectime = ($endtime - $time) * $multiplier;
                         while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
                             $exectime /= 1000;
                             $format++;
@@ -91,7 +118,7 @@ return function ($client) {
                     $prev = \set_error_handler($errorcb);
                     
                     $endtime = null;
-                    $time = \microtime(true);
+                    $time = $timer();
                     
                     $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
                                     \PHP_EOL.$code;
@@ -105,13 +132,13 @@ return function ($client) {
                             $result->then($resolve, $reject);
                         });
                     } elseif(!($result instanceof \React\Promise\PromiseInterface)) {
-                        $endtime = \microtime(true);
+                        $endtime = $timer();
                         $result = \React\Promise\resolve($result);
                     }
                     
-                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time) {
+                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer, $multiplier) {
                         if($endtime === null) {
-                            $endtime = \microtime(true);
+                            $endtime = $timer();
                         }
                         
                         $this->lastResult = $result;
@@ -127,9 +154,9 @@ return function ($client) {
                         }
                         
                         $sizeformat = \count($this->timeformats) - 1;
-                        $format = 0;
+                        $format = ($multiplier === 1000000 ? 1 : 0);
                         
-                        $exectime = ($endtime - $time) * 1000000;
+                        $exectime = ($endtime - $time) * $multiplier;
                         while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
                             $exectime /= 1000;
                             $format++;
