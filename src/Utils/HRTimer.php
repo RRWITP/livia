@@ -9,6 +9,9 @@
 
 namespace CharlotteDunois\Livia\Utils;
 
+/**
+ * Provides a simple interface to a timer.
+ */
 class HRTimer {
     protected $hrtime;
     protected $nativeHrtime;
@@ -23,16 +26,16 @@ class HRTimer {
         $this->hrtime = \extension_loaded('hrtime');
         $this->nativeHrtime = \function_exists('php_hrtime_current');
         
-        if($this->hrtime) {
+        if($this->hrtime && !$this->nativeHrtime) {
             $this->timer = new \HRTime\StopWatch();
         }
     }
     
     /**
      * Returns the resolution (the end product of 10^X, positive). Nano for hrtime (native and pecl), micro for fallback.
-     * @return integer
+     * @return int
      */
-    function getResolution() {
+    function getResolution(): int {
         return ($this->nativeHrtime || $this->hrtime ? 1000000000 : 1000000);
     }
     
@@ -40,7 +43,7 @@ class HRTimer {
      * Starts the timer.
      * @return void
      */
-    function start() {
+    function start(): void {
         if($this->nativeHrtime) {
             $this->timer = \php_hrtime_current(true);
         } elseif($this->hrtime) {
@@ -51,7 +54,7 @@ class HRTimer {
     }
     
     /**
-     * Stops the timer and returns the elapsed time in their respective time unit.
+     * Stops the timer and returns the elapsed time, in nanoseconds.
      * @return int
      */
     function stop(): int {
@@ -60,20 +63,20 @@ class HRTimer {
         }
         
         if($this->nativeHrtime) {
-            $elapsed = \php_hrtime_current(true) - $this->timer;
+            $elapsed = (int) (\php_hrtime_current(true) - $this->timer);
         } elseif($this->hrtime) {
             $this->timer->stop();
-            $elapsed = $this->timer->getElapsedTime(\HRTime\Unit::NANOSECOND);
+            $elapsed = (int) $this->timer->getElapsedTime(\HRTime\Unit::NANOSECOND);
         } else {
             $elapsed = \microtime(true) - $this->timer;
-            $elapsed = \ceil(($elapsed * $this->getResolution()));
+            $elapsed = \ceil(($elapsed * 1000000000));
         }
         
         return $elapsed;
     }
     
     /**
-     * Returns the elapsed time in their respective time unit.
+     * Returns the elapsed time since the last <code>time</code> call, in nanoseconds.
      * @return int
      */
     function time(): int {
@@ -83,11 +86,11 @@ class HRTimer {
             }
             
             $time = \php_hrtime_current(true);
-            $elapsed = $time - $this->lastTime;
+            $elapsed = (int) ($time - $this->lastTime);
             $this->lastTime = $time;
         } elseif($this->hrtime) {
             $this->timer->stop();
-            $elapsed = $this->timer->getLastElapsedTime(\HRTime\Unit::NANOSECOND);
+            $elapsed = (int) $this->timer->getLastElapsedTime(\HRTime\Unit::NANOSECOND);
             $this->timer->start();
         } else {
             if(!$this->lastTime) {
@@ -98,7 +101,7 @@ class HRTimer {
             $elapsed = $time - $this->lastTime;
             
             $this->lastTime = $time;
-            $elapsed = \ceil(($elapsed * $this->getResolution()));
+            $elapsed = \ceil(($elapsed * 1000000000));
         }
         
         return $elapsed;
