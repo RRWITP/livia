@@ -11,7 +11,6 @@ return function ($client) {
     return (new class($client) extends \CharlotteDunois\Livia\Commands\Command {
         protected $timeformats = array('ns', 'µs', 'ms');
         protected $lastResult;
-        protected $hrtime;
         
         function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
             parent::__construct($client, array(
