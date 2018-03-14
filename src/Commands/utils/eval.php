@@ -31,8 +31,6 @@ return function ($client) {
                 ),
                 'guarded' => true
             ));
-            
-            $this->hrtime = \class_exists('\\CharlotteDunois\\Timing\\HRTimer', true);
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
@@ -56,28 +54,21 @@ return function ($client) {
                     $time = null;
                     $multiplier = 1000000;
                     
-                    if($this->hrtime) {
-                        $hrtime = null;
+                    $hrtime = null;
+                    $timer = function (bool $callback = false) use (&$hrtime, &$multiplier) {
+                        if(!$hrtime) {
+                            $hrtime = new \CharlotteDunois\Livia\Utils\HRTimer();
+                            $multiplier = 1000000000 / $hrtime->getResolution();
+                            
+                            return ($hrtime->start() ?? 0);
+                        }
                         
-                        $timer = function (bool $callback = false) use (&$hrtime, &$multiplier) {
-                            if(!$hrtime) {
-                                $hrtime = new \CharlotteDunois\Timing\HRTimer();
-                                $multiplier = 1000000000 / $hrtime->getResolution();
-                                
-                                return ($hrtime->start() ?? 0);
-                            }
-                            
-                            if($callback) {
-                                return $hrtime->time();
-                            }
-                            
-                            return $hrtime->stop();
-                        };
-                    } else {
-                        $timer = function () {
-                            return \microtime(true);
-                        };
-                    }
+                        if($callback) {
+                            return $hrtime->time();
+                        }
+                        
+                        return $hrtime->stop();
+                    };
                     
                     $errorcb = function ($errno, $errstr, $errfile, $errline) {
                         // Fixing xdebug bug

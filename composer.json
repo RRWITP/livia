@@ -16,7 +16,6 @@
         "charlottedunois/validator": "^0.1.7"
     },
     "suggest": {
-        "charlottedunois/hrtimer": "Precise eval timing",
         "react/mysql": "Required for MySQL Provider"
     },
     "autoload": {
