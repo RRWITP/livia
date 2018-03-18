@@ -19,7 +19,7 @@ namespace CharlotteDunois\Livia;
  * @property string|null                                   $argString       Argument string for the command.
  * @property string[]|null                                 $patternMatches  Pattern matches (if from a pattern trigger).
  */
-class CommandMessage {
+class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     protected $client;
     protected $message;
     protected $command;
