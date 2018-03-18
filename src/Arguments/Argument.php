@@ -26,7 +26,7 @@ namespace CharlotteDunois\Livia\Arguments;
  * @property callable|null                                    $emptyChecker  Empty checker function for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::isEmpty})
  * @property int                                              $wait          How long to wait for input (in seconds).
  */
-class Argument {
+class Argument implements \Serializable {
     protected $client;
     
     protected $key;
@@ -127,6 +127,26 @@ class Argument {
         }
         
         throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\Arguments\Argument::'.$name);
+    }
+    
+    /**
+     * @internal
+     */
+    function serialize() {
+        $vars = \get_object_vars($this);
+        unset($vars['validate'], $vars['parse'], $vars['emptyChecker']);
+        return \serialize($vars);
+    }
+    
+    /**
+     * @internal
+     */
+    function unserialize($vars) {
+        $vars = \unserialize($vars);
+        
+        foreach($vars as $name => $val) {
+            $this->$name = $val;
+        }
     }
     
     /**
