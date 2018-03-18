@@ -124,6 +124,19 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
+     * @internal
+     */
+    function serialize() {
+        $provider = $this->provider;
+        $this->provider = null;
+        
+        $str = parent::serialize();
+        $this->provider = $provider;
+        
+        return $str;
+    }
+    
+    /**
      * Sets the global command prefix. Null indicates that there is no default prefix, and only mentions will be used. Emits a commandPrefixChange event.
      * @param string|null  $prefix
      * @param bool         $fromProvider
