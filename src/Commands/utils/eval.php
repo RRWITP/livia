@@ -51,37 +51,16 @@ return function ($client) {
                 \React\Promise\resolve()->then(function () use ($code, $message, &$messages, &$prev) {
                     $messages = array();
                     $time = null;
-                    $multiplier = 1000000;
                     
-                    $hrtime = null;
-                    $timer = function (bool $callback = false) use (&$hrtime, &$multiplier) {
-                        if(!$hrtime) {
-                            $hrtime = new \CharlotteDunois\Livia\Utils\HRTimer();
-                            $multiplier = 1000000000 / $hrtime->getResolution();
-                            
-                            return ($hrtime->start() ?? 0);
-                        }
-                        
-                        if($callback) {
-                            return $hrtime->time();
-                        }
-                        
-                        return $hrtime->stop();
+                    $timer = function (bool $callback = false) {
+                        static $hrtime;
+                        return $this->timer($hrtime, $callback);
                     };
                     
-                    $errorcb = function ($errno, $errstr, $errfile, $errline) {
-                        // Fixing xdebug bug
-                        if(\extension_loaded('xdebug') && \mb_stripos($errstr, 'Cannot modify header information') !== false) {
-                            return true;
-                        }
-                        
-                        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
-                    };
-                    
-                    $doCallback = function ($result) use ($code, $message, &$messages, &$time, &$timer, $multiplier, $errorcb) {
+                    $doCallback = function ($result) use ($code, $message, &$messages, &$time, &$timer) {
                         $endtime = $timer(true);
                         
-                        $previous = \set_error_handler($errorcb);
+                        $previous = \set_error_handler(array($this, 'errorCallback'));
                         $result = $this->invokeDump($result);
                         \set_error_handler($previous);
                         
@@ -93,9 +72,9 @@ return function ($client) {
                         }
                         
                         $sizeformat = \count($this->timeformats) - 1;
-                        $format = ($multiplier === 1000000 ? 1 : 0);
+                        $format = 0;
                         
-                        $exectime = ($endtime - $time) * $multiplier;
+                        $exectime = $endtime - $time;
                         while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
                             $exectime /= 1000;
                             $format++;
@@ -105,7 +84,7 @@ return function ($client) {
                         $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                     };
                     
-                    $prev = \set_error_handler($errorcb);
+                    $prev = \set_error_handler(array($this, 'errorCallback'));
                     
                     $endtime = null;
                     $time = $timer();
@@ -126,7 +105,7 @@ return function ($client) {
                         $result = \React\Promise\resolve($result);
                     }
                     
-                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer, $multiplier) {
+                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer) {
                         if($endtime === null) {
                             $endtime = $timer();
                         }
@@ -144,9 +123,9 @@ return function ($client) {
                         }
                         
                         $sizeformat = \count($this->timeformats) - 1;
-                        $format = ($multiplier === 1000000 ? 1 : 0);
+                        $format = 0;
                         
-                        $exectime = ($endtime - $time) * $multiplier;
+                        $exectime = $endtime - $time;
                         while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
                             $exectime /= 1000;
                             $format++;
@@ -199,6 +178,30 @@ return function ($client) {
             $result = \preg_replace('/'.$tokenregex.($emailregex !== null ? '|'.$emailregex : '').'/iu', '[redacted]', $result);
             
             return $result;
+        }
+        
+        function errorCallback($errno, $errstr, $errfile, $errline) {
+            // Fixing bug
+            if(\mb_stripos($errstr, 'Cannot modify header information') !== false) {
+                return true;
+            }
+            
+            throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+        }
+        
+        function timer(?\CharlotteDunois\Livia\Utils\HRTimer &$hrtime, bool $callback = false) {
+            if(!$hrtime) {
+                $hrtime = new \CharlotteDunois\Livia\Utils\HRTimer();
+                $multiplier = 1000000000 / $hrtime->getResolution();
+                
+                return ($hrtime->start() ?? 0);
+            }
+            
+            if($callback) {
+                return $hrtime->time();
+            }
+            
+            return $hrtime->stop();
         }
     });
 };

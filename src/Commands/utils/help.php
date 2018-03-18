@@ -35,118 +35,110 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
-                $groups = $this->client->registry->groups;
-                $commands = (!empty($args['command']) ? $this->client->registry->findCommands($args['command'], false, $message->message) : $this->client->registry->commands->all());
-                $showAll = (!empty($args['command']) && \mb_strtolower($args['command']) === 'all');
+            return $message->direct($this->renderHelpMessage($message, $args), array('split' => true))->then(function ($msg) use ($message) {
+                if($message->message->channel->type !== 'dm') {
+                    return $message->reply('Sent you a DM with information.');
+                }
                 
-                if(!empty($args['command']) && !$showAll) {
-                    $countCommands = \count($commands);
+                return $msg;
+            }, function () use ($message) {
+                if($message->message->channel->type !== 'dm') {
+                    return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+                }
+            });
+        }
+        
+        function renderHelpMessage(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args) {
+            $groups = $this->client->registry->groups;
+            $commands = (!empty($args['command']) ? $this->client->registry->findCommands($args['command'], false, $message->message) : $this->client->registry->commands->all());
+            $showAll = (!empty($args['command']) && \mb_strtolower($args['command']) === 'all');
+            
+            if(!empty($args['command']) && !$showAll) {
+                $countCommands = \count($commands);
+                
+                if($countCommands === 0) {
+                    return 'Unable to identify command. Use '.$this->usage('', ($message->message->channel->type === 'dm' ? null : $this->client->getGuildPrefix($message->message->guild)), ($message->message->channel->type === 'dm' ? null : $this->client->user)).' to view the list of all commands.';
+                }
+                
+                foreach($commands as $key => $cmd) {
+                    if(!empty($cmd->ownerOnly) && $cmd->hasPermission($message) !== true) {
+                        unset($commands[$key]);
+                    }
+                }
+                
+                $countCommands = \count($commands);
+                
+                if($countCommands === 1) {
+                    $command = $commands[0];
                     
-                    if($countCommands === 0) {
-                        return $resolve($message->reply('Unable to identify command. Use '.$this->usage('', ($message->message->channel->type === 'dm' ? null : $this->client->getGuildPrefix($message->message->guild)), ($message->message->channel->type === 'dm' ? null : $this->client->user)).' to view the list of all commands.'));
+                    $help = "__Command **{$command->name}**:__ {$command->description} ".($command->guildOnly ? '(Usable only in servers)' : '').\PHP_EOL.\PHP_EOL.
+                            '**Format:** '.\CharlotteDunois\Livia\Commands\Command::anyUsage($command->name.(!empty($command->format) ? ' '.$command->format : '')).\PHP_EOL;
+                            
+                    if(!empty($command->aliases)) {
+                        $help .= \PHP_EOL.'**Aliases:** '.\implode(', ', $command->aliases);
                     }
                     
-                    foreach($commands as $key => $cmd) {
-                        if(!empty($cmd->ownerOnly) && $cmd->hasPermission($message) !== true) {
-                            unset($commands[$key]);
-                        }
+                    $help .= \PHP_EOL."**Group:** {$command->group->name} (`{$command->groupID}:{$command->name}`)";
+                    
+                    if(!empty($command->details)) {
+                        $help .= \PHP_EOL.'**Details:** '.$command->details;
                     }
                     
-                    $countCommands = \count($commands);
+                    if(!empty($command->examples)) {
+                        $help .= \PHP_EOL.'**Examples:**'.\PHP_EOL.\implode(\PHP_EOL, $command->examples);
+                    }
                     
-                    if($countCommands === 1) {
-                        $command = $commands[0];
-                        
-                        $help = "__Command **{$command->name}**:__ {$command->description} ".($command->guildOnly ? '(Usable only in servers)' : '').\PHP_EOL.\PHP_EOL.
-                                '**Format:** '.\CharlotteDunois\Livia\Commands\Command::anyUsage($command->name.(!empty($command->format) ? ' '.$command->format : '')).\PHP_EOL;
-                                
-                        if(!empty($command->aliases)) {
-                            $help .= \PHP_EOL.'**Aliases:** '.\implode(', ', $command->aliases);
-                        }
-                        
-                        $help .= \PHP_EOL."**Group:** {$command->group->name} (`{$command->groupID}:{$command->name}`)";
-                        
-                        if(!empty($command->details)) {
-                            $help .= \PHP_EOL.'**Details:** '.$command->details;
-                        }
-                        
-                        if(!empty($command->examples)) {
-                            $help .= \PHP_EOL.'**Examples:**'.\PHP_EOL.\implode(\PHP_EOL, $command->examples);
-                        }
-                        
-                        $message->direct($help)->then(function ($msg) use ($message) {
-                            if($message->message->channel->type !== 'dm') {
-                                return $message->reply('Sent you a DM with information.');
+                    return $help;
+                } elseif($countCommands > 15) {
+                    return 'Multiple commands found. Please be more specific.';
+                } elseif($countCommands > 1) {
+                    return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name');
+                }
+            } else {
+                $help = 'To run a command in '.($message->message->guild !== null ? $message->message->guild->name : 'any server').', use '.
+                        \CharlotteDunois\Livia\Commands\Command::anyUsage('command', $this->client->getGuildPrefix($message->message->guild), $this->client->user).
+                        '. For example, '.
+                        \CharlotteDunois\Livia\Commands\Command::anyUsage('prefix', $this->client->getGuildPrefix($message->message->guild), $this->client->user).'.'.\PHP_EOL.
+                        'To run a command in this DM, simply use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command').' with no prefix.'.\PHP_EOL.\PHP_EOL.
+                        'Use '.$this->usage('<command>', null, null).' to view detailed information about a specific command.'.\PHP_EOL.
+                        'Use '.$this->usage('all', null, null).' to view a list of *all* commands, not just available ones.'.\PHP_EOL.\PHP_EOL.
+                        '__**'.($showAll ? 'All commands' : 'Available commands in '.($message->message->guild !== null ? $message->message->guild->name : 'this DM')).'**__'.\PHP_EOL.\PHP_EOL.
+                        \implode(\PHP_EOL.\PHP_EOL, \array_map(function ($group) use ($message, $showAll) {
+                            $cmds = ($showAll ? $group->commands->filter(function ($cmd) use ($message) {
+                                return (!$cmd->ownerOnly || $this->client->isOwner($message->author));
+                            }) : $group->commands->filter(function ($cmd) use ($message) {
+                                return $cmd->isUsable($message);
+                            }));
+                            
+                            return "__{$group->name}__".\PHP_EOL.\implode(\PHP_EOL, $cmds->sort(function ($a, $b) {
+                                return $a->name <=> $b->name;
+                            })->map(function ($cmd) {
+                                return "**{$cmd->name}:** {$cmd->description}";
+                            })->all());
+                        }, ($showAll ? $groups->filter(function ($group) use ($message) {
+                            foreach($group->commands as $cmd) {
+                                if(!$cmd->ownerOnly || $this->client->isOwner($message->author)) {
+                                    return true;
+                                }
                             }
                             
-                            return $msg;
-                        }, function () use ($message) {
-                            if($message->message->channel->type !== 'dm') {
-                                return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+                            return false;
+                        })->sort(function ($a, $b) {
+                            return $a->name <=> $b->name;
+                        })->all() : $groups->filter(function ($group) use ($message) {
+                            foreach($group->commands as $cmd) {
+                                if($cmd->isUsable($message)) {
+                                    return true;
+                                }
                             }
-                        })->done($resolve, $reject);
-                    } elseif($countCommands > 15) {
-                        $resolve($message->reply('Multiple commands found. Please be more specific.'));
-                    } elseif($countCommands > 1) {
-                        $resolve($message->reply(\CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name')));
-                    }
-                } else {
-                    $help = 'To run a command in '.($message->message->guild !== null ? $message->message->guild->name : 'any server').', use '.
-                            \CharlotteDunois\Livia\Commands\Command::anyUsage('command', $this->client->getGuildPrefix($message->message->guild), $this->client->user).
-                            '. For example, '.
-                            \CharlotteDunois\Livia\Commands\Command::anyUsage('prefix', $this->client->getGuildPrefix($message->message->guild), $this->client->user).'.'.\PHP_EOL.
-                            'To run a command in this DM, simply use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command').' with no prefix.'.\PHP_EOL.\PHP_EOL.
-                            'Use '.$this->usage('<command>', null, null).' to view detailed information about a specific command.'.\PHP_EOL.
-                            'Use '.$this->usage('all', null, null).' to view a list of *all* commands, not just available ones.'.\PHP_EOL.\PHP_EOL.
-                            '__**'.($showAll ? 'All commands' : 'Available commands in '.($message->message->guild !== null ? $message->message->guild->name : 'this DM')).'**__'.\PHP_EOL.\PHP_EOL.
-                            \implode(\PHP_EOL.\PHP_EOL, \array_map(function ($group) use ($message, $showAll) {
-                                $cmds = ($showAll ? $group->commands->filter(function ($cmd) use ($message) {
-                                    return (!$cmd->ownerOnly || $this->client->isOwner($message->author));
-                                }) : $group->commands->filter(function ($cmd) use ($message) {
-                                    return $cmd->isUsable($message);
-                                }));
-                                
-                                return "__{$group->name}__".\PHP_EOL.\implode(\PHP_EOL, $cmds->sort(function ($a, $b) {
-                                    return $a->name <=> $b->name;
-                                })->map(function ($cmd) {
-                                    return "**{$cmd->name}:** {$cmd->description}";
-                                })->all());
-                            }, ($showAll ? $groups->filter(function ($group) use ($message) {
-                                foreach($group->commands as $cmd) {
-                                    if(!$cmd->ownerOnly || $this->client->isOwner($message->author)) {
-                                        return true;
-                                    }
-                                }
-                                
-                                return false;
-                            })->sort(function ($a, $b) {
-                                return $a->name <=> $b->name;
-                            })->all() : $groups->filter(function ($group) use ($message) {
-                                foreach($group->commands as $cmd) {
-                                    if($cmd->isUsable($message)) {
-                                        return true;
-                                    }
-                                }
-                                
-                                return false;
-                            })->sort(function ($a, $b) {
-                                return $a->name <=> $b->name;
-                            })->all())));
-                    
-                    $message->direct($help, array('split' => true))->then(function ($msg) use ($message) {
-                        if($message->message->channel->type !== 'dm') {
-                            return $message->reply('Sent you a DM with information.');
-                        }
-                        
-                        return $msg;
-                    }, function () use ($message) {
-                        if($message->message->channel->type !== 'dm') {
-                            return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
-                        }
-                    })->done($resolve, $reject);
-                }
-            }));
+                            
+                            return false;
+                        })->sort(function ($a, $b) {
+                            return $a->name <=> $b->name;
+                        })->all())));
+                
+                return $help;
+            }
         }
     });
 };
