@@ -36,19 +36,18 @@ return function ($client) {
             $messages = array();
             $prev = null;
             
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args, &$messages, &$prev) {
-                $code = $args['script'];
-                if(\mb_substr($code, -1) !== ';') {
-                    $code .= ';';
-                }
-                
-                if(\mb_strpos($code, 'return') === false && \mb_strpos($code, 'echo') === false) {
-                    $code = \explode(';', $code);
-                    $code[(\count($code) - 2)] = \PHP_EOL.'return '.\trim($code[(\count($code) - 2)]);
-                    $code = \implode(';', $code);
-                }
-                
-                $messages = array();
+            $code = $args['script'];
+            if(\mb_substr($code, -1) !== ';') {
+                $code .= ';';
+            }
+            
+            if(\mb_strpos($code, 'return') === false && \mb_strpos($code, 'echo') === false) {
+                $code = \explode(';', $code);
+                $code[(\count($code) - 2)] = \PHP_EOL.'return '.\trim($code[(\count($code) - 2)]);
+                $code = \implode(';', $code);
+            }
+            
+            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args, $code, &$messages, &$prev) {
                 $time = null;
                 
                 $timer = function (bool $callback = false) {
@@ -134,7 +133,7 @@ return function ($client) {
                     $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                     return $messages;
                 })->done($resolve, $reject);
-            }))->otherwise(function ($e) use ($message, &$messages, &$prev) {
+            }))->otherwise(function ($e) use ($code, $message, &$messages, &$prev) {
                 \set_error_handler($prev);
                 
                 $e = (string) $e;
