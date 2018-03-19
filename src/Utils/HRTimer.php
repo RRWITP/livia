@@ -72,7 +72,7 @@ class HRTimer {
             $elapsed = \ceil(($elapsed * 1000000000));
         }
         
-        return $elapsed;
+        return ((int) $elapsed);
     }
     
     /**
@@ -104,6 +104,6 @@ class HRTimer {
             $elapsed = \ceil(($elapsed * 1000000000));
         }
         
-        return $elapsed;
+        return ((int) $elapsed);
     }
 };

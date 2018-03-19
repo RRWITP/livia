@@ -48,110 +48,106 @@ return function ($client) {
                     $code = \implode(';', $code);
                 }
                 
-                \React\Promise\resolve()->then(function () use ($code, $message, &$messages, &$prev) {
-                    $messages = array();
-                    $time = null;
+                $messages = array();
+                $time = null;
+                
+                $timer = function (bool $callback = false) {
+                    static $hrtime;
+                    return $this->timer($hrtime, $callback);
+                };
+                
+                $doCallback = function ($result) use ($code, $message, &$messages, &$time, &$timer) {
+                    $endtime = $timer(true);
                     
-                    $timer = function (bool $callback = false) {
-                        static $hrtime;
-                        return $this->timer($hrtime, $callback);
-                    };
+                    $previous = \set_error_handler(array($this, 'errorCallback'));
+                    $result = $this->invokeDump($result);
+                    \set_error_handler($previous);
                     
-                    $doCallback = function ($result) use ($code, $message, &$messages, &$time, &$timer) {
-                        $endtime = $timer(true);
-                        
-                        $previous = \set_error_handler(array($this, 'errorCallback'));
-                        $result = $this->invokeDump($result);
-                        \set_error_handler($previous);
-                        
-                        $len = \mb_strlen($result);
-                        $maxlen = 1850 - \mb_strlen($code);
-                        
-                        if($len > $maxlen) {
-                            $result = \mb_substr($result, 0, $maxlen).\PHP_EOL.'...';
-                        }
-                        
-                        $sizeformat = \count($this->timeformats) - 1;
-                        $format = 0;
-                        
-                        $exectime = $endtime - $time;
-                        while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
-                            $exectime /= 1000;
-                            $format++;
-                        }
-                        $exectime = \ceil($exectime);
-                        
-                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
-                    };
-                    
-                    $prev = \set_error_handler(array($this, 'errorCallback'));
-                    
-                    $endtime = null;
-                    $time = $timer();
-                    
-                    $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
-                                    \PHP_EOL.$code;
-                    
-                    $result = (function () use ($evalcode, $message, &$doCallback) {
-                        return eval($evalcode);
-                    })();
-                    
-                    if($result instanceof \GuzzleHttp\Promise\PromiseInterface) {
-                        $result = new \React\Promise\Promise(function (callable $resolve, callable $reject) use (&$result) {
-                            $result->then($resolve, $reject);
-                        });
-                    } elseif(!($result instanceof \React\Promise\PromiseInterface)) {
-                        $endtime = $timer();
-                        $result = \React\Promise\resolve($result);
-                    }
-                    
-                    return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer) {
-                        if($endtime === null) {
-                            $endtime = $timer();
-                        }
-                        
-                        $this->lastResult = $result;
-                        $result = $this->invokeDump($result);
-                        
-                        \set_error_handler($prev);
-                        
-                        $len = \mb_strlen($result);
-                        $maxlen = 1850 - \mb_strlen($code);
-                        
-                        if($len > $maxlen) {
-                            $result = \mb_substr($result, 0, $maxlen).\PHP_EOL.'...';
-                        }
-                        
-                        $sizeformat = \count($this->timeformats) - 1;
-                        $format = 0;
-                        
-                        $exectime = $endtime - $time;
-                        while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
-                            $exectime /= 1000;
-                            $format++;
-                        }
-                        $exectime = \ceil($exectime);
-                        
-                        $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
-                        return $messages;
-                    });
-                })->then(function ($pr) {
-                    return $pr;
-                }, function ($e) use ($code, $message, &$messages, &$prev) {
-                    \set_error_handler($prev);
-                    
-                    $e = (string) $e;
-                    $len = \mb_strlen($e);
-                    $maxlen = 1900 - \mb_strlen($code);
+                    $len = \mb_strlen($result);
+                    $maxlen = 1850 - \mb_strlen($code);
                     
                     if($len > $maxlen) {
-                        $e = \mb_substr($e, 0, $maxlen).\PHP_EOL.'...';
+                        $result = \mb_substr($result, 0, $maxlen).\PHP_EOL.'...';
                     }
                     
-                    $messages[] = $message->say($message->message->author.\PHP_EOL.'```php'.\PHP_EOL.$code.\PHP_EOL.'```'.\PHP_EOL.'Error: ```'.\PHP_EOL.$e.\PHP_EOL.'```');
+                    $sizeformat = \count($this->timeformats) - 1;
+                    $format = 0;
+                    
+                    $exectime = $endtime - $time;
+                    while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
+                        $exectime /= 1000;
+                        $format++;
+                    }
+                    $exectime = \ceil($exectime);
+                    
+                    $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
+                };
+                
+                $prev = \set_error_handler(array($this, 'errorCallback'));
+                
+                $endtime = null;
+                $time = $timer();
+                
+                $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
+                                \PHP_EOL.$code;
+                
+                $result = (function () use ($evalcode, $message, &$doCallback) {
+                    return eval($evalcode);
+                })();
+                
+                if($result instanceof \GuzzleHttp\Promise\PromiseInterface) {
+                    $result = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($result) {
+                        $result->then($resolve, $reject);
+                    });
+                } elseif(!($result instanceof \React\Promise\PromiseInterface)) {
+                    $endtime = $timer();
+                    $result = \React\Promise\resolve($result);
+                }
+                    
+                return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer) {
+                    if($endtime === null) {
+                        $endtime = $timer();
+                    }
+                    
+                    $this->lastResult = $result;
+                    $result = $this->invokeDump($result);
+                    
+                    \set_error_handler($prev);
+                    
+                    $len = \mb_strlen($result);
+                    $maxlen = 1850 - \mb_strlen($code);
+                    
+                    if($len > $maxlen) {
+                        $result = \mb_substr($result, 0, $maxlen).\PHP_EOL.'...';
+                    }
+                    
+                    $sizeformat = \count($this->timeformats) - 1;
+                    $format = 0;
+                    
+                    $exectime = $endtime - $time;
+                    while(\ceil($exectime) >= 1000.0 && $format < $sizeformat) {
+                        $exectime /= 1000;
+                        $format++;
+                    }
+                    $exectime = \ceil($exectime);
+                    
+                    $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                     return $messages;
                 })->done($resolve, $reject);
-            }));
+            }))->otherwise(function ($e) use ($message, &$messages, &$prev) {
+                \set_error_handler($prev);
+                
+                $e = (string) $e;
+                $len = \mb_strlen($e);
+                $maxlen = 1900 - \mb_strlen($code);
+                
+                if($len > $maxlen) {
+                    $e = \mb_substr($e, 0, $maxlen).\PHP_EOL.'...';
+                }
+                
+                $messages[] = $message->say($message->message->author.\PHP_EOL.'```php'.\PHP_EOL.$code.\PHP_EOL.'```'.\PHP_EOL.'Error: ```'.\PHP_EOL.$e.\PHP_EOL.'```');
+                return $messages;
+            });
         }
         
         function invokeDump($result) {
@@ -192,8 +188,6 @@ return function ($client) {
         function timer(?\CharlotteDunois\Livia\Utils\HRTimer &$hrtime, bool $callback = false) {
             if(!$hrtime) {
                 $hrtime = new \CharlotteDunois\Livia\Utils\HRTimer();
-                $multiplier = 1000000000 / $hrtime->getResolution();
-                
                 return ($hrtime->start() ?? 0);
             }
             
