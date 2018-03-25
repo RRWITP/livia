@@ -12,7 +12,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.1",
-        "charlottedunois/yasmin": "^0.3.0|dev-master",
+        "charlottedunois/yasmin": "^0.4.0|dev-master",
         "charlottedunois/validator": "^0.1.7"
     },
     "suggest": {
