@@ -485,12 +485,13 @@ class CommandRegistry {
      * @throws \InvalidArgumentException
      */
     function resolveCommandPath(string $groupID, string $command) {
-        $paths = array($this->commandsPath.'/'.\mb_strtolower($groupID), __DIR__.'/Commands/'.\mb_strtolower($groupID));
+        $paths = array($this->commandsPath.'/'.\mb_strtolower($groupID));
         
         foreach($this->commandsDirectories as $dir) {
             $paths[] = $dir.'/'.\mb_strtolower($groupID);
         }
         
+        $paths[] = __DIR__.'/Commands/'.\mb_strtolower($groupID);
         $filename = '/'.\mb_strtolower($command).'.php';
         
         foreach($paths as $path) {
