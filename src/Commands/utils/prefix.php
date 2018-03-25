@@ -36,47 +36,45 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
-                if(empty($args['prefix'])) {
-                    $prefix = $this->client->getGuildPrefix($message->message->guild);
-                    $msg = ($prefix !== null ? 'The command prefix is `'.$prefix.'`.' : 'There is no command prefix set.').\PHP_EOL.'To run commands, use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user).'.';
-                    return $message->say($msg)->done($resolve, $reject);
+            if(empty($args['prefix'])) {
+                $prefix = $this->client->getGuildPrefix($message->message->guild);
+                $msg = ($prefix !== null ? 'The command prefix is `'.$prefix.'`.' : 'There is no command prefix set.').\PHP_EOL.'To run commands, use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user).'.';
+                return $message->say($msg);
+            }
+            
+            if($message->message->guild !== null) {
+                if($message->message->member->permissions->has('ADMINISTRATOR') === false && $this->client->isOwner($message->message->author) === false) {
+                    return $message->reply('Only administrators may change the command prefix.');
                 }
-                
-                if($message->message->guild !== null) {
-                    if($message->message->member->permissions->has('ADMINISTRATOR') === false && $this->client->isOwner($message->message->author) === false) {
-                        return $message->reply('Only administrators may change the command prefix.')->done($resolve, $reject);
-                    }
-                } elseif($this->client->isOwner($message->message->author) === false) {
-                    return $message->reply('Only the bot owner may change the command prefix.')->done($resolve, $reject);
-                }
-                
-                $prefixLc = \mb_strtolower($args['prefix']);
-                $prefix = ($prefixLc === 'none' ? null : $args['prefix']);
-                $guild = $message->message->guild;
-                
-                if($prefixLc === 'default') {
-                    if($guild !== null) {
-                        $this->client->setGuildPrefix($guild, '');
-                    } else {
-                        $this->client->setCommandPrefix(null);
-                    }
-                    
-                    $prefix = $this->client->commandPrefix;
-                    $current = ($this->client->commandPrefix ? '`'.$this->client->commandPrefix.'`' : 'no prefix');
-                    $response = 'Reset the command prefix to the default (currently '.$current.').';
+            } elseif($this->client->isOwner($message->message->author) === false) {
+                return $message->reply('Only the bot owner may change the command prefix.');
+            }
+            
+            $prefixLc = \mb_strtolower($args['prefix']);
+            $prefix = ($prefixLc === 'none' ? null : $args['prefix']);
+            $guild = $message->message->guild;
+            
+            if($prefixLc === 'default') {
+                if($guild !== null) {
+                    $this->client->setGuildPrefix($guild, '');
                 } else {
-                    if($guild !== null) {
-                        $this->client->setGuildPrefix($guild, $prefix);
-                    } else {
-                        $this->client->setCommandPrefix($prefix);
-                    }
-                    
-                    $response = ($prefix ? 'Set the command prefix to `'.$prefix.'`.' : 'Removed the command prefix entirely.');
+                    $this->client->setCommandPrefix(null);
                 }
                 
-                $message->reply($response.' To run commands use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user))->done($resolve, $reject);
-            }));
+                $prefix = $this->client->commandPrefix;
+                $current = ($this->client->commandPrefix ? '`'.$this->client->commandPrefix.'`' : 'no prefix');
+                $response = 'Reset the command prefix to the default (currently '.$current.').';
+            } else {
+                if($guild !== null) {
+                    $this->client->setGuildPrefix($guild, $prefix);
+                } else {
+                    $this->client->setCommandPrefix($prefix);
+                }
+                
+                $response = ($prefix ? 'Set the command prefix to `'.$prefix.'`.' : 'Removed the command prefix entirely.');
+            }
+            
+            return $message->reply($response.' To run commands use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user));
         }
     });
 };

@@ -36,20 +36,18 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
-                $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
-                
-                if($args['commandOrGroup']->isEnabledIn($message->message->guild) === false) {
-                    return $resolve($message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already disabled.'));
-                }
-                
-                if($args['commandOrGroup']->guarded) {
-                    return $resolve($message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` can not be disabled.'));
-                }
-                
-                $args['commandOrGroup']->setEnabledIn($message->message->guild, false);
-                $resolve($message->reply('Disabled the '.$type.' `'.$args['commandOrGroup']->name.'`.'));
-            }));
+            $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
+            
+            if($args['commandOrGroup']->isEnabledIn($message->message->guild) === false) {
+                return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already disabled.');
+            }
+            
+            if($args['commandOrGroup']->guarded) {
+                return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` can not be disabled.');
+            }
+            
+            $args['commandOrGroup']->setEnabledIn($message->message->guild, false);
+            return $message->reply('Disabled the '.$type.' `'.$args['commandOrGroup']->name.'`.');
         }
     });
 };

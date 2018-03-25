@@ -32,15 +32,13 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
-                if($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup) {
-                    $args['commandOrGroup']->reload();
-                    $resolve($message->reply('Reloaded the group `'.$args['commandOrGroup']->name.'`.'));
-                } else {
-                    $args['commandOrGroup']->reload();
-                    $resolve($message->reply('Reloaded the command `'.$args['commandOrGroup']->name.'`.'));
-                }
-            }));
+            if($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup) {
+                $args['commandOrGroup']->reload();
+                return $message->reply('Reloaded the group `'.$args['commandOrGroup']->name.'`.');
+            }
+            
+            $args['commandOrGroup']->reload();
+            return $message->reply('Reloaded the command `'.$args['commandOrGroup']->name.'`.');
         }
     });
 };

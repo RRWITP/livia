@@ -50,14 +50,8 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
-                $value = \explode(':', $args['command']);
-                $path = $this->client->registry->resolveCommandPath($value[0], $value[1]);
-                include($path);
-                
-                $this->client->registry->registerCommand($args['command']);
-                $resolve($message->reply('Loaded the command `'.$args['command'].'`.'));
-            }));
+            $this->client->registry->registerCommand($args['command']);
+            return $message->reply('Loaded the command `'.$args['command'].'`.');
         }
     });
 };

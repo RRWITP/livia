@@ -36,16 +36,14 @@ return function ($client) {
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args) {
-                $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
-                
-                if($args['commandOrGroup']->isEnabledIn($message->message->guild)) {
-                    return $resolve($message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already enabled.'));
-                }
-                
-                $args['commandOrGroup']->setEnabledIn($message->message->guild, true);
-                $resolve($message->reply('Enabled the '.$type.' `'.$args['commandOrGroup']->name.'`.'));
-            }));
+            $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
+            
+            if($args['commandOrGroup']->isEnabledIn($message->message->guild)) {
+                return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already enabled.');
+            }
+            
+            $args['commandOrGroup']->setEnabledIn($message->message->guild, true);
+            return $message->reply('Enabled the '.$type.' `'.$args['commandOrGroup']->name.'`.');
         }
     });
 };
