@@ -23,6 +23,7 @@ class CommandRegistry {
     
     protected $commands;
     protected $commandsPath;
+    protected $commandsDirectories = array();
     protected $groups;
     protected $types;
     
@@ -484,7 +485,7 @@ class CommandRegistry {
      * @throws \InvalidArgumentException
      */
     function resolveCommandPath(string $groupID, string $command) {
-        $paths = array($this->commandsPath.'/'.\mb_strtolower($groupID), __DIR__.'/Commands/'.\mb_strtolower($groupID));
+        $paths = \array_merge(array($this->commandsPath.'/'.\mb_strtolower($groupID), __DIR__.'/Commands/'.\mb_strtolower($groupID)), $this->commandsDirectories);
         $filename = '/'.\mb_strtolower($command).'.php';
         
         foreach($paths as $path) {
@@ -495,6 +496,45 @@ class CommandRegistry {
         }
         
         throw new \InvalidArgumentException('Unable to resolve command path');
+    }
+    
+    /**
+     * Adds a commands directory to be used in <code>resolveCommandPath</code>.
+     * @param string  $path
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    function addCommandsDirectory(string $path) {
+        $path = \realpath($path);
+        if($path === false) {
+            throw new \InvalidArgumentException('Invalid path specified');
+        }
+        
+        if(!\in_array($path, $this->commandsDirectories, true)) {
+            $this->commandsDirectories[] = $path;
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Removes a commands directory (used in <code>resolveCommandPath</code>).
+     * @param string  $path
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    function removeCommandsDirectory(string $path) {
+        $path = \realpath($path);
+        if($path === false) {
+            throw new \InvalidArgumentException('Invalid path specified');
+        }
+        
+        $pos = \array_search($path, $this->commandsDirectories, true);
+        if($pos !== false) {
+            unset($this->commandsDirectories[$pos]);
+        }
+        
+        return $this;
     }
     
     /**
