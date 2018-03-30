@@ -224,7 +224,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 $promise = $this->command->run($this, $args, ($this->patternMatches !== null));
                 
                 if($promise instanceof \GuzzleHttp\Promise\PromiseInterface) {
-                    $promise = new \React\Promise\Promise(function (callable $resolve, callable $reject) use (&$promise) {
+                    $promise = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($promise) {
                         $promise->then($resolve, $reject);
                     });
                 } elseif(!($promise instanceof \React\Promise\PromiseInterface)) {
