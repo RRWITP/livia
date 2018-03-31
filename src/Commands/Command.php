@@ -36,7 +36,7 @@ namespace CharlotteDunois\Livia\Commands;
  * @property string[]                                           $patterns           Regular expression triggers.
  * @property bool                                               $guarded            Whether the command is protected from being disabled.
  */
-abstract class Command {
+abstract class Command implements \Serializable {
     protected $client;
     
     protected $name;
@@ -226,6 +226,34 @@ abstract class Command {
         }
         
         throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Commands\Command::'.$name);
+    }
+    
+    /**
+     * @internal
+     */
+    function serialize() {
+        $vars = \get_object_vars($this);
+        
+        unset($vars['client']);
+        
+        return \serialize($vars);
+    }
+    
+    /**
+     * @internal
+     */
+    function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
+        $vars = \unserialize($vars);
+        
+        foreach($vars as $name => $val) {
+            $this->$name = $val;
+        }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**

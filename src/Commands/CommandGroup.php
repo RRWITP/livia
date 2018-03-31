@@ -18,7 +18,7 @@ namespace CharlotteDunois\Livia\Commands;
  * @property bool                                      $guarded        Whether this group is guarded against disabling.
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands       The commands that the group contains.
  */
-class CommandGroup {
+class CommandGroup implements \Serializable {
     protected $client;
     
     protected $id;
@@ -62,6 +62,34 @@ class CommandGroup {
         }
         
         throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Commands\CommandGroup::'.$name);
+    }
+    
+    /**
+     * @internal
+     */
+    function serialize() {
+        $vars = \get_object_vars($this);
+        
+        unset($vars['client']);
+        
+        return \serialize($vars);
+    }
+    
+    /**
+     * @internal
+     */
+    function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
+        $vars = \unserialize($vars);
+        
+        foreach($vars as $name => $val) {
+            $this->$name = $val;
+        }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**

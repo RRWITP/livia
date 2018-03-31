@@ -16,7 +16,7 @@ namespace CharlotteDunois\Livia\Arguments;
  * @property \CharlotteDunois\Livia\Arguments\Argument[]  $args         Arguments for the collector.
  * @property int|double                                   $promptLimit  Maximum number of times to prompt for a single argument.
  */
-class ArgumentCollector {
+class ArgumentCollector implements \Serializable {
     protected $client;
     protected $message;
     
@@ -68,6 +68,34 @@ class ArgumentCollector {
         }
         
         throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Arguments\ArgumentCollector::'.$name);
+    }
+    
+    /**
+     * @internal
+     */
+    function serialize() {
+        $vars = \get_object_vars($this);
+        
+        unset($vars['client']);
+        
+        return \serialize($vars);
+    }
+    
+    /**
+     * @internal
+     */
+    function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
+        $vars = \unserialize($vars);
+        
+        foreach($vars as $name => $val) {
+            $this->$name = $val;
+        }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**

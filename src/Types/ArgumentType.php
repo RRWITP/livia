@@ -15,7 +15,7 @@ namespace CharlotteDunois\Livia\Types;
  * @property \CharlotteDunois\Livia\LiviaClient        $client    The client which initiated the instance.
  * @property string                                    $id        The argument type ID.
  */
-abstract class ArgumentType {
+abstract class ArgumentType implements \Serializable {
     protected $client;
     protected $id;
     
@@ -37,6 +37,34 @@ abstract class ArgumentType {
         }
         
         throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Types\ArgumentType::'.$name);
+    }
+    
+    /**
+     * @internal
+     */
+    function serialize() {
+        $vars = \get_object_vars($this);
+        
+        unset($vars['client']);
+        
+        return \serialize($vars);
+    }
+    
+    /**
+     * @internal
+     */
+    function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
+        $vars = \unserialize($vars);
+        
+        foreach($vars as $name => $val) {
+            $this->$name = $val;
+        }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**

@@ -134,7 +134,9 @@ class Argument implements \Serializable {
      */
     function serialize() {
         $vars = \get_object_vars($this);
-        unset($vars['validate'], $vars['parse'], $vars['emptyChecker']);
+        
+        unset($vars['client'], $vars['validate'], $vars['parse'], $vars['emptyChecker']);
+        
         return \serialize($vars);
     }
     
@@ -142,11 +144,17 @@ class Argument implements \Serializable {
      * @internal
      */
     function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
         $vars = \unserialize($vars);
         
         foreach($vars as $name => $val) {
             $this->$name = $val;
         }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**

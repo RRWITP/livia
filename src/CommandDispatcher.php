@@ -50,30 +50,31 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
-     * Serializes the class.
-     * @return string
-     * @intenral
+     * @internal
      */
     function serialize() {
         $vars = \get_object_vars($this);
         
-        unset($vars['inhibitors']);
+        unset($vars['client'], $vars['inhibitors']);
         
         return \serialize($vars);
     }
     
     /**
-     * Unserializes the class.
-     * @param string $vars
-     * @throws \RuntimeException
      * @internal
      */
     function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
         $vars = \unserialize($vars);
         
         foreach($vars as $name => $val) {
             $this->$name = $val;
         }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**

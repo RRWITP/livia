@@ -18,7 +18,7 @@ namespace CharlotteDunois\Livia;
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $groups        Registered command groups, mapped by their name.
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $types         Registered argument types, mapped by their name.
  */
-class CommandRegistry {
+class CommandRegistry implements \Serializable {
     protected $client;
     
     protected $commands;
@@ -48,6 +48,34 @@ class CommandRegistry {
         }
         
         throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandRegistry::'.$name);
+    }
+    
+    /**
+     * @internal
+     */
+    function serialize() {
+        $vars = \get_object_vars($this);
+        
+        unset($vars['client']);
+        
+        return \serialize($vars);
+    }
+    
+    /**
+     * @internal
+     */
+    function unserialize($vars) {
+        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
+        $vars = \unserialize($vars);
+        
+        foreach($vars as $name => $val) {
+            $this->$name = $val;
+        }
+        
+        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**
