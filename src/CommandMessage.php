@@ -311,6 +311,10 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         $channelID = $this->getChannelIDOrDM($this->message->channel);
         
+        if($shouldEdit && ($type === 'direct' && empty($this->responses['dm'])) || ($type !== 'direct' && empty($this->responses[$channelID]))) {
+            $shouldEdit = false;
+        }
+        
         switch($type) {
             case 'plain':
                 if($shouldEdit) {
@@ -332,7 +336,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             break;
             case 'direct':
                 if($shouldEdit) {
-                    return $this->editCurrentResponse('dm', $type, $content, $options);
+                    return $this->editCurrentResponse($channelID, $type, $content, $options);
                 } else {
                     return $this->message->author->createDM()->then(function ($channel) use ($content, $options) {
                         return $channel->send($content, $options);
