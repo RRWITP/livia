@@ -295,8 +295,6 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      * @throws \RangeException|\InvalidArgumentException
      */
     protected function respond(string $type, string $content, array $options = array(), bool $fromEdit = false) {
-        $shouldEdit = (!empty($this->responses) && $fromEdit === false && empty($options['files']));
-        
         if($type === 'reply' && $this->message->channel->type === 'dm') {
             $type = 'plain';
         }
@@ -310,10 +308,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         }
         
         $channelID = $this->getChannelIDOrDM($this->message->channel);
-        
-        if($shouldEdit && ($type === 'direct' && empty($this->responses['dm'])) || ($type !== 'direct' && empty($this->responses[$channelID]))) {
-            $shouldEdit = false;
-        }
+        $shouldEdit = (!empty($this->responses) && (($type === 'direct' && !empty($this->responses['dm'])) || ($type !== 'direct' && !empty($this->responses[$channelID]))) && $fromEdit === false && empty($options['files']));
         
         switch($type) {
             case 'plain':
