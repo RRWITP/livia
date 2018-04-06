@@ -63,7 +63,7 @@ abstract class SettingProvider {
     
     /**
      * Obtains the ID of the provided guild.
-     * @param \CharlotteDunois\Yasmin\Models\Guild|string|null  $guild
+     * @param \CharlotteDunois\Yasmin\Models\Guild|string|int|null  $guild
      * @return string
      * @throws \InvalidArgumentException
      */

@@ -382,8 +382,8 @@ abstract class Command implements \Serializable {
     
     /**
      * Enables or disables the command in a guild (or globally).
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild|null  $guild  The guild instance or the guild ID.
-     * @param bool                                              $enabled
+     * @param string|int|\CharlotteDunois\Yasmin\Models\Guild|null  $guild    The guild instance or the guild ID.
+     * @param bool                                                  $enabled
      * @return bool
      * @throws \BadMethodCallException|\InvalidArgumentException
      */
@@ -407,15 +407,15 @@ abstract class Command implements \Serializable {
     }
     
     /**
-     * Checks if the command is enabled in a guild (or globally).
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild|null  $guild  The guild instance or the guild ID.
+     * Checks if the command is enabled in a guild or globally.
+     * @param \CharlotteDunois\Yasmin\Models\Guild|string|int|null  $guild  The guild instance or the guild ID, null for global.
      * @return bool
      * @throws \InvalidArgumentException
      */
     function isEnabledIn($guild) {
         if($guild !== null) {
             $guild = $this->client->guilds->resolve($guild);
-            return (!\array_key_exists($guild->id, $this->guildEnabled) || $this->guildEnabled[$guild->id]);
+            return ($this->globalEnabled && (!\array_key_exists($guild->id, $this->guildEnabled) || $this->guildEnabled[$guild->id]));
         }
         
         return $this->globalEnabled;
