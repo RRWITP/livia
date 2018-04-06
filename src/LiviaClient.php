@@ -41,6 +41,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      *
      * @param array                           $options  Any Client Options.
      * @param \React\EventLoop\LoopInterface  $loop
+     * @throws \RuntimeException|\InvalidArgumentException
      */
     function __construct(array $options = array(), ?\React\EventLoop\LoopInterface $loop = null) {
         if(!\array_key_exists('commandPrefix', $options)) {
