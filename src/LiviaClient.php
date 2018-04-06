@@ -47,24 +47,18 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
             $options['commandPrefix'] = 'l$';
         }
         
-        if(isset($options['commandEditableDuration'])) {
-            $options['commandEditableDuration'] = (int) $options['commandEditableDuration'];
-        } else {
+        if(!isset($options['commandEditableDuration'])) {
             $options['commandEditableDuration'] = 30;
         }
         
-        if(isset($options['nonCommandEditable'])) {
-            $options['nonCommandEditable'] = (bool) $options['nonCommandEditable'];
-        } else {
+        if(!isset($options['nonCommandEditable'])) {
             $options['nonCommandEditable'] = true;
         }
         
-        if(isset($options['unknownCommandResponse'])) {
-            $options['unknownCommandResponse'] = (bool) $options['unknownCommandResponse'];
-        } else {
+        if(!isset($options['unknownCommandResponse'])) {
             $options['unknownCommandResponse'] = true;
         }
-
+        
         parent::__construct($options, $loop);
         
         $this->dispatcher = new \CharlotteDunois\Livia\CommandDispatcher($this);
@@ -238,5 +232,34 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
                 return $this->provider->destroy();
             }
         });
+    }
+    
+    /**
+     * Validates the passed client options.
+     * @param array
+     * @throws \InvalidArgumentException
+     */
+    protected function validateClientOptions(array $options) {
+        parent::validateClientOptions($options);
+        
+        $validator = \CharlotteDunois\Validation\Validator::make($options, array(
+            'commandPrefix' => 'string|nullable',
+            'commandBlockedMessagePattern' => 'boolean',
+            'commandEditableDuration' => 'integer',
+            'commandThrottlingMessagePattern' => 'boolean',
+            'nonCommandEditable' => 'boolean',
+            'unknownCommandResponse' => 'boolean',
+            'owners' => 'array:string|array:integer',
+            'invite' => 'string'
+        ));
+        
+        if($validator->fails()) {
+            $errors = $validator->errors();
+            
+            $name = \array_keys($errors)[0];
+            $error = $errors[$name];
+            
+            throw new \InvalidArgumentException('Client Option '.$name.' '.\lcfirst($error));
+        }
     }
 }
