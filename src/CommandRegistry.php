@@ -216,7 +216,8 @@ class CommandRegistry implements \Serializable {
      * Registers a command. Emits a commandRegister event for each command.
      * @param string|\CharlotteDunois\Livia\Commands\Command  ...$command  The full qualified command name (groupID:name) or an initiated instance of it.
      * @return $this
-     * @throws \RuntimeException|\InvalidArgumentException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
     function registerCommand(...$command) {
         foreach($command as $cmd) {
@@ -312,7 +313,8 @@ class CommandRegistry implements \Serializable {
      * Registers a group. Emits a groupRegister event for each group.
      * @param \CharlotteDunois\Livia\Commands\CommandGroup|array  ...$group  An instance of CommandGroup or an associative array ('id' => string, 'name' => string, 'guarded' => bool). Guarded is optional, defaults to false.
      * @return $this
-     * @throws \RuntimeException|\InvalidArgumentException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
     function registerGroup(...$group) {
         foreach($group as $gr) {
@@ -351,7 +353,8 @@ class CommandRegistry implements \Serializable {
      * Registers a type. Emits a typeRegister event for each type.
      * @param \CharlotteDunois\Livia\Types\ArgumentType|string  ...$type  The full qualified class name or an initiated instance of it.
      * @return $this
-     * @throws \RuntimeException|\InvalidArgumentException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
     function registerType(...$type) {
         foreach($type as $t) {

@@ -97,7 +97,8 @@ class CommandGroup implements \Serializable {
      * @param string|\CharlotteDunois\Yasmin\Models\Guild|null  $guild  The guild instance or the guild ID.
      * @param bool                                              $enabled
      * @return bool
-     * @throws \BadMethodCallException|\InvalidArgumentException
+     * @throws \BadMethodCallException
+     * @throws \InvalidArgumentException
      */
     function setEnabledIn($guild, bool $enabled) {
         if($guild !== null) {
