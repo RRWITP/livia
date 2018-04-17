@@ -332,7 +332,7 @@ class MySQLProvider extends SettingProvider {
             $this->setupGuild($row['guild']);
         } catch (\InvalidArgumentException $e) {
             $this->settings->delete($row['guild']);
-            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($row['guild']))->done($resolve, $reject);
+            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($row['guild']))->done(null, array($this->client, 'handlePromiseRejection'));
         }
     }
 }
