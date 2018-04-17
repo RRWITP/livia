@@ -145,7 +145,7 @@ class ArgumentCollector implements \Serializable {
                     
                     throw $error;
                 })->done($resolve, $reject);
-            } catch(\Throwable | \Exception | \Error $error) {
+            } catch (\Throwable | \Exception | \Error $error) {
                 $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
                 if($key !== false) {
                     unset($this->client->dispatcher->awaiting[$key]);

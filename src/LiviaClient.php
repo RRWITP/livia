@@ -207,7 +207,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
                 if($prefix !== 404 && $prefix !== '') {
                     return $prefix;
                 }
-            } catch(\BadMethodCallException $e) {
+            } catch (\BadMethodCallException $e) {
                 return $this->commandPrefix;
             }
         }

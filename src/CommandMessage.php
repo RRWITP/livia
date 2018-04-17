@@ -55,7 +55,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         try {
             return $this->message->__get($name);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             /* Continue regardless of error */
         }
         

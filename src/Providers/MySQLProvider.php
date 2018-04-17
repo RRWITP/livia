@@ -13,9 +13,12 @@ namespace CharlotteDunois\Livia\Providers;
  * Loads and stores settings associated with guilds in a MySQL database. Requires the composer package react/mysql.
  */
 class MySQLProvider extends SettingProvider {
+    /** @var \React\MySQL\Connection */
     protected $db;
     
     protected $listeners = array();
+    
+    /** @var \CharlotteDunois\Yasmin\Utils\Collection */
     protected $settings;
     
     /**
@@ -75,6 +78,7 @@ class MySQLProvider extends SettingProvider {
         $guild = $this->getGuildID($guild);
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild) {
+            $this->settings->delete($guild);
             $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($guild))->done($resolve, $reject);
         }));
     }
@@ -137,7 +141,11 @@ class MySQLProvider extends SettingProvider {
                 $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
                     return $this->runQuery('SELECT * FROM `settings`')->then(function ($command) {
                         foreach($command->resultRows as $row) {
-                            $this->loadRow($row);
+                            try {
+                                $this->loadRow($row);
+                            } catch (\InvalidArgumentException $e) {
+                                $this->clear($row['guild'])->done(null, array($this->client, 'handlePromiseRejection'));
+                            }
                         }
                         
                         if($this->settings->has('global')) {
