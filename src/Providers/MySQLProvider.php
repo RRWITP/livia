@@ -141,11 +141,7 @@ class MySQLProvider extends SettingProvider {
                 $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
                     return $this->runQuery('SELECT * FROM `settings`')->then(function ($command) {
                         foreach($command->resultRows as $row) {
-                            try {
-                                $this->loadRow($row);
-                            } catch (\InvalidArgumentException $e) {
-                                $this->clear($row['guild'])->done(null, array($this->client, 'handlePromiseRejection'));
-                            }
+                            $this->loadRow($row);
                         }
                         
                         if($this->settings->has('global')) {
@@ -330,8 +326,13 @@ class MySQLProvider extends SettingProvider {
         }
         
         $settings = new \ArrayObject($settings, \ArrayObject::ARRAY_AS_PROPS);
-        
         $this->settings->set($row['guild'], $settings);
-        $this->setupGuild($row['guild']);
+        
+        try {
+            $this->setupGuild($row['guild']);
+        } catch (\InvalidArgumentException $e) {
+            $this->settings->delete($row['guild']);
+            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($row['guild']))->done($resolve, $reject);
+        }
     }
 }
