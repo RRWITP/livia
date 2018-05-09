@@ -44,7 +44,7 @@ Other restrictions apply as well. If you need any (helper) functions or constant
 
 Example:
 ```php
-// /rootBot/commands/moderation/ban.js
+// /rootBot/commands/moderation/ban.php
 
 // Livia forces you to use lowercase command name and group ID.
 // (moderation = group ID, ban = command name)
