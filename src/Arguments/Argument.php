@@ -69,23 +69,27 @@ class Argument implements \Serializable {
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $info) {
         $this->client = $client;
         
-        if(empty($info['key'])) {
-            throw new \InvalidArgumentException('Key can not be empty');
+        $validator = \CharlotteDunois\Validation\Validator::make($info, array(
+            'key' => 'required|string|min:1',
+            'prompt' => 'required|string|min:1',
+            'type' => 'string',
+            'max' => 'integer|float',
+            'min' => 'integer|float',
+            'wait' => 'integer|min:1'
+        ));
+        
+        try {
+            $validator->throw();
+        } catch (\RuntimeException $e) {
+            throw new \InvalidArgumentException($e->getMessage());
         }
-        if(empty($info['prompt'])) {
-            throw new \InvalidArgumentException('Prompt can not be empty');
-        }
+        
         if(empty($info['type']) && (empty($info['validate']) || empty($info['parse']))) {
             throw new \InvalidArgumentException('Argument type can not be empty if you don\'t implement and validate and parse function');
         }
+        
         if(!empty($info['type']) && !$this->client->registry->types->has($info['type'])) {
             throw new \InvalidArgumentException('Argument type "'.$info['type'].'" is not registered');
-        }
-        if(isset($info['max']) && !\is_int($info['max']) && !\is_float($info['max'])) {
-            throw new \InvalidArgumentException('Max is not an float or an integer');
-        }
-        if(isset($info['min']) && !\is_int($info['min']) && !\is_float($info['min'])) {
-            throw new \InvalidArgumentException('Min is not an float or an integer');
         }
         
         $this->key = (string) $info['key'];

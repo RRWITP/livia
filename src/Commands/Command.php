@@ -127,7 +127,11 @@ abstract class Command implements \Serializable {
             'guarded' => 'boolean'
         ));
         
-        $validator->throw();
+        try {
+            $validator->throw();
+        } catch (\RuntimeException $e) {
+            throw new \InvalidArgumentException($e->getMessage());
+        }
         
         $this->name = $info['name'];
         $this->groupID = $info['group'];
