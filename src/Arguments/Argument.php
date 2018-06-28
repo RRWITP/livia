@@ -75,6 +75,10 @@ class Argument implements \Serializable {
             'type' => 'string',
             'max' => 'integer|float',
             'min' => 'integer|float',
+            'infinite' => 'boolean',
+            'validate' => 'callable',
+            'parse' => 'callable',
+            'emptyChecker' => 'callable',
             'wait' => 'integer|min:1'
         ));
         
@@ -100,9 +104,9 @@ class Argument implements \Serializable {
         $this->min = $info['min'] ?? null;
         $this->default = $info['default'] ?? null;
         $this->infinite = (!empty($info['infinite']));
-        $this->validate = (!empty($info['validate']) && \is_callable($info['validate']) ? $info['validate'] : null);
-        $this->parse = (!empty($info['parse']) && \is_callable($info['parse']) ? $info['parse'] : null);;
-        $this->emptyChecker = (!empty($info['emptyChecker']) && \is_callable($info['emptyChecker']) ? $info['emptyChecker'] : null);
+        $this->validate = (!empty($info['validate']) ? $info['validate'] : null);
+        $this->parse = (!empty($info['parse']) ? $info['parse'] : null);;
+        $this->emptyChecker = (!empty($info['emptyChecker']) ? $info['emptyChecker'] : null);
         $this->wait = (int) ($info['wait'] ?? 30);
     }
     
