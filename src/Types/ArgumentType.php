@@ -68,20 +68,20 @@ abstract class ArgumentType implements \Serializable {
     }
     
     /**
-     * Validates a value against the type.
+     * Validates a value against the type. If the return is a promise, the promise has to resolve with one of the other return types.
      * @param string                                     $value  Value to validate.
      * @param \CharlotteDunois\Livia\CommandMessage      $msg    Message the value was obtained from.
      * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg    Argument the value obtained from.
-     * @return bool|string|\React\Promise\Promise
+     * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
     abstract function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
     
     /**
-     * Parses a value into an usable value.
+     * Parses a value into an usable value. If the return is a promise, the promise has to resolve with one of the other return types.
      * @param string                                          $value  Value to parse.
      * @param \CharlotteDunois\Livia\CommandMessage           $msg    Message the value was obtained from.
      * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg    Argument the value obtained from.
-     * @return mixed|null
+     * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      * @throws \RangeException
      */
     abstract function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
