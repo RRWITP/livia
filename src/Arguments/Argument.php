@@ -167,10 +167,12 @@ class Argument implements \Serializable {
     
     /**
      * Prompts the user and obtains the value for the argument. Resolves with an array of ('value' => mixed, 'cancelled' => string|null, 'prompts' => Message[], 'answers' => Message[]). Cancelled can be one of user, time and promptLimit.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message      Message that triggered the command.
-     * @param string|string[]                        $value        Pre-provided value(s).
-     * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
-     * @param bool|string|null                       $valid        Whether the last retrieved value was valid.
+     * @param \CharlotteDunois\Livia\CommandMessage     $message      Message that triggered the command.
+     * @param string|string[]                           $value        Pre-provided value(s).
+     * @param int|double                                $promptLimit  Maximum number of times to prompt for the argument.
+     * @param \CharlotteDunois\Yasmin\Models\Message[]  $prompts      An array consisting of the prompts.
+     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answerts     An array consisting of the answers.
+     * @param bool|string|null                          $valid        Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
     function obtain(\CharlotteDunois\Livia\CommandMessage $message, $value, $promptLimit = \INF, array $prompts = array(), array $answers = array(), $valid = null) {
@@ -247,88 +249,88 @@ class Argument implements \Serializable {
             
             // Prompt the user for a new value
             $reply->done(function ($msg) use ($message, $promptLimit, &$prompts, &$answers, $resolve, $reject) {
-                            if($msg !== null) {
-                                $prompts[] = $msg;
-                            }
-                            
-                            // Get the user's response
-                            $message->message->channel->collectMessages(function ($msg) use ($message) {
-                                return ($msg->author->id === $message->message->author->id);
-                            }, array(
-                                'max' => 1,
-                                'time' => $this->wait
-                            ))->then(function ($messages) use ($message, $promptLimit, &$prompts, &$answers) {
-                                if($messages->count() === 0) {
-                                    return array(
-                                        'value' => null,
-                                        'cancelled' => 'time',
-                                        'prompts' => $prompts,
-                                        'answers' => $answers
-                                    );
-                                }
-                                
-                                $msg = $messages->first();
-                                $answers[] = $msg;
-                                
-                                $value = $msg->content;
-                                
-                                if(\mb_strtolower($value) === 'cancel') {
-                                    return array(
-                                        'value' => null,
-                                        'cancelled' => 'user',
-                                        'prompts' => $prompts,
-                                        'answers' => $answers
-                                    );
-                                }
-                                
-                                $validate = ($this->validate ? array($this, 'validate') : array($this->type, 'validate'))($value, $message, $this);
-                                if(!($validate instanceof \React\Promise\PromiseInterface)) {
-                                    $validate = \React\Promise\resolve($validate);
-                                }
-                                
-                                return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$prompts, &$answers) {
-                                    if($valid !== true) {
-                                        return $this->obtain($message, $value, $promptLimit, $prompts, $answers, $valid);
-                                    }
-                                    
-                                    $parse = ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
-                                    if(!($parse instanceof \React\Promise\PromiseInterface)) {
-                                        $parse = \React\Promise\resolve($parse);
-                                    }
-                                    
-                                    return $parse->then(function ($value) use (&$prompts, &$answers) {
-                                        return array(
-                                            'value' => $value,
-                                            'cancelled' => null,
-                                            'prompts' => $prompts,
-                                            'answers' => $answers
-                                        );
-                                    });
-                                });
-                            }, function ($error) use (&$prompts, &$answers) {
-                                if($error instanceof \RangeException) {
-                                    return array(
-                                        'value' => null,
-                                        'cancelled' => 'time',
-                                        'prompts' => $prompts,
-                                        'answers' => $answers
-                                    );
-                                }
-                                
-                                throw $error;
-                            })->done($resolve, $reject);
-                        }, $reject);
+                if($msg !== null) {
+                    $prompts[] = $msg;
+                }
+                
+                // Get the user's response
+                $message->message->channel->collectMessages(function ($msg) use ($message) {
+                    return ($msg->author->id === $message->message->author->id);
+                }, array(
+                    'max' => 1,
+                    'time' => $this->wait
+                ))->then(function ($messages) use ($message, $promptLimit, &$prompts, &$answers) {
+                    if($messages->count() === 0) {
+                        return array(
+                            'value' => null,
+                            'cancelled' => 'time',
+                            'prompts' => $prompts,
+                            'answers' => $answers
+                        );
+                    }
+                    
+                    $msg = $messages->first();
+                    $answers[] = $msg;
+                    
+                    $value = $msg->content;
+                    
+                    if(\mb_strtolower($value) === 'cancel') {
+                        return array(
+                            'value' => null,
+                            'cancelled' => 'user',
+                            'prompts' => $prompts,
+                            'answers' => $answers
+                        );
+                    }
+                    
+                    $validate = ($this->validate ? array($this, 'validate') : array($this->type, 'validate'))($value, $message, $this);
+                    if(!($validate instanceof \React\Promise\PromiseInterface)) {
+                        $validate = \React\Promise\resolve($validate);
+                    }
+                    
+                    return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$prompts, &$answers) {
+                        if($valid !== true) {
+                            return $this->obtain($message, $value, $promptLimit, $prompts, $answers, $valid);
+                        }
+                        
+                        $parse = ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
+                        if(!($parse instanceof \React\Promise\PromiseInterface)) {
+                            $parse = \React\Promise\resolve($parse);
+                        }
+                        
+                        return $parse->then(function ($value) use (&$prompts, &$answers) {
+                            return array(
+                                'value' => $value,
+                                'cancelled' => null,
+                                'prompts' => $prompts,
+                                'answers' => $answers
+                            );
+                        });
+                    });
+                }, function ($error) use (&$prompts, &$answers) {
+                    if($error instanceof \RangeException) {
+                        return array(
+                            'value' => null,
+                            'cancelled' => 'time',
+                            'prompts' => $prompts,
+                            'answers' => $answers
+                        );
+                    }
+                    
+                    throw $error;
+                })->done($resolve, $reject);
+            }, $reject);
         }));
     }
     
     /**
      * Prompts the user infinitely and obtains the values for the argument. Resolves with an array of ('values' => mixed, 'cancelled' => string|null, 'prompts' => Message[], 'answers' => Message[]). Cancelled can be one of user, time and promptLimit.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message      Message that triggered the command.
-     * @param string[]                               $values       Pre-provided values.
-     * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
-     * @param array                                  $prompts
-     * @param array                                  $answers
-     * @param bool                                   $valid
+     * @param \CharlotteDunois\Livia\CommandMessage     $message      Message that triggered the command.
+     * @param string[]                                  $values       Pre-provided values.
+     * @param int|double                                $promptLimit  Maximum number of times to prompt for the argument.
+     * @param \CharlotteDunois\Yasmin\Models\Message[]  $prompts      An array consisting of the prompts.
+     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answerts     An array consisting of the answers.
+     * @param bool|string|null                          $valid        Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, array &$prompts = array(), array &$answers = array(), bool $valid = null) {
@@ -430,7 +432,7 @@ class Argument implements \Serializable {
                     
                     return ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
                 });
-            }, function ($error) use(&$prompts, &$answers) {
+            }, function ($error) use (&$prompts, &$answers) {
                 if($error instanceof \RangeException) {
                     return array(
                         'value' => null,
@@ -453,7 +455,7 @@ class Argument implements \Serializable {
      * @param int                                    $i            Current index of current argument value.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit, int $i = 0) {
+    protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, int $i = 0) {
         if(empty($values)) {
             return $this->obtainInfinite($message, array(), $promptLimit);
         }

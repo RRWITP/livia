@@ -283,7 +283,8 @@ class CommandRegistry implements \Serializable {
                 continue;
             }
             
-            $command = include($file);
+            $command = include $file;
+            
             if(!\is_callable($command)) {
                 throw new \RuntimeException('Command file '.\str_replace($path, '', $file).' does not return an anonymous function');
             }
@@ -581,13 +582,14 @@ class CommandRegistry implements \Serializable {
         $commanddot = \explode(':', $command);
         if(\count($commanddot) === 2) {
             $command = $this->resolveCommandPath($commanddot[0], $commanddot[1]);
-            $cmd = include($command);
+            
+            $cmd = include $command;
             return $cmd;
         }
         
         $command = \realpath($command);
         if($command !== false) {
-            $cmd = include($command);
+            $cmd = include $command;
             return $cmd;
         }
         
