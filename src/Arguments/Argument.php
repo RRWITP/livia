@@ -171,7 +171,7 @@ class Argument implements \Serializable {
      * @param string|string[]                           $value        Pre-provided value(s).
      * @param int|double                                $promptLimit  Maximum number of times to prompt for the argument.
      * @param \CharlotteDunois\Yasmin\Models\Message[]  $prompts      An array consisting of the prompts.
-     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answerts     An array consisting of the answers.
+     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answers      An array consisting of the answers.
      * @param bool|string|null                          $valid        Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
@@ -329,7 +329,7 @@ class Argument implements \Serializable {
      * @param string[]                                  $values       Pre-provided values.
      * @param int|double                                $promptLimit  Maximum number of times to prompt for the argument.
      * @param \CharlotteDunois\Yasmin\Models\Message[]  $prompts      An array consisting of the prompts.
-     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answerts     An array consisting of the answers.
+     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answers      An array consisting of the answers.
      * @param bool|string|null                          $valid        Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
