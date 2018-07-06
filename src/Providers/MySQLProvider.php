@@ -117,7 +117,7 @@ class MySQLProvider extends SettingProvider {
     /**
      * @inheritDoc
      */
-    function init(\CharlotteDunois\Livia\LiviaClient $client) {
+    function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface {
         $this->client = $client;
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
