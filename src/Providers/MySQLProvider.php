@@ -93,12 +93,12 @@ class MySQLProvider extends SettingProvider {
     function create($guild, &$settings = array()) {
         $guild = $this->getGuildID($guild);
         
-        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, &$settings, $resolve, $reject) {
+        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, &$settings) {
             if(empty($result->resultRows)) {
                 $this->settings->set($guild, $settings);
                 return $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)));
             } else {
-                $this->loadRow($command->resultRows[0]);
+                $this->loadRow($result->resultRows[0]);
             }
         });
     }
