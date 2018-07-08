@@ -45,7 +45,7 @@ class Argument implements \Serializable {
     /**
      * Constructs a new Argument. Info is an array as following:
      *
-     * <pre>
+     * ```
      * array(
      *   'key' => string, (Key for the argument)
      *   'label' => string, (Label for the argument, defaults to key)
@@ -60,7 +60,7 @@ class Argument implements \Serializable {
      *   'emptyChecker' => callable, (Empty checker function for the argument, optional)
      *   'wait' => int (How long to wait for input (in seconds)
      * )
-     * </pre>
+     * ```
      *
      * @param \CharlotteDunois\Livia\LiviaClient    $client
      * @param array                                 $info

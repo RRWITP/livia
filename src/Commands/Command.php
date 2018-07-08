@@ -70,7 +70,7 @@ abstract class Command implements \Serializable {
     /**
      * Constructs a new Command. Info is an array as following:
      *
-     * <pre>
+     * ```
      * array(
      *   'name' => string,
      *   'aliases' => string[], (optional)
@@ -94,7 +94,7 @@ abstract class Command implements \Serializable {
      *   'patterns' => string[], (Regular Expression strings, pattern matches don't get parsed for arguments, optional)
      *   'guarded' => bool, (defaults to false)
      * )
-     * </pre>
+     * ```
      *
      * @param \CharlotteDunois\Livia\LiviaClient    $client
      * @param array                                 $info

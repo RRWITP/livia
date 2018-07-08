@@ -537,7 +537,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
-     * Adds a commands directory to be used in <code>resolveCommandPath</code>.
+     * Adds a commands directory to be used in `resolveCommandPath`.
      * @param string  $path
      * @return $this
      * @throws \InvalidArgumentException
@@ -556,7 +556,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
-     * Removes a commands directory (used in <code>resolveCommandPath</code>).
+     * Removes a commands directory (used in `resolveCommandPath`).
      * @param string  $path
      * @return $this
      * @throws \InvalidArgumentException

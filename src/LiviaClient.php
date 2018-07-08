@@ -26,7 +26,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     /**
      * Constructs a new Command Client. Additional available Client Options are as following:
      *
-     * <pre>
+     * ```
      * array(
      *   'commandPrefix' => string|null, (Default command prefix, null means only mentions will trigger the handling, defaults to l$)
      *   'commandBlockedMessagePattern' => bool, (Whether command pattern maatches will send command blocked messages, defaults to true)
@@ -37,7 +37,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      *   'owners' => string[], (array of user IDs)
      *   'invite' => string, (Invite URL to the bot's support server)
      * )
-     * </pre>
+     * ```
      *
      * @param array                           $options  Any Client Options.
      * @param \React\EventLoop\LoopInterface  $loop

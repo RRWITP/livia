@@ -76,7 +76,7 @@ class HRTimer {
     }
     
     /**
-     * Returns the elapsed time since the last <code>time</code> call, in nanoseconds.
+     * Returns the elapsed time since the last `time` call, in nanoseconds.
      * @return int
      */
     function time(): int {
