@@ -32,7 +32,7 @@ abstract class SettingProvider {
      * @param \CharlotteDunois\Livia\LiviaClient    $client
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    abstract function init(\CharlotteDunois\Livia\LiviaClient   $client);
+    abstract function init(\CharlotteDunois\Livia\LiviaClient   $client): \React\Promise\ExtendedPromiseInterface;
     
     /**
      * Gets a setting from a guild.

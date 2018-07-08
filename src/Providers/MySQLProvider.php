@@ -13,7 +13,7 @@ namespace CharlotteDunois\Livia\Providers;
  * Loads and stores settings associated with guilds in a MySQL database. Requires the composer package react/mysql.
  */
 class MySQLProvider extends SettingProvider {
-    /** @var \React\MySQL\Connection */
+    /** @var \React\MySQL\ConnectionInterface */
     protected $db;
     
     protected $listeners = array();
@@ -23,9 +23,9 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * Constructs a new instance.
-     * @param \React\MySQL\Connection  $db
+     * @param \React\MySQL\ConnectionInterface  $db
      */
-    function __construct(\React\MySQL\Connection $db) {
+    function __construct(\React\MySQL\ConnectionInterface $db) {
         $this->db = $db;
         
         $this->settings = new \CharlotteDunois\Yasmin\Utils\Collection();
@@ -93,17 +93,14 @@ class MySQLProvider extends SettingProvider {
     function create($guild, &$settings = array()) {
         $guild = $this->getGuildID($guild);
         
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild, &$settings) {
-            $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($command) use ($guild, &$settings, $resolve, $reject) {
-                if(empty($command->resultRows)) {
-                    $this->settings->set($guild, $settings);
-                    $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)))->done($resolve, $reject);
-                } else {
-                    $this->loadRow($command->resultRows[0]);
-                    $resolve();
-                }
-            });
-        }));
+        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, &$settings) {
+            if(empty($result->resultRows)) {
+                $this->settings->set($guild, $settings);
+                return $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)));
+            } else {
+                $this->loadRow($result->resultRows[0]);
+            }
+        });
     }
     
     /**
@@ -120,7 +117,7 @@ class MySQLProvider extends SettingProvider {
     /**
      * @inheritDoc
      */
-    function init(\CharlotteDunois\Livia\LiviaClient $client) {
+    function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface {
         $this->client = $client;
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
@@ -139,8 +136,8 @@ class MySQLProvider extends SettingProvider {
                 }
                 
                 $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
-                    return $this->runQuery('SELECT * FROM `settings`')->then(function ($command) {
-                        foreach($command->resultRows as $row) {
+                    return $this->runQuery('SELECT * FROM `settings`')->then(function ($result) {
+                        foreach($result->resultRows as $row) {
                             $this->loadRow($row);
                         }
                         
@@ -190,18 +187,14 @@ class MySQLProvider extends SettingProvider {
                 $settings = $this->settings->get($guild);
                 $settings[$key] = $value;
             
-                return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->then(function () {
-                    return null;
-                });
+                return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
             });
         }
         
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild, $key, $value) {
-            $settings = $this->settings->get($guild);
-            $settings[$key] = $value;
+        $settings = $this->settings->get($guild);
+        $settings[$key] = $value;
         
-            $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->done($resolve, $reject);
-        }));
+        return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
     }
     
     /**
@@ -218,18 +211,14 @@ class MySQLProvider extends SettingProvider {
                 $settings = $this->settings->get($guild);
                 unset($settings[$key]);
             
-                return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->then(function () {
-                    return null;
-                });
+                return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
             });
         }
         
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild, $key) {
-            $settings = $this->settings->get($guild);
-            unset($settings[$key]);
-            
-            $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild))->done($resolve, $reject);
-        }));
+        $settings = $this->settings->get($guild);
+        unset($settings[$key]);
+        
+        $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
     }
     
     /**
@@ -290,28 +279,20 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * Runs a SQL query. Resolves with the Command instance.
+     * Runs a SQL query. Resolves with the QueryResult instance.
      * @param string  $sql
      * @param array   $parameters  Parameters for the query - these get escaped
      * @return \React\Promise\ExtendedPromiseInterface
-     * @see https://github.com/bixuehujin/reactphp-mysql/blob/master/src/Command.php
+     * @see https://github.com/friends-of-reactphp/mysql/blob/master/src/QueryResult.php
      */
     function runQuery(string $sql, array $parameters = array()) {
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($sql, $parameters) {
-            if(!empty($parameters)) {
-                $query = new \React\MySQL\Query($sql);
-                $query->bindParamsFromArray($parameters);
-                $sql = $query->getSql();
-            }
-            
-            $this->db->query($sql, function ($command) use ($resolve, $reject) {
-                if($command->hasError()) {
-                    return $reject($command->getError());
-                }
-                
-                $resolve($command);
-            });
-        }));
+        if(!empty($parameters)) {
+            $query = new \React\MySQL\Query($sql);
+            $query->bindParamsFromArray($parameters);
+            $sql = $query->getSql();
+        }
+        
+        return $this->db->query($sql);
     }
     
     /**
