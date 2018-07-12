@@ -36,6 +36,19 @@ The following commands are coming with Livia:
 * ping (calculates the bot's latency)
 * prefix (gets or sets the bot's prefix in the guild/globally)
 
+# Setting Provider
+A Setting Provider sits as middle-man between Livia and the DBMS. The job of the Setting Provider is to permanently store the settings, such as guild prefixes.<br>
+Included in Livia is a provider for MySQL/MariaDB, which utilizes [`react/mysql`](https://github.com/friends-of-reactphp/mysql).
+
+Usage:
+```php
+$factory = new \React\MySQL\Factory();
+$factory->createConnection('user:password@localhost/database')->then(function (\React\MySQL\ConnectionInterface $db) use ($your_livia_client) {
+    $provider = new \CharlotteDunois\Livia\Providers\MySQLProvider($db);
+    $your_livia_client->setProvider($provider);
+});
+```
+
 # Making Commands
 Livia features Commands Reloading, which requires you to return an anonymous function in your command file, which returns a new anonymous class.
 

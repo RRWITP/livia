@@ -168,7 +168,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
-     * Sets the setting provider to use, and initializes it once the client is ready
+     * Sets the setting provider to use, and initializes it once the client is ready.
      * @param \CharlotteDunois\Livia\Providers\SettingProvider  $provider
      * @return \React\Promise\ExtendedPromiseInterface
      */
