@@ -12,6 +12,15 @@ return function ($client) {
         protected $timeformats = array('ns', 'µs', 'ms');
         protected $lastResult;
         
+        /** @var \Symfony\Component\VarDumper\Cloner\VarCloner */
+        protected $cloner;
+        
+        /** @var \Symfony\Component\VarDumper\Dumper\CliDumper */
+        protected $dumper;
+        
+        /** @var bool */
+        protected $xdebug;
+        
         function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
             parent::__construct($client, array(
                 'name' => 'eval',
@@ -30,6 +39,13 @@ return function ($client) {
                 ),
                 'guarded' => true
             ));
+            
+            $this->cloner = new \Symfony\Component\VarDumper\Cloner\VarCloner();
+            $this->dumper = new \Symfony\Component\VarDumper\Dumper\CliDumper();
+            $this->xdebug = \extension_loaded('xdebug');
+            
+            $this->cloner->setMinDepth(0);
+            $this->dumper->setColors(false);
         }
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
@@ -150,19 +166,27 @@ return function ($client) {
         }
         
         function invokeDump($result) {
-            \ob_start('mb_output_handler');
-            
-            $old = \ini_get('xdebug.var_display_max_depth');
-            \ini_set('xdebug.var_display_max_depth', 1);
-            
-            \var_dump($result);
-            \ini_set('xdebug.var_display_max_depth', $old);
-            $result = \ob_get_clean();
-            
-            if(\extension_loaded('xdebug')) {
+            if($this->xdebug) {
+                \ob_start('mb_output_handler');
+                
+                $old = \ini_get('xdebug.var_display_max_depth');
+                \ini_set('xdebug.var_display_max_depth', 1);
+                
+                \var_dump($result);
+                \ini_set('xdebug.var_display_max_depth', $old);
+                $result = \ob_get_clean();
+                
                 $result = \explode("\n", \str_replace("\r", "", $result));
                 \array_shift($result);
                 $result = \implode(\PHP_EOL, $result);
+            } else {
+                $output = \fopen('php://memory', 'r+b');
+                
+                $data = $this->cloner->cloneVar($result);
+                $this->dumper->dump($data->withMaxDepth(1), $output);
+                
+                $result = \stream_get_contents($output, -1, 0);
+                \fclose($output);
             }
             
             $email = $this->client->user->email;
