@@ -240,7 +240,14 @@ abstract class Command implements \Serializable {
         
         unset($vars['client']);
         
-        foreach($vars['throttles'] as $id => $val) {
+        foreach($vars['args'] as $key => $arg) {
+            $vars['args'][$key]['validate'] = null;
+            $vars['args'][$key]['parse'] = null;
+            $vars['args'][$key]['emptyChecker'] = null;
+        }
+        
+        $vars['throttles'] = new \CharlotteDunois\Yasmin\Utils\Collection();
+        foreach($this->throttles as $id => $val) {
             $val['timeout'] = null;
             $vars['throttles']->set($id, $val);
         }
