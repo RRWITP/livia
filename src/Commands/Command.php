@@ -240,6 +240,11 @@ abstract class Command implements \Serializable {
         
         unset($vars['client']);
         
+        foreach($vars['throttles'] as $id => $val) {
+            $val['timeout'] = null;
+            $vars['throttles']->set($id, $val);
+        }
+        
         return \serialize($vars);
     }
     
