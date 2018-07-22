@@ -12,17 +12,17 @@ namespace CharlotteDunois\Livia;
 /**
  * Handles registration and searching of commands and groups.
  *
- * @property \CharlotteDunois\Livia\LiviaClient        $client        The client which initiated the instance.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands      Registered commands, mapped by their name.
- * @property string|null                               $commandsPath  Fully resolved path to the bot's commands directory.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $groups        Registered command groups, mapped by their name.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $types         Registered argument types, mapped by their name.
+ * @property \CharlotteDunois\Livia\LiviaClient        $client               The client which initiated the instance.
+ * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands             Registered commands, mapped by their name.
+ * @property string[]                                  $commandsDirectories  List of fully resolved path to the bot's commands directories.
+ * @property \CharlotteDunois\Yasmin\Utils\Collection  $groups               Registered command groups, mapped by their name.
+ * @property \CharlotteDunois\Yasmin\Utils\Collection  $types                Registered argument types, mapped by their name.
  */
 class CommandRegistry implements \Serializable {
     protected $client;
+    protected $basepath;
     
     protected $commands;
-    protected $commandsPath;
     protected $commandsDirectories = array();
     protected $groups;
     protected $types;
@@ -32,6 +32,7 @@ class CommandRegistry implements \Serializable {
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
         $this->client = $client;
+        $this->basepath = realpath(__DIR__.'/Commands/');
         
         $this->commands = new \CharlotteDunois\Yasmin\Utils\Collection();
         $this->groups = new \CharlotteDunois\Yasmin\Utils\Collection();
@@ -270,7 +271,7 @@ class CommandRegistry implements \Serializable {
             throw new \RuntimeException('Invalid path specified');
         }
         
-        $this->commandsPath = $path;
+        $this->addCommandsDirectory($path);
         $files = \CharlotteDunois\Livia\Utils\FileHelpers::recursiveFileSearch($path, '*.php');
         
         foreach($files as $file) {
@@ -517,7 +518,7 @@ class CommandRegistry implements \Serializable {
      * @throws \InvalidArgumentException
      */
     function resolveCommandPath(string $groupID, string $command) {
-        $paths = array($this->commandsPath.'/'.\mb_strtolower($groupID));
+        $paths = array();
         
         foreach($this->commandsDirectories as $dir) {
             $paths[] = $dir.'/'.\mb_strtolower($groupID);
@@ -548,7 +549,7 @@ class CommandRegistry implements \Serializable {
             throw new \InvalidArgumentException('Invalid path specified');
         }
         
-        if(!\in_array($path, $this->commandsDirectories, true)) {
+        if($path !== $this->basepath && !\in_array($path, $this->commandsDirectories, true)) {
             $this->commandsDirectories[] = $path;
         }
         

@@ -107,6 +107,7 @@ return function ($client) {
                                 \PHP_EOL.$code;
                 
                 $result = (function () use ($evalcode, $message, &$doCallback) {
+                    $client = $this->client;
                     return eval($evalcode);
                 })();
                 

@@ -30,6 +30,7 @@ The following commands are coming with Livia:
   * All PHP errors get thrown.
   * Defines randomized eval namespace for eval execution.
   * It has an anonymous function called `$doCallback`, which takes whatever value you give, inspects it and sends it as reply to Discord.
+  * The client is exposed through `$this->client` and `$client`.
   * You have access to the specific `CommandMessage` instance through `$message`.
   * The last eval result is accessible through `$this->lastResult`.
 * help (displays a help message in DM)
