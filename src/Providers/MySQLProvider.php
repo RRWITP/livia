@@ -286,13 +286,7 @@ class MySQLProvider extends SettingProvider {
      * @see https://github.com/friends-of-reactphp/mysql/blob/master/src/QueryResult.php
      */
     function runQuery(string $sql, array $parameters = array()) {
-        if(!empty($parameters)) {
-            $query = new \React\MySQL\Query($sql);
-            $query->bindParamsFromArray($parameters);
-            $sql = $query->getSql();
-        }
-        
-        return $this->db->query($sql);
+        return $this->db->query($sql, $parameters);
     }
     
     /**
