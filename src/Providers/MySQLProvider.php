@@ -125,7 +125,7 @@ class MySQLProvider extends SettingProvider {
                 $this->client->on($event, $listener);
             }
             
-            $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
+            $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->then(function () {
                 return $this->runQuery('SELECT * FROM `settings`')->then(function ($result) {
                     foreach($result->resultRows as $row) {
                         $this->loadRow($row);
