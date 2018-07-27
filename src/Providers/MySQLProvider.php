@@ -121,36 +121,25 @@ class MySQLProvider extends SettingProvider {
         $this->client = $client;
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
-            (new \React\Promise\Promise(function (callable $resolve, $reject) {
-                $this->db->connect(function ($reason) use ($resolve, $reject) {
-                    if($reason === null) {
-                        $this->client->emit('debug', 'Connected to MySQL');
-                        $resolve();
-                    } else {
-                        $reject($reason);
+            foreach($this->listeners as $event => $listener) {
+                $this->client->on($event, $listener);
+            }
+            
+            $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
+                return $this->runQuery('SELECT * FROM `settings`')->then(function ($result) {
+                    foreach($result->resultRows as $row) {
+                        $this->loadRow($row);
                     }
-                });
-            }))->then(function () use ($resolve, $reject) {
-                foreach($this->listeners as $event => $listener) {
-                    $this->client->on($event, $listener);
-                }
-                
-                $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->done(function () {
-                    return $this->runQuery('SELECT * FROM `settings`')->then(function ($result) {
-                        foreach($result->resultRows as $row) {
-                            $this->loadRow($row);
-                        }
-                        
-                        if($this->settings->has('global')) {
-                            return null;
-                        }
-                        
-                        return $this->create('global')->then(function () {
-                            return null;
-                        });
+                    
+                    if($this->settings->has('global')) {
+                        return null;
+                    }
+                    
+                    return $this->create('global')->then(function () {
+                        return null;
                     });
-                })->done($resolve, $reject);
-            }, $reject);
+                });
+            })->done($resolve, $reject);
         }));
     }
     
