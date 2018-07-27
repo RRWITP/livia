@@ -43,7 +43,7 @@ Included in Livia is a provider for MySQL/MariaDB, which utilizes [`react/mysql`
 
 Usage:
 ```php
-$factory = new \React\MySQL\Factory();
+$factory = new \React\MySQL\Factory($your_livia_client->getLoop());
 $factory->createConnection('user:password@localhost/database')->then(function (\React\MySQL\ConnectionInterface $db) use ($your_livia_client) {
     $provider = new \CharlotteDunois\Livia\Providers\MySQLProvider($db);
     $your_livia_client->setProvider($provider);
