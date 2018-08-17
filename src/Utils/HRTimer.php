@@ -24,7 +24,7 @@ class HRTimer {
      */
     function __construct() {
         $this->hrtime = \extension_loaded('hrtime');
-        $this->nativeHrtime = \function_exists('php_hrtime_current');
+        $this->nativeHrtime = \function_exists('hrtime');
         
         if($this->hrtime && !$this->nativeHrtime) {
             $this->timer = new \HRTime\StopWatch();
@@ -45,7 +45,7 @@ class HRTimer {
      */
     function start(): void {
         if($this->nativeHrtime) {
-            $this->timer = \php_hrtime_current(true);
+            $this->timer = \hrtime(true);
         } elseif($this->hrtime) {
             $this->timer->start();
         } else {
@@ -63,7 +63,7 @@ class HRTimer {
         }
         
         if($this->nativeHrtime) {
-            $elapsed = (int) (\php_hrtime_current(true) - $this->timer);
+            $elapsed = (int) (\hrtime(true) - $this->timer);
         } elseif($this->hrtime) {
             $this->timer->stop();
             $elapsed = (int) $this->timer->getElapsedTime(\HRTime\Unit::NANOSECOND);
