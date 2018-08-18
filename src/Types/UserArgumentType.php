@@ -23,6 +23,7 @@ class UserArgumentType extends ArgumentType {
     
     /**
      * {@inheritdoc}
+     * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);
@@ -72,6 +73,7 @@ class UserArgumentType extends ArgumentType {
     
     /**
      * {@inheritdoc}
+     * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);

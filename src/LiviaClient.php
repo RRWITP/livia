@@ -255,7 +255,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     
     /**
      * Validates the passed client options.
-     * @param array
+     * @param array  $options
      * @return void
      * @throws \InvalidArgumentException
      */

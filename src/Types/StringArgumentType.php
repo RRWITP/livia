@@ -23,6 +23,7 @@ class StringArgumentType extends ArgumentType {
     
     /**
      * {@inheritdoc}
+     * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         if(\mb_strlen($value) === 0) {
@@ -42,6 +43,7 @@ class StringArgumentType extends ArgumentType {
     
     /**
      * {@inheritdoc}
+     * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         return $value;

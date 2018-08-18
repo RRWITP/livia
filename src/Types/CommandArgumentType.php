@@ -23,6 +23,7 @@ class CommandArgumentType extends ArgumentType {
     
     /**
      * {@inheritdoc}
+     * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $commands = $this->client->registry->findCommands($value);
@@ -39,6 +40,7 @@ class CommandArgumentType extends ArgumentType {
     
     /**
      * {@inheritdoc}
+     * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $commands = $this->client->registry->findCommands($value);
