@@ -44,7 +44,7 @@ return function ($client) {
             $this->dumper = new \Symfony\Component\VarDumper\Dumper\CliDumper();
             $this->xdebug = \extension_loaded('xdebug');
             
-            $this->cloner->setMinDepth(0);
+            $this->cloner->setMinDepth(1);
             $this->dumper->setColors(false);
         }
         
