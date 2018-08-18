@@ -48,6 +48,11 @@ return function ($client) {
             });
         }
         
+        /**
+         * @param \CharlotteDunois\Livia\CommandMessage  $message
+         * @param \ArrayObject                           $args
+         * @return string
+         */
         function renderHelpMessage(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args) {
             $groups = $this->client->registry->groups;
             $commands = (!empty($args['command']) ? $this->client->registry->findCommands($args['command'], false, $message->message) : $this->client->registry->commands->all());

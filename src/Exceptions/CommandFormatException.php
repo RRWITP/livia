@@ -11,14 +11,13 @@ namespace CharlotteDunois\Livia\Exceptions;
 
 /**
  * Has a descriptive message for a command not having proper format.
- *
- * @inheritDoc
  */
 class CommandFormatException extends FriendlyException {
     /**
+     * @param \CharlotteDunois\Livia\CommandMessage  $message
      * @internal
      */
-    function __construct($message) {
+    function __construct(\CharlotteDunois\Livia\CommandMessage $message) {
         $prefix = $message->client->getGuildPrefix($message->message->guild);
         
         parent::__construct('Invalid command usage. The `'.$message->command->name.'` command\'s accepted format is: '.

@@ -19,12 +19,34 @@ namespace CharlotteDunois\Livia;
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $types                Registered argument types, mapped by their name.
  */
 class CommandRegistry implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
+    
+    /**
+     * @var string
+     */
     protected $basepath;
     
+    /**
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $commands;
+    
+    /**
+     * @var string[]
+     */
     protected $commandsDirectories = array();
+    
+    /**
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $groups;
+    
+    /**
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $types;
     
     /**
@@ -32,7 +54,7 @@ class CommandRegistry implements \Serializable {
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
         $this->client = $client;
-        $this->basepath = realpath(__DIR__.'/Commands/');
+        $this->basepath = \realpath(__DIR__.'/Commands/');
         
         $this->commands = new \CharlotteDunois\Yasmin\Utils\Collection();
         $this->groups = new \CharlotteDunois\Yasmin\Utils\Collection();
@@ -40,6 +62,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -52,6 +75,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -63,6 +87,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {
@@ -439,24 +464,30 @@ class CommandRegistry implements \Serializable {
     
     /**
      * Registers the default argument types, groups, and commands.
+     * @return $this
      * @throws \RuntimeException
      */
     function registerDefaults() {
         $this->registerDefaultTypes();
         $this->registerDefaultGroups();
         $this->registerDefaultCommands();
+        
+        return $this;
     }
     
     /**
      * Registers the default commands.
+     * @return $this
      * @throws \RuntimeException
      */
     function registerDefaultCommands() {
         $this->registerCommandsIn(__DIR__.'/Commands', true);
+        return $this;
     }
     
     /**
      * Registers the default command groups.
+     * @return $this
      * @throws \RuntimeException
      */
     function registerDefaultGroups() {
@@ -464,20 +495,25 @@ class CommandRegistry implements \Serializable {
             (new \CharlotteDunois\Livia\Commands\CommandGroup($this->client, 'commands', 'Commands', true)),
             (new \CharlotteDunois\Livia\Commands\CommandGroup($this->client, 'utils', 'Utilities', true))
         );
+        
+        return $this;
     }
     
     /**
      * Registers the default argument types.
+     * @return $this
      * @throws \RuntimeException
      */
     function registerDefaultTypes() {
         $this->registerTypesIn(__DIR__.'/Types', 'ArgumentType.php');
+        return $this;
     }
     
     /**
      * Reregisters a command. Emits a commandReregister event.
      * @param \CharlotteDunois\Livia\Commands\Command|string  $command     The full qualified command name (groupID:name) or an initiated instance of it.
      * @param \CharlotteDunois\Livia\Commands\Command         $oldCommand
+     * @return $this
      * @throws \RuntimeException
      */
     function reregisterCommand($command, \CharlotteDunois\Livia\Commands\Command $oldCommand) {
@@ -494,11 +530,14 @@ class CommandRegistry implements \Serializable {
         
         $this->client->emit('debug', 'Reregistered command '.$command->groupID.':'.$command->name);
         $this->client->emit('commandReregister', $command, $oldCommand, $this);
+        
+        return $this;
     }
     
     /**
      * Unregisters a command. Emits a commandUnregister event.
      * @param \CharlotteDunois\Livia\Commands\Command  $command
+     * @return $this
      * @throws \RuntimeException
      */
     function unregisterCommand(\CharlotteDunois\Livia\Commands\Command $command) {
@@ -508,6 +547,8 @@ class CommandRegistry implements \Serializable {
         
         $this->client->emit('debug', 'Unregistered command '.$command->groupID.':'.$command->name);
         $this->client->emit('commandUnregister', $command, $this);
+        
+        return $this;
     }
     
     /**
@@ -577,6 +618,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
+     * @return \Closure
      * @throws \RuntimeException
      */
     protected function handleCommandSpacing(string $command) {

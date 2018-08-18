@@ -10,7 +10,7 @@
 namespace CharlotteDunois\Livia\Types;
 
 /**
- * @inheritDoc
+ * {@inheritdoc}
  * @internal
  */
 class FloatArgumentType extends ArgumentType {
@@ -22,7 +22,7 @@ class FloatArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $value = \filter_var($value, \FILTER_VALIDATE_FLOAT);
@@ -42,7 +42,7 @@ class FloatArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         return ((float) $value);

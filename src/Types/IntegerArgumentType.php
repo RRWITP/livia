@@ -10,7 +10,7 @@
 namespace CharlotteDunois\Livia\Types;
 
 /**
- * @inheritDoc
+ * {@inheritdoc}
  * @internal
  */
 class IntegerArgumentType extends ArgumentType {
@@ -22,7 +22,7 @@ class IntegerArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $value = \filter_var($value, \FILTER_VALIDATE_INT);
@@ -42,7 +42,7 @@ class IntegerArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         return ((int) $value);

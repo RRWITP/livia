@@ -166,6 +166,11 @@ return function ($client) {
             });
         }
         
+        /**
+         * @param mixed  $result
+         * @return string
+         * @throws \RuntimeException
+         */
         function invokeDump($result) {
             if($this->xdebug) {
                 \ob_start('mb_output_handler');
@@ -182,6 +187,9 @@ return function ($client) {
                 $result = \implode(\PHP_EOL, $result);
             } else {
                 $output = \fopen('php://memory', 'r+b');
+                if(!$output) {
+                    throw new \RuntimeException('Unable to open memory file handle to dump variables');
+                }
                 
                 $data = $this->cloner->cloneVar($result);
                 $this->dumper->dump($data->withMaxDepth(1), $output);
@@ -200,6 +208,10 @@ return function ($client) {
             return $result;
         }
         
+        /**
+         * @return bool
+         * @throws \ErrorException
+         */
         function errorCallback($errno, $errstr, $errfile, $errline) {
             // Fixing bug
             if(\mb_stripos($errstr, 'Cannot modify header information') !== false) {
@@ -209,6 +221,9 @@ return function ($client) {
             throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
         }
         
+        /**
+         * @return mixed
+         */
         function timer(?\CharlotteDunois\Livia\Utils\HRTimer &$hrtime, bool $callback = false) {
             if(!$hrtime) {
                 $hrtime = new \CharlotteDunois\Livia\Utils\HRTimer();

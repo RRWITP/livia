@@ -27,6 +27,9 @@ namespace CharlotteDunois\Livia\Arguments;
  * @property int                                              $wait          How long to wait for input (in seconds).
  */
 class Argument implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
     
     protected $key;
@@ -111,6 +114,7 @@ class Argument implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -123,6 +127,7 @@ class Argument implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -138,6 +143,7 @@ class Argument implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -149,6 +155,7 @@ class Argument implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {
@@ -351,6 +358,9 @@ class Argument implements \Serializable {
         }));
     }
     
+    /**
+     * @return \React\Promise\ExtendedPromiseInterface
+     */
     protected function infiniteObtain(\CharlotteDunois\Livia\CommandMessage $message, $value, array &$values, $promptLimit, array &$prompts, array &$answers, $valid = null) {
         if($value === null) {
             $reply = $message->reply($this->prompt.\PHP_EOL.

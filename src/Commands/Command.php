@@ -37,6 +37,9 @@ namespace CharlotteDunois\Livia\Commands;
  * @property bool                                               $guarded            Whether the command is protected from being disabled.
  */
 abstract class Command implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
     
     protected $name;
@@ -215,6 +218,7 @@ abstract class Command implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -233,6 +237,7 @@ abstract class Command implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -256,6 +261,7 @@ abstract class Command implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {
@@ -332,6 +338,8 @@ abstract class Command implements \Serializable {
     
     /**
      * Reloads the command.
+     * @return void
+     * @throws \RuntimeException
      */
     function reload() {
         $this->client->registry->reregisterCommand($this->groupID.':'.$this->name, $this);
@@ -339,6 +347,8 @@ abstract class Command implements \Serializable {
     
     /**
      * Unloads the command.
+     * @return void
+     * @throws \RuntimeException
      */
     function unload() {
         $this->client->registry->unregisterCommand($this);
@@ -371,6 +381,7 @@ abstract class Command implements \Serializable {
     /**
      * Increments the usage of the throttle object for a user, if necessary (owners are excluded).
      * @param string  $userID
+     * @return void
      * @internal
      */
     final function updateThrottle(string $userID) {

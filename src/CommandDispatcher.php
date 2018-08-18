@@ -16,6 +16,9 @@ namespace CharlotteDunois\Livia;
  * @property array                                     $inhibitors  Functions that can block commands from running.
  */
 class CommandDispatcher implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
     
     protected $inhibitors = array();
@@ -38,6 +41,7 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -50,6 +54,7 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -61,6 +66,7 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {
@@ -277,6 +283,7 @@ class CommandDispatcher implements \Serializable {
      * @param \CharlotteDunois\Yasmin\Models\Message|null    $oldMessage  Triggering message's old version.
      * @param \CharlotteDunois\Livia\CommandMessage|null     $cmdMsg      Command message to cache.
      * @param \CharlotteDunois\Yasmin\Models\Message[]|null  $responses   Responses to the message.
+     * @return void
      */
     protected function cacheCommandMessage($message, $oldMessage, $cmdMsg, $responses) {
         $duration = (int) $this->client->getOption('commandEditableDuration', 0);

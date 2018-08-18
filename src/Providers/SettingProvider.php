@@ -18,14 +18,16 @@ abstract class SettingProvider {
     /**
      * Removes all settings in a guild.
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @return mixed
      * @throws \InvalidArgumentException
      */
     abstract function clear($guild);
     
     /**
      * Destroys the provider, removing any event listeners.
+     * @return void
      */
-    abstract function destroy();
+    abstract function destroy(): void;
     
     /**
      * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.
@@ -50,6 +52,7 @@ abstract class SettingProvider {
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
      * @param string                                       $key
      * @param mixed                                        $value
+     * @return mixed
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */
@@ -59,6 +62,7 @@ abstract class SettingProvider {
      * Removes a setting from a guild.
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
      * @param string                                       $key
+     * @return mixed
      * @throws \BadMethodCallException
      * @throws \InvalidArgumentException
      */

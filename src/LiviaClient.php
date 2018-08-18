@@ -19,8 +19,19 @@ namespace CharlotteDunois\Livia;
  * @property \CharlotteDunois\Yasmin\Models\User[]                    $owners         Owners of the bot, set by the client option owners. If you simply need to check if a user is an owner of the bot, please use LiviaClient::isOwner instead. ({@see \CharlotteDunois\Livia\LiviaClient:isOwner})
  */
 class LiviaClient extends \CharlotteDunois\Yasmin\Client {
+    /**
+     * @var \CharlotteDunois\Livia\CommandDispatcher
+     */
     protected $dispatcher;
+    
+    /**
+     * @var \CharlotteDunois\Livia\CommandRegistry
+     */
     protected $registry;
+    
+    /**
+     * @var \CharlotteDunois\Livia\Providers\SettingProvider|null
+     */
     protected $provider;
     
     /**
@@ -95,6 +106,8 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
+     * @return mixed
+     * @throws \RuntimeException
      * @internal
      */
     function __get($name) {
@@ -121,6 +134,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -188,11 +202,12 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
             
             $this->once('ready', function () use ($resolve, $reject) {
                 $this->emit('debug', 'Initializing provider...');
-                $this->provider->init($this)->done($resolve, $reject);
+                $this->provider->init($this)->done(function () use ($resolve) {
+                    $this->emit('debug', 'Provider finished initialization.');
+                    $resolve();
+                }, $reject);
             });
-        }))->then(function () {
-            $this->emit('debug', 'Provider finished initialization.');
-        });
+        }));
     }
     
     /**
@@ -227,6 +242,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
+     * @return \React\Promise\ExtendedPromiseInterface
      * @internal
      */
     function destroy(bool $destroyUtils = true) {
@@ -240,6 +256,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     /**
      * Validates the passed client options.
      * @param array
+     * @return void
      * @throws \InvalidArgumentException
      */
     protected function validateClientOptions(array $options) {

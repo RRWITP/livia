@@ -20,15 +20,26 @@ namespace CharlotteDunois\Livia;
  * @property string[]|null                                 $patternMatches  Pattern matches (if from a pattern trigger).
  */
 class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
+    
+    /**
+     * @var \CharlotteDunois\Yasmin\Models\Message
+     */
     protected $message;
+    
+    /**
+     * @var \CharlotteDunois\Livia\Commands\Command|null
+     */
     protected $command;
     
     protected $argString;
     protected $patternMatches;
     
-    protected $responses;
-    protected $responsePositions;
+    protected $responses = array();
+    protected $responsePositions = array();
     
     /**
      * @internal
@@ -43,6 +54,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -63,6 +75,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -205,6 +218,8 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     if(!$args) {
                         $args = $this->parseCommandArgs();
                     }
+                    
+                    $args = new \ArrayObject(((array) $args), \ArrayObject::ARRAY_AS_PROPS);
                 });
             }
             
@@ -216,11 +231,6 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             $typingCount = $this->message->channel->typingCount();
             
             \React\Promise\all($promises)->then(function () use (&$args) {
-                $args = new \ArrayObject((array) $args, \ArrayObject::ARRAY_AS_PROPS);
-            }, function ($error) use (&$args) {
-                $args = new \ArrayObject((array) $args, \ArrayObject::ARRAY_AS_PROPS);
-                throw $error;
-            })->then(function () use (&$args) {
                 $promise = $this->command->run($this, $args, ($this->patternMatches !== null));
                 
                 if($promise instanceof \GuzzleHttp\Promise\PromiseInterface) {
@@ -383,7 +393,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     }
                 }
             } else {
-                $promises[] = $response->edit($prepend.$content, $options);
+                $promises[] = $response->edit($prepend.$content[0], $options);
                 for($i = 1; $i < $clength; $i++) {
                     $promises[] = $this->message->channel->send($prepend.$content[$i], $options);
                 }
@@ -467,15 +477,13 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     /**
      * Finalizes the command message by setting the responses and deleting any remaining prior ones.
      * @param \CharlotteDunois\Yasmin\Models\Message|\CharlotteDunois\Yasmin\Models\Message[]|null  $responses
+     * @return void
      * @internal
      */
     function finalize($responses) {
         if(!empty($this->responses)) {
             $this->deleteRemainingResponses();
         }
-        
-        $this->responses = array();
-        $this->responsePositions = array();
         
         if(\is_array($responses)) {
             foreach($responses as $response) {
@@ -498,6 +506,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     
     /**
      * Deletes any prior responses that haven't been updated.
+     * @return void
      * @internal
      */
     function deleteRemainingResponses() {
@@ -516,6 +525,9 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         }
     }
     
+    /**
+     * @return string|int
+     */
     protected function getChannelIDOrDM(\CharlotteDunois\Yasmin\Interfaces\TextChannelInterface $channel) {
         if($channel->type !== 'dm') {
             return $channel->id;
@@ -574,6 +586,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     }
     
     /**
+     * @return void
      * @internal
      */
     function setResponses($responses, $responsePositions) {

@@ -19,6 +19,9 @@ namespace CharlotteDunois\Livia\Commands;
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands       The commands that the group contains.
  */
 class CommandGroup implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
     
     protected $id;
@@ -53,6 +56,7 @@ class CommandGroup implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -65,6 +69,7 @@ class CommandGroup implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -76,6 +81,7 @@ class CommandGroup implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {
@@ -136,10 +142,23 @@ class CommandGroup implements \Serializable {
     
     /**
      * Reloads all of the group's commands.
+     * @return void
+     * @throws \RuntimeException
      */
     function reload() {
         foreach($this->commands as $command) {
             $command->reload();
+        }
+    }
+    
+    /**
+     * Unloads all of the group's commands.
+     * @return void
+     * @throws \RuntimeException
+     */
+    function unload() {
+        foreach($this->commands as $command) {
+            $command->unload();
         }
     }
 }

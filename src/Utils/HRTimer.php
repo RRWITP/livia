@@ -13,7 +13,14 @@ namespace CharlotteDunois\Livia\Utils;
  * Provides a simple interface to a timer.
  */
 class HRTimer {
+    /**
+     * @var bool
+     */
     protected $hrtime;
+    
+    /**
+     * @var bool
+     */
     protected $nativeHrtime;
     
     protected $timer;

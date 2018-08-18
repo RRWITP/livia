@@ -10,7 +10,7 @@
 namespace CharlotteDunois\Livia\Types;
 
 /**
- * @inheritDoc
+ * {@inheritdoc}
  * @internal
  */
 class StringArgumentType extends ArgumentType {
@@ -22,7 +22,7 @@ class StringArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         if(\mb_strlen($value) === 0) {
@@ -41,7 +41,7 @@ class StringArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         return $value;

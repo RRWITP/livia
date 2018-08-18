@@ -10,7 +10,7 @@
 namespace CharlotteDunois\Livia\Types;
 
 /**
- * @inheritDoc
+ * {@inheritdoc}
  * @internal
  */
 class MemberArgumentType extends ArgumentType {
@@ -22,7 +22,7 @@ class MemberArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         if($message->message->guild === null) {
@@ -75,7 +75,7 @@ class MemberArgumentType extends ArgumentType {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);

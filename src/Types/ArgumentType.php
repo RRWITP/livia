@@ -16,7 +16,11 @@ namespace CharlotteDunois\Livia\Types;
  * @property string                                    $id        The argument type ID.
  */
 abstract class ArgumentType implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
+    
     protected $id;
     
     /**
@@ -28,6 +32,7 @@ abstract class ArgumentType implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -40,6 +45,7 @@ abstract class ArgumentType implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -51,6 +57,7 @@ abstract class ArgumentType implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {

@@ -71,7 +71,7 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      * @return \React\Promise\ExtendedPromiseInterface
      */
     function clear($guild) {
@@ -104,9 +104,10 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     * @return void
      */
-    function destroy() {
+    function destroy(): void {
         foreach($this->listeners as $event => $listener) {
             $this->client->removeListener($event, $listener);
         }
@@ -115,7 +116,8 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     * @return \React\Promise\ExtendedPromiseInterface
      */
     function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface {
         $this->client = $client;
@@ -144,7 +146,8 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     * @return mixed
      */
     function get($guild, string $key, $defaultValue = null) {
         $guild = $this->getGuildID($guild);
@@ -165,7 +168,7 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      * @return \React\Promise\ExtendedPromiseInterface
      */
     function set($guild, string $key, $value) {
@@ -187,7 +190,7 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      * @return \React\Promise\ExtendedPromiseInterface
      */
     function remove($guild, string $key) {
@@ -207,12 +210,13 @@ class MySQLProvider extends SettingProvider {
         $settings = $this->settings->get($guild);
         unset($settings[$key]);
         
-        $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
+        return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
     }
     
     /**
      * Loads all settings for a guild.
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @return void
      * @internal
      */
     function setupGuild($guild) {
@@ -242,6 +246,7 @@ class MySQLProvider extends SettingProvider {
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
      * @param \CharlotteDunois\Livia\Commands\Command      $command
      * @param array|\ArrayObject                           $settings
+     * @return void
      * @internal
      */
     function setupGuildCommand($guild, \CharlotteDunois\Livia\Commands\Command $command, &$settings) {
@@ -256,7 +261,8 @@ class MySQLProvider extends SettingProvider {
      * Sets up a group's status in a guild from the guild's settings.
      * @param string|\CharlotteDunois\Yasmin\Models\Guild   $guild
      * @param \CharlotteDunois\Livia\Commands\CommandGroup  $group
-     * @param array|\ArrayObject                           $settings
+     * @param array|\ArrayObject                            $settings
+     * @return void
      * @internal
      */
     function setupGuildGroup($guild, \CharlotteDunois\Livia\Commands\CommandGroup $group, &$settings) {
@@ -281,6 +287,7 @@ class MySQLProvider extends SettingProvider {
     /**
      * Processes a database row.
      * @param array  $row
+     * @return void
      */
     protected function loadRow(array $row) {
         $settings = \json_decode($row['settings'], true);

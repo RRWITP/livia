@@ -11,8 +11,6 @@ namespace CharlotteDunois\Livia\Exceptions;
 
 /**
  * Has a message that can be considered user-friendly.
- *
- * @inheritDoc
  */
 class FriendlyException extends \Exception {
     /**

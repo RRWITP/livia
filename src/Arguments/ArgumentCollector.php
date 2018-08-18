@@ -17,8 +17,10 @@ namespace CharlotteDunois\Livia\Arguments;
  * @property int|double                                   $promptLimit  Maximum number of times to prompt for a single argument.
  */
 class ArgumentCollector implements \Serializable {
+    /**
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
-    protected $message;
     
     protected $args = array();
     protected $promptLimit;
@@ -59,6 +61,7 @@ class ArgumentCollector implements \Serializable {
     }
     
     /**
+     * @return mixed
      * @throws \RuntimeException
      * @internal
      */
@@ -71,6 +74,7 @@ class ArgumentCollector implements \Serializable {
     }
     
     /**
+     * @return string
      * @internal
      */
     function serialize() {
@@ -82,6 +86,7 @@ class ArgumentCollector implements \Serializable {
     }
     
     /**
+     * @return void
      * @internal
      */
     function unserialize($vars) {
