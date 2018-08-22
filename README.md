@@ -126,6 +126,9 @@ $client = new \CharlotteDunois\Livia\LiviaClient(array(
 // Registers default commands, command groups and argument types
 $client->registry->registerDefaults();
 
+// Register the command group for our example command
+$client->registry->registerGroup(array('id' => 'moderation', 'name' => 'Moderation'));
+
 // Register our commands (this is an example path)
 $client->registry->registerCommandsIn(__DIR__.'/commands/');
 
