@@ -139,7 +139,7 @@ $client->on('ready', function () use ($client) {
            $client->user->createdAt->format('d.m.Y H:i:s').PHP_EOL;
 });
 
-$client->login('YOUR_TOKEN');
+$client->login('YOUR_TOKEN')->done();
 $loop->run();
 ```
 
