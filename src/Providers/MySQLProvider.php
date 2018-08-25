@@ -105,14 +105,14 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * {@inheritdoc}
-     * @return void
+     * @return \React\Promise\ExtendedPromiseInterface
      */
-    function destroy(): void {
+    function destroy() {
         foreach($this->listeners as $event => $listener) {
             $this->client->removeListener($event, $listener);
         }
         
-        $this->db->close();
+        return $this->db->quit();
     }
     
     /**
