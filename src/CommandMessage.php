@@ -221,6 +221,8 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     
                     $args = new \ArrayObject(((array) $args), \ArrayObject::ARRAY_AS_PROPS);
                 });
+            } else {
+                $args = new \ArrayObject(((array) $args), \ArrayObject::ARRAY_AS_PROPS);
             }
             
             // Run the command
