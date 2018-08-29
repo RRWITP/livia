@@ -231,6 +231,10 @@ class CommandDispatcher implements \Serializable {
             return false;
         }
         
+        if($message->guild !== null && !$message->guild->available) {
+            return false;
+        }
+        
         // Ignore messages from users that the bot is already waiting for input from
         if(\in_array($message->author->id.$message->channel->id, $this->awaiting)) {
             return false;
