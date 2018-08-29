@@ -128,7 +128,7 @@ class CommandDispatcher implements \Serializable {
     function handleMessage(\CharlotteDunois\Yasmin\Models\Message $message, \CharlotteDunois\Yasmin\Models\Message $oldMessage = null) {
         return (new \React\Promise\Promise(function (callable $resolve) use ($message, $oldMessage) {
             try {
-                if($this->shouldHandleMessage($message, $oldMessage) === false) {
+                if(!$this->shouldHandleMessage($message, $oldMessage)) {
                     return $resolve();
                 }
                 
