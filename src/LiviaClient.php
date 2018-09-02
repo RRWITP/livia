@@ -107,7 +107,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     
     /**
      * @param string  $name
-     * @return bool
+     * @return mixed
      * @throws \Exception
      * @internal
      */

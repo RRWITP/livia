@@ -51,8 +51,7 @@ abstract class ArgumentType implements \Serializable {
     
     /**
      * @param string  $name
-     * @param string  $name
-     * @return bool
+     * @return mixed
      * @throws \Exception
      * @internal
      */
