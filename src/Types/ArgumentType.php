@@ -32,8 +32,28 @@ abstract class ArgumentType implements \Serializable {
     }
     
     /**
-     * @return mixed
-     * @throws \RuntimeException
+     * @param string  $name
+     * @return bool
+     * @throws \Exception
+     * @internal
+     */
+    function __isset($name) {
+        try {
+            return $this->$name !== null;
+        } catch (\RuntimeException $e) {
+            if($e->getTrace()[0]['function'] === '__get') {
+                return false;
+            }
+            
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string  $name
+     * @param string  $name
+     * @return bool
+     * @throws \Exception
      * @internal
      */
     function __get($name) {
@@ -41,7 +61,7 @@ abstract class ArgumentType implements \Serializable {
             return $this->$name;
         }
         
-        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Types\ArgumentType::'.$name);
+        throw new \RuntimeException('Unknown property '.\get_class($this).'::$'.$name);
     }
     
     /**

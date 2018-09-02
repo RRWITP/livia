@@ -218,6 +218,25 @@ abstract class Command implements \Serializable {
     }
     
     /**
+     * @param string  $name
+     * @return bool
+     * @throws \Exception
+     * @internal
+     */
+    function __isset($name) {
+        try {
+            return $this->$name !== null;
+        } catch (\RuntimeException $e) {
+            if($e->getTrace()[0]['function'] === '__get') {
+                return false;
+            }
+            
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string  $name
      * @return mixed
      * @throws \RuntimeException
      * @internal
@@ -233,7 +252,7 @@ abstract class Command implements \Serializable {
             break;
         }
         
-        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\Commands\Command::'.$name);
+        throw new \RuntimeException('Unknown property '.\get_class($this).'::$'.$name);
     }
     
     /**

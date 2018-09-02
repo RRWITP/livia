@@ -106,8 +106,9 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
-     * @return mixed
-     * @throws \RuntimeException
+     * @param string  $name
+     * @return bool
+     * @throws \Exception
      * @internal
      */
     function __get($name) {

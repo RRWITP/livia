@@ -41,6 +41,25 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
+     * @param string  $name
+     * @return bool
+     * @throws \Exception
+     * @internal
+     */
+    function __isset($name) {
+        try {
+            return $this->$name !== null;
+        } catch (\RuntimeException $e) {
+            if($e->getTrace()[0]['function'] === '__get') {
+                return false;
+            }
+            
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string  $name
      * @return mixed
      * @throws \RuntimeException
      * @internal
@@ -50,7 +69,7 @@ class CommandDispatcher implements \Serializable {
             return $this->$name;
         }
         
-        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandDispatcher::'.$name);
+        throw new \RuntimeException('Unknown property '.\get_class($this).'::$'.$name);
     }
     
     /**

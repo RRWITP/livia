@@ -54,6 +54,25 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     }
     
     /**
+     * @param string  $name
+     * @return bool
+     * @throws \Exception
+     * @internal
+     */
+    function __isset($name) {
+        try {
+            return $this->$name !== null;
+        } catch (\RuntimeException $e) {
+            if($e->getTrace()[0]['function'] === '__get') {
+                return false;
+            }
+            
+            throw $e;
+        }
+    }
+    
+    /**
+     * @param string  $name
      * @return mixed
      * @throws \RuntimeException
      * @internal
@@ -61,17 +80,9 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     function __get($name) {
         if(\property_exists($this, $name)) {
             return $this->$name;
-        } elseif(\property_exists($this->message, $name)) {
-            return $this->message->$name;
         }
         
-        try {
-            return $this->message->__get($name);
-        } catch (\Exception $e) {
-            /* Continue regardless of error */
-        }
-        
-        throw new \RuntimeException('Unknown property \CharlotteDunois\Livia\CommandMessage::'.$name);
+        return $this->message->$name;
     }
     
     /**
@@ -84,7 +95,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             return $this->message->$name(...$args);
         }
         
-        throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\CommandMessage::'.$name);
+        throw new \RuntimeException('Unknown method '.\get_class($this).'::'.$name);
     }
     
     /**
@@ -124,14 +135,12 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             
             if($this->command->guildOnly && $this->message->guild === null) {
                 $this->client->emit('commandBlocked', $this, 'guildOnly');
-                $this->message->reply('The `'.$this->command->name.'` command must be used in a server channel.')->done($resolve, $reject);
-                return;
+                return $this->message->reply('The `'.$this->command->name.'` command must be used in a server channel.')->done($resolve, $reject);
             }
             
             if($this->command->nsfw && !$this->message->nsfw) {
                 $this->client->emit('commandBlocked', $this, 'nsfw');
-                $this->message->reply('The `'.$this->command->name.'` command must be used in NSFW channels.')->done($resolve, $reject);
-                return;
+                return $this->message->reply('The `'.$this->command->name.'` command must be used in NSFW channels.')->done($resolve, $reject);
             }
             
             $perms = $this->command->hasPermission($this);
@@ -146,8 +155,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     $perms = 'You do not have permission to use the `'.$this->command->name.'` command.';
                 }
                 
-                $this->message->reply($perms)->done($resolve, $reject);
-                return;
+                return $this->message->reply($perms)->done($resolve, $reject);
             }
             
             // Ensure the client user has the required permissions
@@ -177,8 +185,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                         $msg = 'I need the following permissions for the `'.$this->command->name.'` command to work:'.\PHP_EOL.$missing;
                     }
                     
-                    $this->message->reply($msg)->done($resolve, $reject);
-                    return;
+                    return $this->message->reply($msg)->done($resolve, $reject);
                 }
             }
             
@@ -192,8 +199,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     return $resolve();
                 }
                 
-                $this->message->reply('You may not use the `'.$this->command->name.'` command again for another '.$remaining.' seconds.')->done($resolve, $reject);
-                return;
+                return $this->message->reply('You may not use the `'.$this->command->name.'` command again for another '.$remaining.' seconds.')->done($resolve, $reject);
             }
             
             // Figure out the command arguments
