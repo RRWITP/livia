@@ -61,7 +61,7 @@ class Argument implements \Serializable {
      *   'validate' => callable, (Validator function for the argument, optional)
      *   'parse' => callable, (Parser function for the argument, optional)
      *   'emptyChecker' => callable, (Empty checker function for the argument, optional)
-     *   'wait' => int (How long to wait for input (in seconds)
+     *   'wait' => int (how long to wait for input, in seconds)
      * )
      * ```
      *
