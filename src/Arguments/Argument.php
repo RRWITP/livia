@@ -158,7 +158,7 @@ class Argument implements \Serializable {
             }
         }
         
-        throw new \RuntimeException('Unknown method \CharlotteDunois\Livia\Arguments\Argument::'.$name);
+        throw new \RuntimeException('Unknown method '.\get_class($this).'::'.$name);
     }
     
     /**
@@ -193,16 +193,14 @@ class Argument implements \Serializable {
     
     /**
      * Prompts the user and obtains the value for the argument. Resolves with an array of ('value' => mixed, 'cancelled' => string|null, 'prompts' => Message[], 'answers' => Message[]). Cancelled can be one of user, time and promptLimit.
-     * @param \CharlotteDunois\Livia\CommandMessage     $message      Message that triggered the command.
-     * @param string|string[]                           $value        Pre-provided value(s).
-     * @param int|double                                $promptLimit  Maximum number of times to prompt for the argument.
-     * @param \CharlotteDunois\Yasmin\Models\Message[]  $prompts      An array consisting of the prompts.
-     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answers      An array consisting of the answers.
-     * @param bool|string|null                          $valid        Whether the last retrieved value was valid.
+     * @param \CharlotteDunois\Livia\CommandMessage         $message  Message that triggered the command.
+     * @param string|string[]                               $value    Pre-provided value(s).
+     * @param \CharlotteDunois\Livia\Arguments\ArgumentBag  $bag      The argument bag.
+     * @param bool|string|null                              $valid    Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    function obtain(\CharlotteDunois\Livia\CommandMessage $message, $value, $promptLimit = \INF, array $prompts = array(), array $answers = array(), $valid = null) {
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $promptLimit, &$prompts, &$answers, $valid) {
+    function obtain(\CharlotteDunois\Livia\CommandMessage $message, $value, \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, $valid = null) {
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $bag, $valid) {
             $empty = ($this->emptyChecker !== null ? $this->emptyChecker($value, $message, $this) : ($this->type !== null ? $this->type->isEmpty($value, $message, $this) : $value === null));
             if($empty && $this->default !== null) {
                 return $resolve(array(
@@ -215,11 +213,11 @@ class Argument implements \Serializable {
             
             if($this->infinite) {
                 if(!$empty && $value !== null) {
-                    $this->parseInfiniteProvided($message, (\is_array($value) ? $value : array($value)), $promptLimit)->done($resolve, $reject);
+                    $this->parseInfiniteProvided($message, (\is_array($value) ? $value : array($value)), $bag)->done($resolve, $reject);
                     return;
                 }
                 
-                $this->obtainInfinite($message, array(), $promptLimit)->done($resolve, $reject);
+                $this->obtainInfinite($message, array(), $bag)->done($resolve, $reject);
                 return;
             }
             
@@ -230,9 +228,9 @@ class Argument implements \Serializable {
                     $validate = \React\Promise\resolve($validate);
                 }
                 
-                return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$prompts, &$answers) {
+                return $validate->then(function ($valid) use ($message, $value, $bag) {
                     if($valid !== true) {
-                        return $this->obtain($message, $value, $promptLimit, $prompts, $answers, $valid);
+                        return $this->obtain($message, $value, $bag, $valid);
                     }
                     
                     $parse = ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
@@ -240,24 +238,16 @@ class Argument implements \Serializable {
                         $parse = \React\Promise\resolve($parse);
                     }
                     
-                    return $parse->then(function ($value) use (&$prompts, &$answers) {
-                        return array(
-                            'value' => $value,
-                            'cancelled' => null,
-                            'prompts' => $prompts,
-                            'answers' => $answers
-                        );
+                    return $parse->then(function ($value) use ($bag) {
+                        $bag->values[] = $value;
+                        return $bag->done();
                     });
                 })->done($resolve, $reject);
             }
             
-            if(\count($prompts) > $promptLimit) {
-                return $resolve(array(
-                    'value' => null,
-                    'cancelled' => 'promptLimit',
-                    'prompts' => $prompts,
-                    'answers' => $answers
-                ));
+            if(\count($bag->prompts) > $bag->promptLimit) {
+                $bag->cancelled = 'promptLimit';
+                return $bag->done();
             }
             
             if($empty && $value === null) {
@@ -274,9 +264,9 @@ class Argument implements \Serializable {
             }
             
             // Prompt the user for a new value
-            $reply->done(function ($msg) use ($message, $promptLimit, &$prompts, &$answers, $resolve, $reject) {
+            $reply->done(function ($msg) use ($message, $bag, $resolve, $reject) {
                 if($msg !== null) {
-                    $prompts[] = $msg;
+                    $bag->prompts[] = $msg;
                 }
                 
                 // Get the user's response
@@ -285,28 +275,20 @@ class Argument implements \Serializable {
                 }, array(
                     'max' => 1,
                     'time' => $this->wait
-                ))->then(function ($messages) use ($message, $promptLimit, &$prompts, &$answers) {
+                ))->then(function ($messages) use ($message, $bag) {
                     if($messages->count() === 0) {
-                        return array(
-                            'value' => null,
-                            'cancelled' => 'time',
-                            'prompts' => $prompts,
-                            'answers' => $answers
-                        );
+                        $bag->cancelled = 'time';
+                        return $bag->done();
                     }
                     
                     $msg = $messages->first();
-                    $answers[] = $msg;
+                    $bag->answers[] = $msg;
                     
                     $value = $msg->content;
                     
                     if(\mb_strtolower($value) === 'cancel') {
-                        return array(
-                            'value' => null,
-                            'cancelled' => 'user',
-                            'prompts' => $prompts,
-                            'answers' => $answers
-                        );
+                        $bag->cancelled = 'user';
+                        return $bag->done();
                     }
                     
                     $validate = ($this->validate ? array($this, 'validate') : array($this->type, 'validate'))($value, $message, $this);
@@ -314,9 +296,9 @@ class Argument implements \Serializable {
                         $validate = \React\Promise\resolve($validate);
                     }
                     
-                    return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$prompts, &$answers) {
+                    return $validate->then(function ($valid) use ($message, $value, $bag) {
                         if($valid !== true) {
-                            return $this->obtain($message, $value, $promptLimit, $prompts, $answers, $valid);
+                            return $this->obtain($message, $value, $bag, $valid);
                         }
                         
                         $parse = ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
@@ -324,23 +306,15 @@ class Argument implements \Serializable {
                             $parse = \React\Promise\resolve($parse);
                         }
                         
-                        return $parse->then(function ($value) use (&$prompts, &$answers) {
-                            return array(
-                                'value' => $value,
-                                'cancelled' => null,
-                                'prompts' => $prompts,
-                                'answers' => $answers
-                            );
+                        return $parse->then(function ($value) use ($bag) {
+                            $bag->values[] = $value;
+                            return $bag->done();
                         });
                     });
-                }, function ($error) use (&$prompts, &$answers) {
+                }, function ($error) use ($bag) {
                     if($error instanceof \RangeException) {
-                        return array(
-                            'value' => null,
-                            'cancelled' => 'time',
-                            'prompts' => $prompts,
-                            'answers' => $answers
-                        );
+                        $bag->cancelled = 'time';
+                        return $bag->done();
                     }
                     
                     throw $error;
@@ -351,36 +325,32 @@ class Argument implements \Serializable {
     
     /**
      * Prompts the user infinitely and obtains the values for the argument. Resolves with an array of ('values' => mixed, 'cancelled' => string|null, 'prompts' => Message[], 'answers' => Message[]). Cancelled can be one of user, time and promptLimit.
-     * @param \CharlotteDunois\Livia\CommandMessage     $message      Message that triggered the command.
-     * @param string[]                                  $values       Pre-provided values.
-     * @param int|double                                $promptLimit  Maximum number of times to prompt for the argument.
-     * @param \CharlotteDunois\Yasmin\Models\Message[]  $prompts      An array consisting of the prompts.
-     * @param \CharlotteDunois\Yasmin\Models\Message[]  $answers      An array consisting of the answers.
-     * @param bool|string|null                          $valid        Whether the last retrieved value was valid.
+     * @param \CharlotteDunois\Livia\CommandMessage         $message      Message that triggered the command.
+     * @param string[]                                      $values       Pre-provided values.
+     * @param \CharlotteDunois\Livia\Arguments\ArgumentBag  $bag          The argument bag.
+     * @param bool|string|null                              $valid        Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, array &$prompts = array(), array &$answers = array(), bool $valid = null) {
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $values, $promptLimit, $prompts, $answers, $valid) {
-            $value = null;
-            if(!empty($values)) {
-                $value = $values[(\count($values) - 1)];
+    protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, bool $valid = null) {
+        $value = null;
+        if(!empty($values)) {
+            $value = \array_shift($values);
+        }
+        
+        return $this->infiniteObtain($message, $value, $bag, $valid)->then(function ($value) use ($message, &$values, $bag) {
+            if($value instanceof \CharlotteDunois\Livia\Arguments\ArgumentBag && $value->done) {
+                return $value;
             }
             
-            $this->infiniteObtain($message, $value, $values, $promptLimit, $prompts, $answers, $valid)->then(function ($value) use ($message, $values, $promptLimit, $prompts, $answers, $resolve) {
-                if(\is_array($value)) {
-                    return $resolve($value);
-                }
-                
-                $values[] = $value;
-                return $this->obtainInfinite($message, $values, $promptLimit, $prompts, $answers);
-            })->done($resolve, $reject);
-        }));
+            $bag->values[] = $value;
+            return $this->obtainInfinite($message, $values, $bag);
+        });
     }
     
     /**
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function infiniteObtain(\CharlotteDunois\Livia\CommandMessage $message, $value, array &$values, $promptLimit, array &$prompts, array &$answers, $valid = null) {
+    protected function infiniteObtain(\CharlotteDunois\Livia\CommandMessage $message, $value, \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, $valid = null) {
         if($value === null) {
             $reply = $message->reply($this->prompt.\PHP_EOL.
                 'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.\PHP_EOL.
@@ -398,18 +368,14 @@ class Argument implements \Serializable {
             $reply = \React\Promise\resolve(null);
         }
         
-        return $reply->then(function ($msg) use ($message, &$values, $promptLimit, &$prompts, &$answers) {
+        return $reply->then(function ($msg) use ($message, $bag) {
             if($msg !== null) {
-                $prompts[] = $msg;
+                $bag->prompts[] = $msg;
             }
             
-            if(\count($prompts) > $promptLimit) {
-                return array(
-                    'value' => null,
-                    'cancelled' => 'promptLimit',
-                    'prompts' => $prompts,
-                    'answers' => $answers
-                );
+            if(\count($bag->prompts) > $bag->promptLimit) {
+                $bag->cancelled = 'promptLimit';
+                return $bag->done();
             }
             
             // Get the user's response
@@ -418,35 +384,23 @@ class Argument implements \Serializable {
             }, array(
                 'max' => 1,
                 'time' => $this->wait
-            ))->then(function ($messages) use ($message, &$values, $promptLimit, &$prompts, &$answers) {
+            ))->then(function ($messages) use ($message, $Bags) {
                 if($messages->count() === 0) {
-                    return array(
-                        'value' => null,
-                        'cancelled' => 'time',
-                        'prompts' => $prompts,
-                        'answers' => $answers
-                    );
+                    $bag->cancelled = 'time';
+                    return $bag->done();
                 }
                 
                 $msg = $messages->first();
-                $answers[] = $msg;
+                $bag->answers[] = $msg;
                 
                 $value = $msg->content;
                 
                 if(\mb_strtolower($value) === 'finish') {
-                    return array(
-                        'value' => $values,
-                        'cancelled' => (\count($values) > 0 ? null : 'user'),
-                        'prompts' => $prompts,
-                        'answers' => $answers
-                    );
+                    $bag->cancelled = (\count($bag->values) > 0 ? null : 'user');
+                    return $bag->done();
                 } elseif(\mb_strtolower($value) === 'cancel') {
-                    return array(
-                        'value' => null,
-                        'cancelled' => 'user',
-                        'prompts' => $prompts,
-                        'answers' => $answers
-                    );
+                    $bag->cancelled = 'user';
+                    return $bag->done();
                 }
                 
                 $validate = ($this->validate ? array($this, 'validate') : array($this->type, 'validate'))($value, $message, $this);
@@ -454,21 +408,17 @@ class Argument implements \Serializable {
                     $validate = \React\Promise\resolve($validate);
                 }
                 
-                return $validate->then(function ($valid) use ($message, $value, &$values, $promptLimit, &$prompts, &$answers) {
+                return $validate->then(function ($valid) use ($message, $value, $bag) {
                     if($valid !== true) {
-                        return $this->infiniteObtain($message, $value, $values, $promptLimit, $prompts, $answers, $valid);
+                        return $this->infiniteObtain($message, $value, $bag, $valid);
                     }
                     
                     return ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
                 });
-            }, function ($error) use (&$prompts, &$answers) {
+            }, function ($error) use ($bag) {
                 if($error instanceof \RangeException) {
-                    return array(
-                        'value' => null,
-                        'cancelled' => 'time',
-                        'prompts' => $prompts,
-                        'answers' => $answers
-                    );
+                    $bag->cancelled = 'time';
+                    return $bag->done();
                 }
                 
                 throw $error;
@@ -478,18 +428,18 @@ class Argument implements \Serializable {
     
     /**
      * Parses the provided infinite arguments.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message      Message that triggered the command.
-     * @param string[]                               $values       Pre-provided values.
-     * @param int|double                             $promptLimit  Maximum number of times to prompt for the argument.
-     * @param int                                    $i            Current index of current argument value.
+     * @param \CharlotteDunois\Livia\CommandMessage         $message      Message that triggered the command.
+     * @param string[]                                      $values       Pre-provided values.
+     * @param \CharlotteDunois\Livia\Arguments\ArgumentBag  $bag          The argument bag.
+     * @param int                                           $i            Current index of current argument value.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), $promptLimit = \INF, int $i = 0) {
+    protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, int $i = 0) {
         if(empty($values)) {
-            return $this->obtainInfinite($message, array(), $promptLimit);
+            return $this->obtainInfinite($message, array(), $bag);
         }
         
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, &$values, $promptLimit, $i) {
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, &$values, $bag, $i) {
             $value = $values[$i];
             $val = null;
             
@@ -498,34 +448,25 @@ class Argument implements \Serializable {
                 $validate = \React\Promise\resolve($validate);
             }
             
-            return $validate->then(function ($valid) use ($message, $value, $promptLimit, &$val) {
+            return $validate->then(function ($valid) use ($message, $value, $bag, &$val) {
                 if($valid !== true) {
-                    $val = $valid;
-                    $prompts = array();
-                    $answers = array();
-                    
-                    return $this->obtainInfinite($message, array($value), $promptLimit, $prompts, $answers, $valid);
+                    return $this->obtainInfinite($message, array($value), $bag, $valid);
                 }
                 
                 return ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
-            })->then(function ($value) use ($message, &$values, $promptLimit, $i, &$val) {
+            })->then(function ($value) use ($message, &$values, $bag, $i, &$val) {
                 if($val !== null) {
                     return $value;
                 }
                 
-                $values[$i] = $value;
+                $bag->values[] = $value;
                 $i++;
                 
                 if($i < \count($values)) {
-                    return $this->parseInfiniteProvided($message, $values, $promptLimit, $i);
+                    return $this->parseInfiniteProvided($message, $values, $bag, $i);
                 }
                 
-                return array(
-                    'value' => $values,
-                    'cancelled' => null,
-                    'prompts' => array(),
-                    'answers' => array()
-                );
+                return $bag->done();
             })->done($resolve, $reject);
         }));
     }

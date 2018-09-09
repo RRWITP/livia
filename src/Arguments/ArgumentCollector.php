@@ -22,7 +22,14 @@ class ArgumentCollector implements \Serializable {
      */
     protected $client;
     
+    /**
+     * @var \CharlotteDunois\Livia\Arguments\Argument[]
+     */
     protected $args = array();
+    
+    /**
+     * @var int|float
+     */
     protected $promptLimit;
     
     /**
@@ -155,10 +162,10 @@ class ArgumentCollector implements \Serializable {
                         'values' => $values,
                         'cancelled' => null,
                         'prompts' => \array_merge(array(), ...\array_map(function ($res) {
-                            return $res['prompts'];
+                            return $res->prompts;
                         }, $results)),
                         'answers' => \array_merge(array(), ...\array_map(function ($res) {
-                            return $res['answers'];
+                            return $res->answers;
                         }, $results))
                     );
                 }, function ($error) use ($message) {
@@ -182,12 +189,12 @@ class ArgumentCollector implements \Serializable {
     
     /**
      * Obtains and collects the next argument.
-     * @param \CharlotteDunois\Livia\CommandMessage $message
-     * @param array                                 $provided
-     * @param int|double                            $promptLimit
-     * @param array                                 $values
-     * @param array                                 $results
-     * @param int                                   $current
+     * @param \CharlotteDunois\Livia\CommandMessage           $message
+     * @param array                                           $provided
+     * @param int|double                                      $promptLimit
+     * @param array                                           $values
+     * @param array                                           $results
+     * @param int                                             $current
      * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function obtainNext(\CharlotteDunois\Livia\CommandMessage $message, array &$provided, $promptLimit, array &$values, array &$results, int $current) {
@@ -195,26 +202,29 @@ class ArgumentCollector implements \Serializable {
             return \React\Promise\resolve();
         }
         
-        return $this->args[$current]->obtain($message, (isset($provided[$current]) ? ($this->args[$current]->infinite ? \array_slice($provided, $current) : $provided[$current]) : null), $promptLimit)->then(function ($result) use ($message, &$provided, $promptLimit, &$values, &$results, $current) {
-            $results[] = $result;
-            
-            if($result['cancelled']) {
-                return array(
-                    'values' => null,
-                    'cancelled' => $result['cancelled'],
-                    'prompts' => \array_merge(array(), ...\array_map(function ($res) {
-                        return $res['prompts'];
-                    }, $results)),
-                    'answers' => \array_merge(array(), ...\array_map(function ($res) {
-                        return $res['answers'];
-                    }, $results))
-                );
-            }
-            
-            $values[$this->args[$current]->key] = $result['value'];
-            $current++;
-            
-            return $this->obtainNext($message, $provided, $promptLimit, $values, $results, $current);
-        });
+        $bag = new \CharlotteDunois\Livia\Arguments\ArgumentBag($this->args[$current], $promptLimit);
+        
+        return $this->args[$current]->obtain($message, (isset($provided[$current]) ? ($this->args[$current]->infinite ? \array_slice($provided, $current) : $provided[$current]) : null), $bag)
+            ->then(function ($result) use ($message, &$provided, $bag, $promptLimit, &$values, &$results, $current) {
+                $results[] = $result;
+                
+                if($bag->cancelled) {
+                    return array(
+                        'values' => null,
+                        'cancelled' => $result->cancelled,
+                        'prompts' => \array_merge(array(), ...\array_map(function ($res) {
+                            return $res->prompts;
+                        }, $results)),
+                        'answers' => \array_merge(array(), ...\array_map(function ($res) {
+                            return $res->answers;
+                        }, $results))
+                    );
+                }
+                
+                $values[$this->args[$current]->key] = ($this->args[$current]->infinite ? $result->values : $result->values[0]);
+                $current++;
+                
+                return $this->obtainNext($message, $provided, $promptLimit, $values, $results, $current);
+            });
     }
 }
