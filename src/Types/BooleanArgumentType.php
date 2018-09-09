@@ -14,7 +14,16 @@ namespace CharlotteDunois\Livia\Types;
  * @internal
  */
 class BooleanArgumentType extends ArgumentType {
+    /**
+     * Truthy values.
+     * @var string[]
+     */
     protected $truthy = array('true', 't', 'yes', 'y', 'on', 'enable', 'enabled', '1', '+');
+    
+    /**
+     * Falsey values.
+     * @var string[]
+     */
     protected $falsey = array('false', 'f', 'no', 'n', 'off', 'disable', 'disabled', '0', '-');
     
     /**

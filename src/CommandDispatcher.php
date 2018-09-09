@@ -13,22 +13,36 @@ namespace CharlotteDunois\Livia;
  * Handles parsing messages and running commands from them.
  *
  * @property \CharlotteDunois\Livia\LiviaClient        $client      The client which initiated the instance.
- * @property array                                     $inhibitors  Functions that can block commands from running.
  */
 class CommandDispatcher implements \Serializable {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
+    /**
+     * Functions that can block commands from running.
+     * @var callable[]
+     */
     protected $inhibitors = array();
     
     /**
-     * @internal
+     * AuthorID+ChannelID combination waiting for responses
+     * @var string[]
      */
-    public $awaiting = array();
+    protected $awaiting = array();
     
+    /**
+     * Patterns of command.
+     * @var string[]
+     */
     protected $commandPatterns = array();
+    
+    /**
+     * Command results.
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $results;
     
     /**
@@ -117,7 +131,7 @@ class CommandDispatcher implements \Serializable {
      * @return $this
      */
     function addInhibitor(callable $inhibitor) {
-        if(!\in_array($inhibitor, $this->inhibitors)) {
+        if(!\in_array($inhibitor, $this->inhibitors, true)) {
             $this->inhibitors[] = $inhibitor;
         }
         
@@ -130,7 +144,7 @@ class CommandDispatcher implements \Serializable {
      * @return $this
      */
     function removeInhibitor(callable $inhibitor) {
-        $key = \array_search($inhibitor, $this->inhibitors);
+        $key = \array_search($inhibitor, $this->inhibitors, true);
         if($key !== false) {
             unset($this->inhibitors[$key]);
         }
@@ -401,5 +415,28 @@ class CommandDispatcher implements \Serializable {
         
         $this->client->emit('debug', 'Built command pattern for prefix "'.$prefix.'": '.$pattern);
         return $pattern;
+    }
+    
+    /**
+     * Sets the awaiting context for the message.
+     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @return void
+     * @internal
+     */
+    function setAwaiting(\CharlotteDunois\Livia\CommandMessage $message) {
+        $this->awaiting[] = $message->message->author->id.$message->message->channel->id;
+    }
+    
+    /**
+     * Removes the awaiting context for the message.
+     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @return void
+     * @internal
+     */
+    function unsetAwaiting(\CharlotteDunois\Livia\CommandMessage $message) {
+        $key = \array_search($message->message->author->id.$message->message->channel->id, $this->awaiting, true);
+        if($key !== false) {
+            unset($this->awaiting[$key]);
+        }
     }
 }

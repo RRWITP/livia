@@ -11,7 +11,6 @@ namespace CharlotteDunois\Livia\Arguments;
 
 /**
  * A fancy bag for our arguments.
- * @internal
  */
 class ArgumentBag {
     /**

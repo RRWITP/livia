@@ -28,21 +28,81 @@ namespace CharlotteDunois\Livia\Arguments;
  */
 class Argument implements \Serializable {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
+    /**
+     * Key for the argument.
+     * @var string
+     */
     protected $key;
+    
+    /**
+     * Label for the argument.
+     * @var string
+     */
     protected $label;
+    
+    /**
+     * Question prompt for the argument.
+     * @var string
+     */
     protected $prompt;
+    
+    /**
+     * Type of the argument.
+     * @var \CharlotteDunois\Livia\Types\ArgumentType|null
+     */
     protected $type;
+    
+    /**
+     * If type is integer or float, this is the maximum value of the number. If type is string, this is the maximum length of the string.
+     * @var int|float|null
+     */
     protected $max;
+    
+    /**
+     * If type is integer or float, this is the minimum value of the number. If type is string, this is the minimum length of the string.
+     * @var int|float|null
+     */
     protected $min;
+    
+    /**
+     * The default value for the argument.
+     * @var mixed|null
+     */
     protected $default;
+    
+    /**
+     * Whether the argument accepts an infinite number of values.
+     * @var bool
+     */
     protected $infinite;
+    
+    /**
+     * Validator function for validating a value for the argument.
+     * @var callable|null
+     */
     protected $validate;
+    
+    /**
+     * Parser function to parse a value for the argument.
+     * @var callable|null
+     */
     protected $parse;
+    
+    /**
+     * Empty checker function for the argument.
+     * @var callable|null
+     */
     protected $emptyChecker;
+    
+    /**
+     * How long to wait for input (in seconds).
+     * @var int
+     */
     protected $wait;
     
     /**

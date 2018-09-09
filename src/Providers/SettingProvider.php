@@ -13,6 +13,10 @@ namespace CharlotteDunois\Livia\Providers;
  * Loads and stores settings associated with guilds.
  */
 abstract class SettingProvider {
+    /**
+     * The client this provider is for.
+     * @var \CharlotteDunois\Livia\LiviaClient
+     */
     protected $client;
     
     /**
@@ -31,10 +35,10 @@ abstract class SettingProvider {
     
     /**
      * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.
-     * @param \CharlotteDunois\Livia\LiviaClient    $client
+     * @param \CharlotteDunois\Livia\LiviaClient  $client
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    abstract function init(\CharlotteDunois\Livia\LiviaClient   $client): \React\Promise\ExtendedPromiseInterface;
+    abstract function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface;
     
     /**
      * Gets a setting from a guild.

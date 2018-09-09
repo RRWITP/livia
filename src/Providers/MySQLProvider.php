@@ -13,12 +13,22 @@ namespace CharlotteDunois\Livia\Providers;
  * Loads and stores settings associated with guilds in a MySQL database. Requires the composer package react/mysql.
  */
 class MySQLProvider extends SettingProvider {
-    /** @var \React\MySQL\ConnectionInterface */
+    /**
+     * The DB connection.
+     * @var \React\MySQL\ConnectionInterface
+     */
     protected $db;
     
+    /**
+     * The provider's listeners, mapped by event name.
+     * @var \Closure[]
+     */
     protected $listeners = array();
     
-    /** @var \CharlotteDunois\Yasmin\Utils\Collection */
+    /**
+     * A collection of a guild's settings, mapped by guild ID.
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $settings;
     
     /**

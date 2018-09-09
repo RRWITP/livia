@@ -38,36 +38,159 @@ namespace CharlotteDunois\Livia\Commands;
  */
 abstract class Command implements \Serializable {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
+    /**
+     * The name of the command.
+     * @var string
+     */
     protected $name;
+    
+    /**
+     * Aliases of the command.
+     * @var string[]
+     */
     protected $aliases = array();
+    
+    /**
+     * ID of the command group the command is part of.
+     * @var string
+     */
     protected $groupID;
+    
+    /**
+     * A short description of the command.
+     * @var string
+     */
     protected $description;
+    
+    /**
+     * A longer description of the command.
+     * @var string|null
+     */
     protected $details;
+    
+    /**
+     * Usage format string of the command.
+     * @var string
+     */
     protected $format = '';
+    
+    /**
+     * Examples of and for the command.
+     * @var string[]
+     */
     protected $examples = array();
+    
+    /**
+     * Whether the command can only be triggered in a guild channel.
+     * @var bool
+     */
     protected $guildOnly = false;
+    
+    /**
+     * Whether the command can only be triggered by the bot owner (requires default hasPermission method).
+     * @var bool
+     */
     protected $ownerOnly = false;
+    
+    /**
+     * The required permissions for the client user to make the command work.
+     * @var string[]|null
+     */
     protected $clientPermissions;
+    
+    /**
+     * The required permissions for the user to use the command.
+     * @var string[]|null
+     */
     protected $userPermissions;
+    
+    /**
+     * Whether the command can only be run in NSFW channels.
+     * @var bool
+     */
     protected $nsfw = false;
+    
+    /**
+     * Options for throttling command usages.
+     * @var array
+     */
     protected $throttling = array();
+    
+    /**
+     * Whether the command gets handled normally.
+     * @var bool
+     */
     protected $defaultHandling = true;
+    
+    /**
+     * An array containing the command arguments.
+     * @var array
+     */
     protected $args = array();
+    
+    /**
+     * How many times the user gets prompted for an argument.
+     * @var int|float
+     */
     protected $argsPromptLimit = \INF;
+    
+    /**
+     * Whether single quotes are allowed to encapsulate an argument.
+     * @var bool
+     */
     protected $argsSingleQuotes = true;
+    
+    /**
+     * How the arguments are split when passed to the command's run method.
+     * @var string
+     */
     protected $argsType = 'single';
+    
+    /**
+     * Maximum number of arguments that will be split.
+     * @var int
+     */
     protected $argsCount = 0;
+    
+    /**
+     * Command patterns for pattern matches.
+     * @var string[]
+     */
     protected $patterns = array();
+    
+    /**
+     * Whether the command is guarded (can not be disabled).
+     * @var bool
+     */
     protected $guarded = false;
     
+    /**
+     * Whether the command is globally enabled.
+     * @var bool
+     */
     protected $globalEnabled = true;
+    
+    /**
+     * Array of guild ID to bool, which indicates whether the command is enabled in that guild.
+     * @var bool[]
+     */
     protected $guildEnabled = array();
     
+    /**
+     * The argument collector for the command.
+     * @var \CharlotteDunois\Livia\Arguments\ArgumentCollector|null
+     */
     protected $argsCollector;
+    
+    /**
+     * A collection of throttle arrays.
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $throttles;
     
     /**

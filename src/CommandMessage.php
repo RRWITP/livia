@@ -21,24 +21,45 @@ namespace CharlotteDunois\Livia;
  */
 class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
     /**
+     * The message that triggers the command.
      * @var \CharlotteDunois\Yasmin\Models\Message
      */
     protected $message;
     
     /**
+     * The command that got triggered, if any.
      * @var \CharlotteDunois\Livia\Commands\Command|null
      */
     protected $command;
     
+    /**
+     * Argument string for the command.
+     * @var string|null
+     */
     protected $argString;
+    
+    /**
+     * Pattern matches (if from a pattern trigger).
+     * @var string[]|null
+     */
     protected $patternMatches;
     
+    /**
+     * Command responses, as multidimensional array (channelID|dm => Message[]).
+     * @var \CharlotteDunois\Yasmin\Models\Message[]
+     */
     protected $responses = array();
+    
+    /**
+     * Command response position, mapped by channeLID|dm to position (int).
+     * @var
+     */
     protected $responsePositions = array();
     
     /**

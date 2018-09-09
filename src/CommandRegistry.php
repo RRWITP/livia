@@ -15,36 +15,42 @@ namespace CharlotteDunois\Livia;
  * @property \CharlotteDunois\Livia\LiviaClient        $client               The client which initiated the instance.
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands             Registered commands, mapped by their name.
  * @property string[]                                  $commandsDirectories  List of fully resolved path to the bot's commands directories.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $groups               Registered command groups, mapped by their name.
+ * @property \CharlotteDunois\Yasmin\Utils\Collection  $groups               Registered command groups, mapped by their id.
  * @property \CharlotteDunois\Yasmin\Utils\Collection  $types                Registered argument types, mapped by their name.
  */
 class CommandRegistry implements \Serializable {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
     /**
+     * The basepath commands directory of Livia.
      * @var string
      */
     protected $basepath;
     
     /**
+     * Registered commands, mapped by their name.
      * @var \CharlotteDunois\Yasmin\Utils\Collection
      */
     protected $commands;
     
     /**
+     * List of fully resolved path to the bot's commands directories.
      * @var string[]
      */
     protected $commandsDirectories = array();
     
     /**
+     * Registered command groups, mapped by their id.
      * @var \CharlotteDunois\Yasmin\Utils\Collection
      */
     protected $groups;
     
     /**
+     * Registered argument types, mapped by their name.
      * @var \CharlotteDunois\Yasmin\Utils\Collection
      */
     protected $types;

@@ -14,16 +14,27 @@ namespace CharlotteDunois\Livia\Utils;
  */
 class HRTimer {
     /**
+     * Whether the extension hrtime is installed and loaded.
      * @var bool
      */
     protected $hrtime;
     
     /**
+     * Whether we use a PHP version which has the function hrtime. (PHP >= 7.3.0)
      * @var bool
      */
     protected $nativeHrtime;
     
+    /**
+     * The timer.
+     * @var \HRTime\StopWatch|int|float
+     */
     protected $timer;
+    
+    /**
+     * The last time we called time.
+     * @var int|float
+     */
     protected $lastTime;
     
     /**
@@ -92,7 +103,7 @@ class HRTimer {
                 $this->lastTime = $this->timer;
             }
             
-            $time = \php_hrtime_current(true);
+            $time = \hrtime(true);
             $elapsed = (int) ($time - $this->lastTime);
             $this->lastTime = $time;
         } elseif($this->hrtime) {

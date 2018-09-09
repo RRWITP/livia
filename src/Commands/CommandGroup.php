@@ -20,16 +20,45 @@ namespace CharlotteDunois\Livia\Commands;
  */
 class CommandGroup implements \Serializable {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
+    /**
+     * The ID of the group.
+     * @var string
+     */
     protected $id;
+    
+    /**
+     * The name of the group.
+     * @var string
+     */
     protected $name;
+    
+    /**
+     * Whether this group is guarded against disabling.
+     * @var bool
+     */
     protected $guarded;
+    
+    /**
+     * The commands that the group contains.
+     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     */
     protected $commands;
     
+    /**
+     * Whether the command group is globally enabled.
+     * @var bool
+     */
     protected $globalEnabled = true;
+    
+    /**
+     * Array of guild ID to bool, which indicates whether the command group is enabled in that guild.
+     * @var bool[]
+     */
     protected $guildEnabled = array();
     
     /**

@@ -18,16 +18,19 @@ namespace CharlotteDunois\Livia\Arguments;
  */
 class ArgumentCollector implements \Serializable {
     /**
+     * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
     protected $client;
     
     /**
+     * Arguments for the collector.
      * @var \CharlotteDunois\Livia\Arguments\Argument[]
      */
     protected $args = array();
     
     /**
+     * Maximum number of times to prompt for a single argument.
      * @var int|float
      */
     protected $promptLimit;
@@ -142,17 +145,14 @@ class ArgumentCollector implements \Serializable {
         }
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $provided, $promptLimit) {
-            $this->client->dispatcher->awaiting[] = $message->message->author->id.$message->message->channel->id;
+            $this->client->dispatcher->setAwaiting($message);
             
             $values = array();
             $results = array();
             
             try {
                 $this->obtainNext($message, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($message, &$values, &$results) {
-                    $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
-                    if($key !== false) {
-                        unset($this->client->dispatcher->awaiting[$key]);
-                    }
+                    $this->client->dispatcher->unsetAwaiting($message);
                     
                     if($result !== null) {
                         return $result;
@@ -169,18 +169,12 @@ class ArgumentCollector implements \Serializable {
                         }, $results))
                     );
                 }, function ($error) use ($message) {
-                    $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
-                    if($key !== false) {
-                        unset($this->client->dispatcher->awaiting[$key]);
-                    }
+                    $this->client->dispatcher->unsetAwaiting($message);
                     
                     throw $error;
                 })->done($resolve, $reject);
             } catch (\Throwable | \Exception | \Error $error) {
-                $key = \array_search($message->message->author->id.$message->message->channel->id, $this->client->dispatcher->awaiting);
-                if($key !== false) {
-                    unset($this->client->dispatcher->awaiting[$key]);
-                }
+                $this->client->dispatcher->unsetAwaiting($message);
                 
                 throw $error;
             }
