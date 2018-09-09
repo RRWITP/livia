@@ -384,7 +384,7 @@ class Argument implements \Serializable {
             }, array(
                 'max' => 1,
                 'time' => $this->wait
-            ))->then(function ($messages) use ($message, $Bags) {
+            ))->then(function ($messages) use ($message, $bag) {
                 if($messages->count() === 0) {
                     $bag->cancelled = 'time';
                     return $bag->done();
@@ -450,7 +450,8 @@ class Argument implements \Serializable {
             
             return $validate->then(function ($valid) use ($message, $value, $bag, &$val) {
                 if($valid !== true) {
-                    return $this->obtainInfinite($message, array($value), $bag, $valid);
+                    $val = $valid;
+                    return $this->obtainInfinite($message, array($value), $bag, $val);
                 }
                 
                 return ($this->parse ? array($this, 'parse') : array($this->type, 'parse'))($value, $message, $this);
