@@ -124,4 +124,4 @@ class HRTimer {
         
         return ((int) $elapsed);
     }
-};
+}
