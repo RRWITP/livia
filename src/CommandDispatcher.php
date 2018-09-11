@@ -176,7 +176,7 @@ class CommandDispatcher implements \Serializable {
                     
                     $cmdMessage = $this->parseMessage($message);
                     if($cmdMessage && $oldCmdMessage) {
-                        $cmdMessage->setResponses($oldCmdMessage->responses, $oldCmdMessage->responsePositions);
+                        $cmdMessage->setResponses($oldCmdMessage->responses);
                     }
                 } else {
                     $cmdMessage = $this->parseMessage($message);

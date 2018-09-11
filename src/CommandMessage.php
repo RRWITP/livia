@@ -57,12 +57,6 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     protected $responses = array();
     
     /**
-     * Command response position, mapped by channeLID|dm to position (int).
-     * @var
-     */
-    protected $responsePositions = array();
-    
-    /**
      * @internal
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, \CharlotteDunois\Yasmin\Models\Message $message, \CharlotteDunois\Livia\Commands\Command $command = null, string $argString = null, array $patternMatches = null) {
@@ -225,22 +219,25 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             
             // Figure out the command arguments
             $args = $this->patternMatches;
+            $argmsgs = array();
             $countArgs = \count($this->command->args);
             
             if(!$args && $countArgs > 0) {
                 $count = (!empty($this->command->args[($countArgs - 1)]['infinite']) ? \INF : $countArgs);
                 $provided = self::parseArgs($this->argString, $count, $this->command->argsSingleQuotes);
                 
-                $promises[] = $this->command->argsCollector->obtain($this, $provided)->then(function ($result) use (&$args) {
+                $promises[] = $this->command->argsCollector->obtain($this, $provided)->then(function ($result) use (&$args, &$argmsgs) {
                     if($result['cancelled']) {
                         if(\count($result['prompts']) === 0) {
                             throw new \CharlotteDunois\Livia\Exceptions\CommandFormatException($this);
                         }
                         
+                        $argmsgs = $result['prompts'];
                         throw new \CharlotteDunois\Livia\Exceptions\FriendlyException('Cancelled Command.');
                     }
                     
                     $args = $result['values'];
+                    $argmsgs = $result['prompts'];
                     
                     if(!$args) {
                         $args = $this->parseCommandArgs();
@@ -259,7 +256,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             
             $typingCount = $this->message->channel->typingCount();
             
-            \React\Promise\all($promises)->then(function () use (&$args) {
+            \React\Promise\all($promises)->then(function () use (&$args, &$argmsgs) {
                 $promise = $this->command->run($this, $args, ($this->patternMatches !== null));
                 
                 if($promise instanceof \GuzzleHttp\Promise\PromiseInterface) {
@@ -272,13 +269,14 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 
                 $this->client->emit('commandRun', $this->command, $promise, $this, $args, ($this->patternMatches !== null));
                 
-                return $promise->then(function ($response) {
+                return $promise->then(function ($response) use (&$argmsgs) {
                     if(!($response instanceof \CharlotteDunois\Yasmin\Models\Message || $response instanceof \CharlotteDunois\Yasmin\Utils\Collection || \is_array($response) || $response === null)) {
                         throw new \RuntimeException('Command '.$this->command->name.'\'s run() resolved with an unknown type ('.\gettype($response).'). Command run methods must return a Promise that resolve with a Message, an array of Messages, a Collection of Messages, or null.');
                     }
                     
                     if(!\is_array($response) && !($response instanceof \CharlotteDunois\Yasmin\Utils\Collection)) {
-                        return $response;
+                        $argmsgs[] = $response;
+                        return $argmsgs;
                     }
                     
                     foreach($response as &$val) {
@@ -287,15 +285,20 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                         }
                     }
                     
-                    return \React\Promise\all($response);
+                    return \React\Promise\all($response)->then(function ($msgs) use (&$argmsgs) {
+                        return \array_merge($argmsgs, $msgs);
+                    });
                 });
-            })->otherwise(function ($error) use (&$args, $typingCount) {
+            })->otherwise(function ($error) use (&$args, $typingCount, &$argmsgs) {
                 if($this->message->channel->typingCount() > $typingCount) {
                     $this->message->channel->stopTyping();
                 }
                 
                 if($error instanceof \CharlotteDunois\Livia\Exceptions\FriendlyException) {
-                    return $this->reply($error->getMessage());
+                    return $this->reply($error->getMessage())->then(function (\CharlotteDunois\Yasmin\Models\Message $msg) use (&$argmsgs) {
+                        $argmsgs[] = $msg;
+                        return $argmsgs;
+                    });
                 }
                 
                 $this->client->emit('commandError', $this->command, $error, $this, $args, ($this->patternMatches !== null));
@@ -319,7 +322,11 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 
                 return $this->reply('An error occurred while running the command: `'.\get_class($error).': '.\str_replace('`', '', $error->getMessage()).'`'.\PHP_EOL.
                         'You shouldn\'t ever receive an error like this.'.\PHP_EOL.
-                        'Please contact '.$owners.($this->client->getOption('invite') ? ' in this server: '.$this->client->getOption('invite') : '.'));
+                        'Please contact '.$owners.($this->client->getOption('invite') ? ' in this server: '.$this->client->getOption('invite') : '.'))
+                        ->then(function (\CharlotteDunois\Yasmin\Models\Message $msg) use (&$argmsgs) {
+                            $argmsgs[] = $msg;
+                            return $argmsgs;
+                        });
             })->done($resolve, $reject);
         }));
     }
@@ -386,10 +393,10 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     
     /**
      * Edits a response to the command message. Resolves with an instance of Message or an array of Message instances.
-     * @param \CharlotteDunois\Yasmin\Models\Message|\CharlotteDunois\Yasmin\Models\Message[]  $response
-     * @param string                                                                           $type
-     * @param string                                                                           $content
-     * @param array                                                                            $options
+     * @param \CharlotteDunois\Yasmin\Models\Message|\CharlotteDunois\Yasmin\Models\Message[]|null  $response
+     * @param string                                                                                $type
+     * @param string                                                                                $content
+     * @param array                                                                                 $options
      * @return \React\Promise\ExtendedPromiseInterface
      */
     protected function editResponse($response, string $type, string $content, array $options = array()) {
@@ -455,12 +462,13 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             $this->responses[$id] = array();
         }
         
-        if(empty($this->responsePositions[$id])) {
-            $this->responsePositions[$id] = -1;
+        if(!empty($this->responses[$id])) {
+            $msg = \array_shift($this->responses[$id]);
+        } else {
+            $msg = null;
         }
-        $this->responsePositions[$id]++;
         
-        return $this->editResponse(($this->responses[$id][$this->responsePositions[$id]] ?? null), $type, $content, $options);
+        return $this->editResponse($msg, $type, $content, $options);
     }
     
     /**
@@ -521,7 +529,6 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 
                 if(empty($this->responses[$id])) {
                     $this->responses[$id] = array();
-                    $this->responsePositions[$id] = -1;
                 }
                 
                 $this->responses[$id][] = $response;
@@ -529,7 +536,6 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         } elseif($responses !== null) {
             $id = $this->getChannelIDOrDM($responses->channel);
             $this->responses[$id] = array($responses);
-            $this->responsePositions[$id] = -1;
         }
     }
     
@@ -539,10 +545,8 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      * @internal
      */
     function deleteRemainingResponses() {
-        foreach($this->responses as $id => $msg) {
-            $cmsg = \count($msg);
-            for($i = $this->responsePositions[$id] + 1; $i < $cmsg; $i++) {
-                $response = $msg[$i];
+        foreach($this->responses as $id => $msgs) {
+            foreach($msgs as $response) {
                 if(\is_array($response)) {
                     foreach($response as $resp) {
                         $resp->delete()->done();
@@ -551,6 +555,8 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     $response->delete()->done();
                 }
             }
+            
+            $this->responses[$id] = array();
         }
     }
     
@@ -618,8 +624,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      * @return void
      * @internal
      */
-    function setResponses($responses, $responsePositions) {
+    function setResponses($responses) {
         $this->responses = $responses;
-        $this->responsePositions = $responsePositions;
     }
 }
