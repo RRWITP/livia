@@ -144,41 +144,39 @@ class ArgumentCollector implements \Serializable {
             $promptLimit = $this->promptLimit;
         }
         
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $provided, $promptLimit) {
-            $this->client->dispatcher->setAwaiting($message);
-            
-            $values = array();
-            $results = array();
-            
-            try {
-                $this->obtainNext($message, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($message, &$values, &$results) {
-                    $this->client->dispatcher->unsetAwaiting($message);
-                    
-                    if($result !== null) {
-                        return $result;
-                    }
-                    
-                    return array(
-                        'values' => $values,
-                        'cancelled' => null,
-                        'prompts' => \array_merge(array(), ...\array_map(function ($res) {
-                            return $res->prompts;
-                        }, $results)),
-                        'answers' => \array_merge(array(), ...\array_map(function ($res) {
-                            return $res->answers;
-                        }, $results))
-                    );
-                }, function ($error) use ($message) {
-                    $this->client->dispatcher->unsetAwaiting($message);
-                    
-                    throw $error;
-                })->done($resolve, $reject);
-            } catch (\Throwable | \Exception | \Error $error) {
+        $this->client->dispatcher->setAwaiting($message);
+        
+        $values = array();
+        $results = array();
+        
+        try {
+            return $this->obtainNext($message, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($message, &$values, &$results) {
+                $this->client->dispatcher->unsetAwaiting($message);
+                
+                if($result !== null) {
+                    return $result;
+                }
+                
+                return array(
+                    'values' => $values,
+                    'cancelled' => null,
+                    'prompts' => \array_merge(array(), ...\array_map(function ($res) {
+                        return $res->prompts;
+                    }, $results)),
+                    'answers' => \array_merge(array(), ...\array_map(function ($res) {
+                        return $res->answers;
+                    }, $results))
+                );
+            }, function ($error) use ($message) {
                 $this->client->dispatcher->unsetAwaiting($message);
                 
                 throw $error;
-            }
-        }));
+            });
+        } catch (\Throwable | \Exception | \Error $error) {
+            $this->client->dispatcher->unsetAwaiting($message);
+            
+            throw $error;
+        }
     }
     
     /**

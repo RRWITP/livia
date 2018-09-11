@@ -470,7 +470,7 @@ class CommandRegistry implements \Serializable {
             
             $namespace = \trim($matches[1]);
             
-            preg_match('/class(.*?){/i', $code, $matches);
+            preg_match('/class(.*){?/i', $code, $matches);
             if(empty($matches[1])) {
                 throw new \RuntimeException($file.' is not a valid argument type file');
             }

@@ -68,7 +68,7 @@ class UserArgumentType extends ArgumentType {
             return 'Multiple users found. Please be more specific.';
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($users, 'users', null).\PHP_EOL;
+        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($users, 'users', 'tag').\PHP_EOL;
     }
     
     /**

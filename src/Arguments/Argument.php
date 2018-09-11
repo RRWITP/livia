@@ -263,12 +263,8 @@ class Argument implements \Serializable {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $bag, $valid) {
             $empty = ($this->emptyChecker !== null ? $this->emptyChecker($value, $message, $this) : ($this->type !== null ? $this->type->isEmpty($value, $message, $this) : $value === null));
             if($empty && $this->default !== null) {
-                return $resolve(array(
-                    'value' => $this->default,
-                    'cancelled' => null,
-                    'prompts' => array(),
-                    'answers' => array()
-                ));
+                $bag->values[] = $this->default;
+                return $resolve($bag->done());
             }
             
             if($this->infinite) {
