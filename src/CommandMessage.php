@@ -275,7 +275,10 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                     }
                     
                     if(!\is_array($response) && !($response instanceof \CharlotteDunois\Yasmin\Utils\Collection)) {
-                        $argmsgs[] = $response;
+                        if($response instanceof \CharlotteDunois\Yasmin\Models\Message) {
+                            $argmsgs[] = $response;
+                        }
+                        
                         return $argmsgs;
                     }
                     
@@ -524,8 +527,12 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         if(\is_array($responses)) {
             foreach($responses as $response) {
-                $channel = (\is_array($response) ? $response[0] : $response)->channel;
-                $id = $this->getChannelIDOrDM($channel);
+                $msg = (\is_array($response) ? $response[0] : $response);
+                if(!($msg instanceof \CharlotteDunois\Yasmin\Models\Message)) {
+                    continue;
+                }
+                
+                $id = $this->getChannelIDOrDM($msg->channel);
                 
                 if(empty($this->responses[$id])) {
                     $this->responses[$id] = array();
@@ -534,6 +541,10 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 $this->responses[$id][] = $response;
             }
         } elseif($responses !== null) {
+            if(!($responses instanceof \CharlotteDunois\Yasmin\Models\Message)) {
+                return;
+            }
+            
             $id = $this->getChannelIDOrDM($responses->channel);
             $this->responses[$id] = array($responses);
         }

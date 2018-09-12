@@ -10,7 +10,7 @@
 namespace CharlotteDunois\Livia\Arguments;
 
 /**
- * A fancy bag for our arguments.
+ * A fancy bag for our arguments. This class is used for a library-internal optimization.
  */
 class ArgumentBag {
     /**
