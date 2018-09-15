@@ -12,6 +12,8 @@ namespace CharlotteDunois\Livia\Providers;
 /**
  * Loads and stores settings associated with guilds.
  * Classes extending this class must assign the client received in the `init` method to the `client` property.
+ *
+ * @property \CharlotteDunois\Livia\LiviaClient  $client  The client this provider is for. This property is NOT accessible outside of the client and is only for documentation purpose here (for extending the class).
  */
 abstract class SettingProvider {
     /**
