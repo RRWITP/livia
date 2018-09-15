@@ -21,14 +21,6 @@ abstract class SettingProvider {
     protected $client;
     
     /**
-     * Removes all settings in a guild.
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
-     * @return mixed
-     * @throws \InvalidArgumentException
-     */
-    abstract function clear($guild);
-    
-    /**
      * Destroys the provider, removing any event listeners.
      * @return mixed|void
      */
@@ -72,6 +64,14 @@ abstract class SettingProvider {
      * @throws \InvalidArgumentException
      */
     abstract function remove($guild, string $key);
+    
+    /**
+     * Removes all settings in a guild.
+     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    abstract function clear($guild);
     
     /**
      * Obtains the ID of the provided guild.
