@@ -24,7 +24,7 @@ abstract class SettingProvider {
     
     /**
      * An array of guilds getting set up. If in the array, events doing further setup should ignore the event.
-     * @property string[]|int[]
+     * @property array
      */
     protected $setup = array();
     
@@ -160,7 +160,7 @@ abstract class SettingProvider {
             return;
         }
         
-        $this->setup[$guild] = $true;
+        $this->setup[$guild] = true;
         
         if($guild === 'global' && \array_key_exists('commandPrefix', $settings)) {
             $this->client->setCommandPrefix($settings['commandPrefix'], true);
