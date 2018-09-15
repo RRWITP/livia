@@ -11,6 +11,7 @@ namespace CharlotteDunois\Livia\Providers;
 
 /**
  * Loads and stores settings associated with guilds.
+ * Classes extending this class must assign the client received in the `init` method to the `client` property.
  */
 abstract class SettingProvider {
     /**
@@ -84,5 +85,175 @@ abstract class SettingProvider {
         }
         
         return $this->client->guilds->resolve($guild)->id;
+    }
+    
+    /**
+     * This method will attach all necessary event listeners to the client.
+     * Providers extending this class must call this method when initializing the provider (in the `init` method).
+     * @return void
+     * @throws \BadMethodCallException
+     */
+    function attachListeners() {
+        if(!($this->client instanceof \CharlotteDunois\Livia\LiviaClient)) {
+            throw new \BadMethodCallException('The client property is not set or not a valid instance of LiviaClient');
+        }
+        
+        $this->client->on('commandPrefixChange', array($this, 'callbackCommandPrefixChange'));
+        $this->client->on('commandStatusChange', array($this, 'callbackCommandStatusChange'));
+        $this->client->on('groupStatusChange', array($this, 'callbackGroupStatusChange'));
+        $this->client->on('guildCreate', array($this, 'callbackGuildCreate'));
+        $this->client->on('commandRegister', array($this, 'callbackCommandRegister'));
+        $this->client->on('commandReregister', array($this, 'callbackCommandRegister'));
+        $this->client->on('groupRegister', array($this, 'callbackGroupRegister'));
+        $this->client->on('groupReregister', array($this, 'callbackGroupRegister'));
+    }
+    
+    /**
+     * This method will remove the attached event listeners from the client.
+     * Providers extending this class must call this method when destroying the provider (in the `destroy` method).
+     * @return void
+     * @throws \BadMethodCallException
+     */
+    function removeListeners() {
+        if(!($this->client instanceof \CharlotteDunois\Livia\LiviaClient)) {
+            throw new \BadMethodCallException('The client property is not set or not a valid instance of LiviaClient');
+        }
+        
+        $this->client->removeListener('commandPrefixChange', array($this, 'callbackCommandPrefixChange'));
+        $this->client->removeListener('commandStatusChange', array($this, 'callbackCommandStatusChange'));
+        $this->client->removeListener('groupStatusChange', array($this, 'callbackGroupStatusChange'));
+        $this->client->removeListener('guildCreate', array($this, 'callbackGuildCreate'));
+        $this->client->removeListener('commandRegister', array($this, 'callbackCommandRegister'));
+        $this->client->removeListener('commandReregister', array($this, 'callbackCommandRegister'));
+        $this->client->removeListener('groupRegister', array($this, 'callbackGroupRegister'));
+        $this->client->removeListener('groupReregister', array($this, 'callbackGroupRegister'));
+    }
+    
+    /**
+     * Loads all settings for a guild. Used in listener callbacks.
+     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @return void
+     */
+    function setupGuild($guild) {
+        $guild = $this->getGuildID($guild);
+        
+        $settings = $this->settings->get($guild);
+        if(!$settings) {
+            $this->create($guild)->done(null, array($this->client, 'handlePromiseRejection'));
+            return;
+        }
+        
+        if($guild === 'global' && \array_key_exists('commandPrefix', $settings)) {
+            $this->client->setCommandPrefix($settings['commandPrefix'], true);
+        }
+        
+        foreach($this->client->registry->commands as $command) {
+            $this->setupGuildCommand($guild, $command, $settings);
+        }
+        
+        foreach($this->client->registry->groups as $group) {
+            $this->setupGuildGroup($guild, $group, $settings);
+        }
+    }
+    
+    /**
+     * Sets up a command's status in a guild from the guild's settings. Used in listener callbacks.
+     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @param \CharlotteDunois\Livia\Commands\Command      $command
+     * @param array|\ArrayObject                           $settings
+     * @return void
+     */
+    function setupGuildCommand($guild, \CharlotteDunois\Livia\Commands\Command $command, &$settings) {
+        if(!isset($settings['command-'.$command->name])) {
+            return;
+        }
+        
+        $command->setEnabledIn(($guild !== 'global' ? $guild : null), $settings['command-'.$command->name]);
+    }
+    
+    /**
+     * Sets up a group's status in a guild from the guild's settings. Used in listener callbacks.
+     * @param string|\CharlotteDunois\Yasmin\Models\Guild   $guild
+     * @param \CharlotteDunois\Livia\Commands\CommandGroup  $group
+     * @param array|\ArrayObject                            $settings
+     * @return void
+     */
+    function setupGuildGroup($guild, \CharlotteDunois\Livia\Commands\CommandGroup $group, &$settings) {
+        if(!isset($settings['group-'.$group->id])) {
+            return;
+        }
+        
+        $group->setEnabledIn(($guild !== 'global' ? $guild : null), $settings['group-'.$group->id]);
+    }
+    
+    /**
+     * The callback for the command prefix change event.
+     * @param \CharlotteDunois\Yasmin\Models\Guild|null  $guild
+     * @param string|null                                $prefix
+     * @return void
+     */
+    function callbackCommandPrefixChange(?\CharlotteDunois\Yasmin\Models\Guild $guild, ?string $prefix) {
+        $this->set($guild, 'commandPrefix', $prefix);
+    }
+    
+    /**
+     * The callback for the command status change event.
+     * @param \CharlotteDunois\Yasmin\Models\Guild|null  $guild
+     * @param string|null                                $prefix
+     * @param bool                                       $enabled
+     * @return void
+     */
+    function callbackCommandStatusChange(?\CharlotteDunois\Yasmin\Models\Guild $guild, \CharlotteDunois\Livia\Commands\Command $command, bool $enabled) {
+        $this->set($guild, 'command-'.$command->name, $enabled);
+    }
+    
+    /**
+     * The callback for the group status change event.
+     * @param \CharlotteDunois\Yasmin\Models\Guild|null  $guild
+     * @param string|null                                $prefix
+     * @param bool                                       $enabled
+     * @return void
+     */
+    function callbackGroupStatusChange(?\CharlotteDunois\Yasmin\Models\Guild $guild, \CharlotteDunois\Livia\Commands\CommandGroup $group, bool $enabled) {
+        $this->set($guild, 'group-'.$group->id, $enabled);
+    }
+    
+    /**
+     * The callback for the guild create event.
+     * @param \CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @return void
+     */
+    function callbackGuildCreate(\CharlotteDunois\Yasmin\Models\Guild $guild) {
+        $this->setupGuild($guild);
+    }
+    
+    /**
+     * The callback for the command register and reregister event.
+     * @param \CharlotteDunois\Livia\Commands\Command  $copmmand
+     * @return void
+     */
+    function callbackCommandRegister(\CharlotteDunois\Livia\Commands\Command $command) {
+        foreach($this->settings as $guild => $settings) {
+            if($guild !== 'global' && $this->client->guilds->has($guild) === false) {
+                continue;
+            }
+            
+            $this->setupGuildCommand($guild, $command, $settings);
+        }
+    }
+    
+    /**
+     * The callback for the group register and reregister event.
+     * @param \CharlotteDunois\Livia\Commands\CommandGroup  $group
+     * @return void
+     */
+    function callbackGroupRegister(\CharlotteDunois\Livia\Commands\CommandGroup $group) {
+        foreach($this->settings as $guild => $settings) {
+            if($guild !== 'global' && $this->client->guilds->has($guild) === false) {
+                continue;
+            }
+            
+            $this->setupGuildGroup($guild, $group, $settings);
+        }
     }
 }

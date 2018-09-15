@@ -39,37 +39,6 @@ class MySQLProvider extends SettingProvider {
         $this->db = $db;
         
         $this->settings = new \CharlotteDunois\Yasmin\Utils\Collection();
-        
-        $this->listeners['commandPrefixChange'] = function ($guild, $prefix) {
-            $this->set($guild, 'commandPrefix', $prefix);
-        };
-        $this->listeners['commandStatusChange'] = function ($guild, $command, $enabled) {
-            $this->set($guild, 'command-'.$command->name, $enabled);
-        };
-        $this->listeners['groupStatusChange'] = function ($guild, $group, $enabled) {
-            $this->set($guild, 'group-'.$group->id, $enabled);
-        };
-        $this->listeners['guildCreate'] = function ($guild) {
-            $this->setupGuild($guild);
-        };
-        $this->listeners['commandRegister'] = function ($command) {
-            foreach($this->settings as $guild => $settings) {
-                if($guild !== 'global' && $this->client->guilds->has($guild) === false) {
-                    continue;
-                }
-                
-                $this->setupGuildCommand($guild, $command, $settings);
-            }
-        };
-        $this->listeners['groupRegister'] = function ($group) {
-            foreach($this->settings as $guild => $settings) {
-                if($guild !== 'global' && $this->client->guilds->has($guild) === false) {
-                    continue;
-                }
-                
-                $this->setupGuildGroup($guild, $group, $settings);
-            }
-        };
     }
     
     /**
@@ -118,9 +87,7 @@ class MySQLProvider extends SettingProvider {
      * @return \React\Promise\ExtendedPromiseInterface
      */
     function destroy() {
-        foreach($this->listeners as $event => $listener) {
-            $this->client->removeListener($event, $listener);
-        }
+        $this->removeListeners();
         
         return $this->db->quit();
     }
@@ -133,9 +100,7 @@ class MySQLProvider extends SettingProvider {
         $this->client = $client;
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
-            foreach($this->listeners as $event => $listener) {
-                $this->client->on($event, $listener);
-            }
+            $this->attachListeners();
             
             $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->then(function () {
                 return $this->runQuery('SELECT * FROM `settings`')->then(function ($result) {
@@ -221,66 +186,6 @@ class MySQLProvider extends SettingProvider {
         unset($settings[$key]);
         
         return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
-    }
-    
-    /**
-     * Loads all settings for a guild.
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
-     * @return void
-     * @internal
-     */
-    function setupGuild($guild) {
-        $guild = $this->getGuildID($guild);
-        
-        $settings = $this->settings->get($guild);
-        if(!$settings) {
-            $this->create($guild)->done(null, array($this->client, 'handlePromiseRejection'));
-            return;
-        }
-        
-        if($guild === 'global' && \array_key_exists('commandPrefix', $settings)) {
-            $this->client->setCommandPrefix($settings['commandPrefix'], true);
-        }
-        
-        foreach($this->client->registry->commands as $command) {
-            $this->setupGuildCommand($guild, $command, $settings);
-        }
-        
-        foreach($this->client->registry->groups as $group) {
-            $this->setupGuildGroup($guild, $group, $settings);
-        }
-    }
-    
-    /**
-     * Sets up a command's status in a guild from the guild's settings.
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
-     * @param \CharlotteDunois\Livia\Commands\Command      $command
-     * @param array|\ArrayObject                           $settings
-     * @return void
-     * @internal
-     */
-    function setupGuildCommand($guild, \CharlotteDunois\Livia\Commands\Command $command, &$settings) {
-        if(!isset($settings['command-'.$command->name])) {
-            return;
-        }
-        
-        $command->setEnabledIn(($guild !== 'global' ? $guild : null), $settings['command-'.$command->name]);
-    }
-    
-    /**
-     * Sets up a group's status in a guild from the guild's settings.
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild   $guild
-     * @param \CharlotteDunois\Livia\Commands\CommandGroup  $group
-     * @param array|\ArrayObject                            $settings
-     * @return void
-     * @internal
-     */
-    function setupGuildGroup($guild, \CharlotteDunois\Livia\Commands\CommandGroup $group, &$settings) {
-        if(!isset($settings['group-'.$group->id])) {
-            return;
-        }
-        
-        $group->setEnabledIn(($guild !== 'global' ? $guild : null), $settings['group-'.$group->id]);
     }
     
     /**
