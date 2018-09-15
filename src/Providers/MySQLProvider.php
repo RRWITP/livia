@@ -50,26 +50,6 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * Creates a new table row in the db for the guild, if it doesn't exist already - otherwise loads the row.
-     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
-     * @param array|\ArrayObject                           $settings
-     * @return \React\Promise\ExtendedPromiseInterface
-     * @throws \InvalidArgumentException
-     */
-    function create($guild, &$settings = array()) {
-        $guild = $this->getGuildID($guild);
-        
-        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, &$settings) {
-            if(empty($result->resultRows)) {
-                $this->settings->set($guild, $settings);
-                return $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)));
-            } else {
-                $this->loadRow($result->resultRows[0]);
-            }
-        });
-    }
-    
-    /**
      * {@inheritdoc}
      * @return \React\Promise\ExtendedPromiseInterface
      */
@@ -85,10 +65,9 @@ class MySQLProvider extends SettingProvider {
      */
     function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface {
         $this->client = $client;
+        $this->attachListeners();
         
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
-            $this->attachListeners();
-            
             $this->runQuery('CREATE TABLE IF NOT EXISTS `settings` (`guild` VARCHAR(20) NOT NULL, `settings` TEXT NOT NULL, PRIMARY KEY (`guild`))')->then(function () {
                 return $this->runQuery('SELECT * FROM `settings`')->then(function ($result) {
                     foreach($result->resultRows as $row) {
@@ -105,6 +84,26 @@ class MySQLProvider extends SettingProvider {
                 });
             })->done($resolve, $reject);
         }));
+    }
+    
+    /**
+     * Creates a new table row in the db for the guild, if it doesn't exist already - otherwise loads the row.
+     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @param array|\ArrayObject                           $settings
+     * @return \React\Promise\ExtendedPromiseInterface
+     * @throws \InvalidArgumentException
+     */
+    function create($guild, &$settings = array()): \React\Promise\ExtendedPromiseInterface {
+        $guild = $this->getGuildID($guild);
+        
+        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, &$settings) {
+            if(empty($result->resultRows)) {
+                $this->settings->set($guild, $settings);
+                return $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)));
+            } else {
+                $this->loadRow($result->resultRows[0]);
+            }
+        });
     }
     
     /**

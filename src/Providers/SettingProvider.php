@@ -23,6 +23,12 @@ abstract class SettingProvider {
     protected $client;
     
     /**
+     * An array of guilds getting set up. If in the array, events doing further setup should ignore the event.
+     * @property string[]|int[]
+     */
+    protected $setup = array();
+    
+    /**
      * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.
      * @param \CharlotteDunois\Livia\LiviaClient  $client
      * @return \React\Promise\ExtendedPromiseInterface
@@ -34,6 +40,15 @@ abstract class SettingProvider {
      * @return mixed|void
      */
     abstract function destroy();
+    
+    /**
+     * Creates a new table row in the db for the guild, if it doesn't exist already - otherwise loads the row.
+     * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
+     * @param array|\ArrayObject                           $settings
+     * @return \React\Promise\ExtendedPromiseInterface
+     * @throws \InvalidArgumentException
+     */
+    abstract function create($guild, &$settings = array()): \React\Promise\ExtendedPromiseInterface;
     
     /**
      * Gets a setting from a guild.
@@ -145,6 +160,8 @@ abstract class SettingProvider {
             return;
         }
         
+        $this->setup[$guild] = $true;
+        
         if($guild === 'global' && \array_key_exists('commandPrefix', $settings)) {
             $this->client->setCommandPrefix($settings['commandPrefix'], true);
         }
@@ -156,6 +173,8 @@ abstract class SettingProvider {
         foreach($this->client->registry->groups as $group) {
             $this->setupGuildGroup($guild, $group, $settings);
         }
+        
+        unset($this->setup[$guild]);
     }
     
     /**
@@ -195,6 +214,10 @@ abstract class SettingProvider {
      * @return void
      */
     function callbackCommandPrefixChange(?\CharlotteDunois\Yasmin\Models\Guild $guild, ?string $prefix) {
+        if(!empty($this->setup[$this->getGuildID($guild)])) {
+            return;
+        }
+        
         $this->set($guild, 'commandPrefix', $prefix);
     }
     
@@ -206,6 +229,10 @@ abstract class SettingProvider {
      * @return void
      */
     function callbackCommandStatusChange(?\CharlotteDunois\Yasmin\Models\Guild $guild, \CharlotteDunois\Livia\Commands\Command $command, bool $enabled) {
+        if(!empty($this->setup[$this->getGuildID($guild)])) {
+            return;
+        }
+        
         $this->set($guild, 'command-'.$command->name, $enabled);
     }
     
@@ -217,6 +244,10 @@ abstract class SettingProvider {
      * @return void
      */
     function callbackGroupStatusChange(?\CharlotteDunois\Yasmin\Models\Guild $guild, \CharlotteDunois\Livia\Commands\CommandGroup $group, bool $enabled) {
+        if(!empty($this->setup[$this->getGuildID($guild)])) {
+            return;
+        }
+        
         $this->set($guild, 'group-'.$group->id, $enabled);
     }
     
