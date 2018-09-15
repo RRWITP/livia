@@ -21,17 +21,17 @@ abstract class SettingProvider {
     protected $client;
     
     /**
-     * Destroys the provider, removing any event listeners.
-     * @return mixed|void
-     */
-    abstract function destroy();
-    
-    /**
      * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.
      * @param \CharlotteDunois\Livia\LiviaClient  $client
      * @return \React\Promise\ExtendedPromiseInterface
      */
     abstract function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface;
+    
+    /**
+     * Destroys the provider, removing any event listeners.
+     * @return mixed|void
+     */
+    abstract function destroy();
     
     /**
      * Gets a setting from a guild.
