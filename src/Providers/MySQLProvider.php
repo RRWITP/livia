@@ -50,19 +50,6 @@ class MySQLProvider extends SettingProvider {
     }
     
     /**
-     * {@inheritdoc}
-     * @return \React\Promise\ExtendedPromiseInterface
-     */
-    function clear($guild) {
-        $guild = $this->getGuildID($guild);
-        
-        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild) {
-            $this->settings->delete($guild);
-            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($guild))->done($resolve, $reject);
-        }));
-    }
-    
-    /**
      * Creates a new table row in the db for the guild, if it doesn't exist already - otherwise loads the row.
      * @param string|\CharlotteDunois\Yasmin\Models\Guild  $guild
      * @param array|\ArrayObject                           $settings
@@ -186,6 +173,19 @@ class MySQLProvider extends SettingProvider {
         unset($settings[$key]);
         
         return $this->runQuery('UPDATE `settings` SET `settings` = ? WHERE `guild` = ?', array(\json_encode($settings), $guild));
+    }
+    
+    /**
+     * {@inheritdoc}
+     * @return \React\Promise\ExtendedPromiseInterface
+     */
+    function clear($guild) {
+        $guild = $this->getGuildID($guild);
+        
+        return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($guild) {
+            $this->settings->delete($guild);
+            $this->runQuery('DELETE FROM `settings` WHERE `guild` = ?', array($guild))->done($resolve, $reject);
+        }));
     }
     
     /**
