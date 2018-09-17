@@ -594,6 +594,10 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             return array();
         }
         
+        if($argCount === 1) {
+            return array($argString);
+        }
+        
         $regex = ($allowSingleQuotes ? '/\s*(?:("|\')(.*?)\1|(\S+))\s*/u' : '/\s*(?:(")(.*?)"|(\S+))\s*/u');
         $results = array();
         
