@@ -172,7 +172,7 @@ class ArgumentCollector implements \Serializable {
                 
                 throw $error;
             });
-        } catch (\Throwable | \Exception | \Error $error) {
+        } catch (\Throwable $error) {
             $this->client->dispatcher->unsetAwaiting($message);
             
             throw $error;

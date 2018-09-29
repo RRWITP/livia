@@ -246,7 +246,7 @@ class CommandDispatcher implements \Serializable {
                     $this->cacheCommandMessage($message, $oldMessage, $cmdMessage, array());
                     $resolve();
                 }
-            } catch (\Throwable | \Exception | \Error $error) {
+            } catch (\Throwable $error) {
                 $this->client->emit('error', $error);
                 throw $error;
             }
