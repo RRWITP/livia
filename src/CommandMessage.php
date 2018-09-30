@@ -598,7 +598,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             return array($argString);
         }
         
-        $regex = ($allowSingleQuotes ? '/\s*(?:("|\')(.*?)\1|(\S+))\s*/u' : '/\s*(?:(")(.*?)"|(\S+))\s*/u');
+        $regex = '/\s*(?:"((?>(?:(?>[^"\\\\]+)|\\\\.)*))")'.($allowSingleQuotes ? '|(?:\'((?>(?:(?>[^\'\\\\]+)|\\\\.)*))\')' : '').'\s*/u';
         $results = array();
         
         $argString = \trim($argString);
@@ -615,7 +615,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 break;
             }
             
-            $val = \trim((!empty($matches[2][$key]) ? $matches[2][$key] : $matches[3][$key]));
+            $val = \trim((!empty($matches[2][$key]) ? $matches[2][$key] : $matches[1][$key]));
             $results[] = $val;
             
             $content = \trim(\preg_replace('/'.\preg_quote($val, '/').'/u', '', $content, 1));
@@ -623,7 +623,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         // If text remains, push it to the array as-is (except for wrapping quotes, which are removed)
         if(\mb_strlen($content) > 0) {
-            $results[] = \preg_replace(($allowSingleQuotes ? '/^("|\')(.*)\1$/u' : '/^(")(.*)"$/u'), '$2', $content);
+            $results[] = \preg_replace(($allowSingleQuotes ? '/^("|\')(.*)\1$/u' : '/^(")(.*)\1$/u'), '$2', $content);
         }
         
         if(\count($results) > 0) {
