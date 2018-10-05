@@ -153,7 +153,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 return $this->message->reply('The `'.$this->command->name.'` command must be used in a server channel.')->done($resolve, $reject);
             }
             
-            if($this->command->nsfw && !$this->message->nsfw) {
+            if($this->command->nsfw && !($this->message->channel->nsfw ?? true)) {
                 $this->client->emit('commandBlocked', $this, 'nsfw');
                 return $this->message->reply('The `'.$this->command->name.'` command must be used in NSFW channels.')->done($resolve, $reject);
             }
