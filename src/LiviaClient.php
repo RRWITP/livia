@@ -153,6 +153,21 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     }
     
     /**
+     * @return void
+     * @internal
+     */
+    function unserialize($str) {
+        parent::unserialize($str);
+        
+        $commands = $this->registry->commands->all();
+        $this->registry->commands->clear();
+        
+        foreach($commands as $command) {
+            $this->registry->registerCommand($command);
+        }
+    }
+    
+    /**
      * Sets the global command prefix. Null indicates that there is no default prefix, and only mentions will be used. Emits a commandPrefixChange event.
      * @param string|null  $prefix
      * @param bool         $fromProvider

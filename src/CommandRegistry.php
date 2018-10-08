@@ -108,10 +108,15 @@ class CommandRegistry implements \Serializable {
         
         unset($vars['client']);
         
+        $vars['commands'] = $vars['commands']->map(function (\CharlotteDunois\Livia\Commands\Command $cmd) {
+            return ($cmd->groupID.':'.$cmd->name);
+        });
+        
         return \serialize($vars);
     }
     
     /**
+     * Depends on LiviaClient for command re-registration.
      * @return void
      * @internal
      */

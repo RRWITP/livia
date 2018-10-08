@@ -114,6 +114,35 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     }
     
     /**
+     * @return string
+     * @internal
+     */
+    function serialize() {
+        $cmd = $this->command;
+        $this->command = $cmd->groupID.':'.$cmd->name;
+        
+        $str = parent::serialize();
+        $this->command = $cmd;
+        
+        return $str;
+    }
+    
+    /**
+     * @return void
+     * @internal
+     */
+    function unserialize($data) {
+        if(self::$serializeClient === null) {
+            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
+        }
+        
+        parent::unserialize($data);
+        
+        $this->client = self::$serializeClient;
+        $this->command = $this->client->registry->resolveCommand($this->command);
+    }
+    
+    /**
      * Parses the argString into usable arguments, based on the argsType and argsCount of the command.
      * @return string|string[]
      * @throws \RangeException
@@ -153,7 +182,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 return $this->message->reply('The `'.$this->command->name.'` command must be used in a server channel.')->done($resolve, $reject);
             }
             
-            if($this->command->nsfw && !$this->message->nsfw) {
+            if($this->command->nsfw && !($this->message->channel->nsfw ?? true)) {
                 $this->client->emit('commandBlocked', $this, 'nsfw');
                 return $this->message->reply('The `'.$this->command->name.'` command must be used in NSFW channels.')->done($resolve, $reject);
             }
