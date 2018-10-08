@@ -124,6 +124,7 @@ class CommandGroup implements \Serializable {
         $vars = \get_object_vars($this);
         
         unset($vars['client']);
+        $vars['commands'] = new \CharlotteDunois\Yasmin\Utils\Collection();
         
         return \serialize($vars);
     }
