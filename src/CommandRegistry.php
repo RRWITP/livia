@@ -150,22 +150,26 @@ class CommandRegistry implements \Serializable {
             $searchString = \array_pop($parts);
         }
         
+        if($message !== null) {
+            $cmdmsg = new \CharlotteDunois\Livia\CommandMessage($this->client, $message);
+        }
+        
         $matches = array();
         foreach($this->commands as $command) {
             if($exact) {
-                if(!empty($parts[0]) && $parts[0] === $command->groupID && ($command->name === $searchString || \in_array($searchString, $command->aliases)) && ($message === null || $command->hasPermission($message) === true)) {
+                if(!empty($parts[0]) && $parts[0] === $command->groupID && ($command->name === $searchString || \in_array($searchString, $command->aliases)) && ($message === null || $command->hasPermission($cmdmsg) === true)) {
                     return array($command);
                 }
                 
-                if(($command->name === $searchString || \in_array($searchString, $command->aliases)) && ($message === null || $command->hasPermission($message) === true)) {
+                if(($command->name === $searchString || \in_array($searchString, $command->aliases)) && ($message === null || $command->hasPermission($cmdmsg) === true)) {
                     $matches[] = $command;
                 }
             } else {
-                if(!empty($parts[0]) && $parts[0] === $command->groupID && \mb_stripos($command->name, $searchString) !== false && ($message === null || $command->hasPermission($message) === true)) {
+                if(!empty($parts[0]) && $parts[0] === $command->groupID && \mb_stripos($command->name, $searchString) !== false && ($message === null || $command->hasPermission($cmdmsg) === true)) {
                     return array($command);
                 }
                 
-                if(\mb_stripos($command->name, $searchString) !== false && ($message === null || $command->hasPermission($message) === true)) {
+                if(\mb_stripos($command->name, $searchString) !== false && ($message === null || $command->hasPermission($cmdmsg) === true)) {
                     $matches[] = $command;
                 }
             }

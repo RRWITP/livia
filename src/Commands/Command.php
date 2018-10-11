@@ -422,26 +422,26 @@ abstract class Command implements \Serializable {
     
     /**
      * Checks if the user has permission to use the command.
-     * @param \CharlotteDunois\Livia\CommandMessage|\CharlotteDunois\Yasmin\Models\Message  $message
-     * @param bool                                                                          $ownerOverride  Whether the bot owner(s) will always have permission.
+     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @param bool                                   $ownerOverride  Whether the bot owner(s) will always have permission.
      * @return bool|string  Whether the user has permission, or an error message to respond with if they don't.
      */
-    function hasPermission($message, bool $ownerOverride = true) {
+    function hasPermission(\CharlotteDunois\Livia\CommandMessage $message, bool $ownerOverride = true) {
         if($this->ownerOnly === false && empty($this->userPermissions)) {
             return true;
         }
         
-        if($ownerOverride && $this->client->isOwner($message->author)) {
+        if($ownerOverride && $this->client->isOwner($message->message->author)) {
             return true;
         }
         
-        if($this->ownerOnly && ($ownerOverride || !$this->client->isOwner($message->author))) {
+        if($this->ownerOnly && ($ownerOverride || !$this->client->isOwner($message->message->author))) {
             return 'The command `'.$this->name.'` can only be used by the bot owner.';
         }
         
         // Ensure the user has the proper permissions
-        if($message->channel->type === 'text' && !empty($this->userPermissions)) {
-            $perms = $message->channel->permissionsFor($message->member);
+        if($message->message->channel->type === 'text' && !empty($this->userPermissions)) {
+            $perms = $message->channel->permissionsFor($message->message->member);
             
             $missing = array();
             foreach($this->userPermissions as $perm) {
@@ -593,10 +593,10 @@ abstract class Command implements \Serializable {
     
     /**
      * Checks if the command is usable for a message.
-     * @param \CharlotteDunois\Livia\CommandMessage|\CharlotteDunois\Yasmin\Models\Message|null  $message
+     * @param \CharlotteDunois\Livia\CommandMessage|null  $message
      * @return bool
      */
-    function isUsable($message = null) {
+    function isUsable(?\CharlotteDunois\Livia\CommandMessage $message = null) {
         if($message === null) {
             return $this->globalEnabled;
         }
