@@ -90,7 +90,7 @@ return function ($client) {
         
         // Checks if the command is allowed to run - the default method from Command class also checks userPermissions.
         // Even if you don't use all arguments, you are forced to match that method signature.
-        function hasPermission($message, bool $ownerOverride = true) {
+        function hasPermission(\CharlotteDunois\Livia\CommandMessage $message, bool $ownerOverride = true) {
             return $message->member->roles->has('SERVER_STAFF_ROLE_ID');
         }
         
