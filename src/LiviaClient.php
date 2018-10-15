@@ -159,12 +159,11 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     function unserialize($str) {
         parent::unserialize($str);
         
-        $commands = $this->registry->commands->all();
-        $this->registry->commands->clear();
-        
-        foreach($commands as $command) {
+        foreach($this->registry->internalSerializedCommands as $command) {
             $this->registry->registerCommand($command);
         }
+        
+        $this->registry->unsetInternalSerializedCommands();
     }
     
     /**

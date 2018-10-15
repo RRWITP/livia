@@ -56,6 +56,12 @@ class CommandRegistry implements \Serializable {
     protected $types;
     
     /**
+     * Used for serialization/unserialization of commands.
+     * @var string[]
+     */
+    protected $internalSerializedCommands = array();
+    
+    /**
      * @internal
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
@@ -108,9 +114,10 @@ class CommandRegistry implements \Serializable {
         
         unset($vars['client']);
         
-        $vars['commands'] = $vars['commands']->map(function (\CharlotteDunois\Livia\Commands\Command $cmd) {
+        $vars['internalSerializedCommands'] = $vars['commands']->map(function (\CharlotteDunois\Livia\Commands\Command $cmd) {
             return ($cmd->groupID.':'.$cmd->name);
         });
+        $vars['commands'] = array();
         
         return \serialize($vars);
     }
@@ -132,6 +139,7 @@ class CommandRegistry implements \Serializable {
         }
         
         $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
+        $this->commands = new \CharlotteDunois\Yasmin\Utils\Collection();
     }
     
     /**
@@ -653,6 +661,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
+     * @param string  $command
      * @return \Closure
      * @throws \RuntimeException
      */
@@ -672,5 +681,14 @@ class CommandRegistry implements \Serializable {
         }
         
         throw new \RuntimeException('Unable to resolve command');
+    }
+    
+    /**
+     * Unsets (resets) the internally used serialized commands array.
+     * @return void
+     * @internal
+     */
+    function unsetInternalSerializedCommands() {
+        $this->internalSerializedCommands = array();
     }
 }
