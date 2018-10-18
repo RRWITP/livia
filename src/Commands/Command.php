@@ -36,7 +36,7 @@ namespace CharlotteDunois\Livia\Commands;
  * @property string[]                                           $patterns           Regular expression triggers.
  * @property bool                                               $guarded            Whether the command is protected from being disabled.
  */
-abstract class Command implements \Serializable {
+abstract class Command {
     /**
      * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient
@@ -376,48 +376,6 @@ abstract class Command implements \Serializable {
         }
         
         throw new \RuntimeException('Unknown property '.\get_class($this).'::$'.$name);
-    }
-    
-    /**
-     * @return string
-     * @internal
-     */
-    function serialize() {
-        $vars = \get_object_vars($this);
-        
-        unset($vars['client']);
-        
-        foreach($vars['args'] as $key => $arg) {
-            $vars['args'][$key]['validate'] = null;
-            $vars['args'][$key]['parse'] = null;
-            $vars['args'][$key]['emptyChecker'] = null;
-        }
-        
-        $vars['throttles'] = new \CharlotteDunois\Yasmin\Utils\Collection();
-        foreach($this->throttles as $id => $val) {
-            $val['timeout'] = null;
-            $vars['throttles']->set($id, $val);
-        }
-        
-        return \serialize($vars);
-    }
-    
-    /**
-     * @return void
-     * @internal
-     */
-    function unserialize($vars) {
-        if(\CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient === null) {
-            throw new \Exception('Unable to unserialize a class without ClientBase::$serializeClient being set');
-        }
-        
-        $vars = \unserialize($vars);
-        
-        foreach($vars as $name => $val) {
-            $this->$name = $val;
-        }
-        
-        $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
     }
     
     /**
