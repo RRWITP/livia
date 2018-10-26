@@ -143,7 +143,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      * @internal
      */
     function serialize() {
-        $serializable = $this->provider instanceof \Serializable;
+        $serializable = ($this->provider instanceof \Serializable);
         
         if(!$serializable) {
             $provider = $this->provider;
