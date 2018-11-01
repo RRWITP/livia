@@ -27,7 +27,7 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * A collection of a guild's settings, mapped by guild ID.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $settings;
     
@@ -38,7 +38,7 @@ class MySQLProvider extends SettingProvider {
     function __construct(\React\MySQL\ConnectionInterface $db) {
         $this->db = $db;
         
-        $this->settings = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $this->settings = new \CharlotteDunois\Collect\Collection();
     }
     
     /**

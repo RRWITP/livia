@@ -412,7 +412,7 @@ class Argument implements \Serializable {
                 'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.\PHP_EOL.
                 'The command will automatically be cancelled in '.$this->wait.' seconds.');
         } elseif($valid === false) {
-            $escaped = \str_replace('@', "@\u{200B}", \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($value));
+            $escaped = \str_replace('@', "@\u{200B}", \CharlotteDunois\Yasmin\Utils\MessageHelpers::escapeMarkdown($value));
             
             $reply = $message->reply('You provided an invalid '.$this->label.', "'.(\mb_strlen($escaped) < 1850 ? $escaped : '[too long to show]').'". '.
                                         'Please try again.');

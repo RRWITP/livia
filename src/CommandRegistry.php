@@ -13,10 +13,10 @@ namespace CharlotteDunois\Livia;
  * Handles registration and searching of commands and groups.
  *
  * @property \CharlotteDunois\Livia\LiviaClient        $client               The client which initiated the instance.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands             Registered commands, mapped by their name.
+ * @property \CharlotteDunois\Collect\Collection       $commands             Registered commands, mapped by their name.
  * @property string[]                                  $commandsDirectories  List of fully resolved path to the bot's commands directories.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $groups               Registered command groups, mapped by their id.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $types                Registered argument types, mapped by their name.
+ * @property \CharlotteDunois\Collect\Collection       $groups               Registered command groups, mapped by their id.
+ * @property \CharlotteDunois\Collect\Collection       $types                Registered argument types, mapped by their name.
  */
 class CommandRegistry implements \Serializable {
     /**
@@ -33,7 +33,7 @@ class CommandRegistry implements \Serializable {
     
     /**
      * Registered commands, mapped by their name.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $commands;
     
@@ -45,13 +45,13 @@ class CommandRegistry implements \Serializable {
     
     /**
      * Registered command groups, mapped by their id.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $groups;
     
     /**
      * Registered argument types, mapped by their name.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $types;
     
@@ -68,9 +68,9 @@ class CommandRegistry implements \Serializable {
         $this->client = $client;
         $this->basepath = \realpath(__DIR__.'/Commands/');
         
-        $this->commands = new \CharlotteDunois\Yasmin\Utils\Collection();
-        $this->groups = new \CharlotteDunois\Yasmin\Utils\Collection();
-        $this->types = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $this->commands = new \CharlotteDunois\Collect\Collection();
+        $this->groups = new \CharlotteDunois\Collect\Collection();
+        $this->types = new \CharlotteDunois\Collect\Collection();
     }
     
     /**
@@ -139,7 +139,7 @@ class CommandRegistry implements \Serializable {
         }
         
         $this->client = \CharlotteDunois\Yasmin\Models\ClientBase::$serializeClient;
-        $this->commands = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $this->commands = new \CharlotteDunois\Collect\Collection();
     }
     
     /**

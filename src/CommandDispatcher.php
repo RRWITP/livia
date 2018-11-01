@@ -41,7 +41,7 @@ class CommandDispatcher implements \Serializable {
     
     /**
      * Command results.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $results;
     
@@ -51,7 +51,7 @@ class CommandDispatcher implements \Serializable {
     function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
         $this->client = $client;
         
-        $this->results = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $this->results = new \CharlotteDunois\Collect\Collection();
     }
     
     /**

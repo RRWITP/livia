@@ -189,7 +189,7 @@ abstract class Command {
     
     /**
      * A collection of throttle arrays.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $throttles;
     
@@ -337,7 +337,7 @@ abstract class Command {
         $this->patterns = $info['patterns'] ?? $this->patterns;
         $this->guarded = $info['guarded'] ?? $this->guarded;
         
-        $this->throttles = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $this->throttles = new \CharlotteDunois\Collect\Collection();
     }
     
     /**
@@ -602,12 +602,12 @@ abstract class Command {
         $prStr = null;
         if(!empty($prefix)) {
             $prefix = \str_replace(' ', "\u{00A0}", $prefix);
-            $prStr = '`'.\CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($prefix.$command).'`';
+            $prStr = '`'.\CharlotteDunois\Yasmin\Utils\MessageHelpers::escapeMarkdown($prefix.$command).'`';
         }
         
         $meStr = null;
         if($user !== null) {
-            $meStr = '`@'.\CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown(\str_replace(' ', "\u{00A0}", $user->tag)."\u{00A0}".$command).'`';
+            $meStr = '`@'.\CharlotteDunois\Yasmin\Utils\MessageHelpers::escapeMarkdown(\str_replace(' ', "\u{00A0}", $user->tag)."\u{00A0}".$command).'`';
         }
         
         return ($prStr ?? '').(!empty($prefix) && $user !== null ? ' or ' : '').($meStr ?? '');

@@ -15,13 +15,13 @@ namespace CharlotteDunois\Livia\Utils;
 class DataHelpers {
     /**
      * If a selection is ambiguous, this will make a list of selectable items.
-     * @param array|\CharlotteDunois\Yasmin\Utils\Collection  $items
+     * @param array|\CharlotteDunois\Collect\Collection       $items
      * @param string                                          $label
      * @param string|null                                     $property
      * @return string
      */
     static function disambiguation($items, string $label, ?string $property = null) {
-        if($items instanceof \CharlotteDunois\Yasmin\Utils\Collection) {
+        if($items instanceof \CharlotteDunois\Collect\Collection) {
             $items = $items->all();
         }
         
@@ -30,7 +30,7 @@ class DataHelpers {
                 $item = (\is_array($item) ? $item[$property] : $item->$property);
             }
             
-            return '`'.\str_replace(' ', "\u{00A0}", \CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($item)).'`';
+            return '`'.\str_replace(' ', "\u{00A0}", \CharlotteDunois\Yasmin\Utils\MessageHelpers::escapeMarkdown($item)).'`';
         }, $items);
         
         return 'Multiple '.$label.' found, please be more specific: '.\implode(', ', $itemList);

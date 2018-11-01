@@ -57,6 +57,12 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     protected $responses = array();
     
     /**
+     * Internal command for serialization.
+     * @var string|null
+     */
+    protected $internalCommand;
+    
+    /**
      * @internal
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, \CharlotteDunois\Yasmin\Models\Message $message, \CharlotteDunois\Livia\Commands\Command $command = null, string $argString = null, array $patternMatches = null) {
@@ -119,7 +125,9 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      */
     function serialize() {
         $cmd = $this->command;
-        $this->command = $cmd->groupID.':'.$cmd->name;
+        $this->command = null;
+        
+        $this->internalCommand = $cmd->groupID.':'.$cmd->name;
         
         $str = parent::serialize();
         $this->command = $cmd;
@@ -139,7 +147,9 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         parent::unserialize($data);
         
         $this->client = self::$serializeClient;
-        $this->command = $this->client->registry->resolveCommand($this->command);
+        
+        $this->command = $this->client->registry->resolveCommand($this->internalCommand);
+        $this->internalCommand = null;
     }
     
     /**
@@ -299,11 +309,11 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 $this->client->emit('commandRun', $this->command, $promise, $this, $args, ($this->patternMatches !== null));
                 
                 return $promise->then(function ($response) use (&$argmsgs) {
-                    if(!($response instanceof \CharlotteDunois\Yasmin\Models\Message || $response instanceof \CharlotteDunois\Yasmin\Utils\Collection || \is_array($response) || $response === null)) {
+                    if(!($response instanceof \CharlotteDunois\Yasmin\Models\Message || $response instanceof \CharlotteDunois\Collect\Collection || \is_array($response) || $response === null)) {
                         throw new \RuntimeException('Command '.$this->command->name.'\'s run() resolved with an unknown type ('.\gettype($response).'). Command run methods must return a Promise that resolve with a Message, an array of Messages, a Collection of Messages, or null.');
                     }
                     
-                    if(!\is_array($response) && !($response instanceof \CharlotteDunois\Yasmin\Utils\Collection)) {
+                    if(!\is_array($response) && !($response instanceof \CharlotteDunois\Collect\Collection)) {
                         if($response instanceof \CharlotteDunois\Yasmin\Models\Message) {
                             $argmsgs[] = $response;
                         }
@@ -344,7 +354,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                         $or = ($ownersLength > 1 && $index === ($ownersLength - 1) ? 'or ' : '');
                         $index++;
                         
-                        return $or.\CharlotteDunois\Yasmin\Utils\DataHelpers::escapeMarkdown($user->tag);
+                        return $or.\CharlotteDunois\Yasmin\Utils\MessageHelpers::escapeMarkdown($user->tag);
                     }, $owners);
                     
                     $owners = \implode((\count($owners) > 2 ? ', ' : ' '), $owners);
@@ -437,7 +447,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         }
         
         if(!empty($options['split'])) {
-            $content = \CharlotteDunois\Yasmin\Utils\DataHelpers::splitMessage($content, (\is_array($options['split']) ? $options['split'] : array()));
+            $content = \CharlotteDunois\Yasmin\Utils\MessageHelpers::splitMessage($content, (\is_array($options['split']) ? $options['split'] : array()));
             if(\count($content) === 1) {
                 $content = $content[0];
             }

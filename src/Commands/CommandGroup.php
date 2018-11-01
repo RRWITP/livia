@@ -16,7 +16,7 @@ namespace CharlotteDunois\Livia\Commands;
  * @property string                                    $id             The ID of the group.
  * @property string                                    $name           The name of the group.
  * @property bool                                      $guarded        Whether this group is guarded against disabling.
- * @property \CharlotteDunois\Yasmin\Utils\Collection  $commands       The commands that the group contains.
+ * @property \CharlotteDunois\Collect\Collection       $commands       The commands that the group contains.
  */
 class CommandGroup implements \Serializable {
     /**
@@ -45,7 +45,7 @@ class CommandGroup implements \Serializable {
     
     /**
      * The commands that the group contains.
-     * @var \CharlotteDunois\Yasmin\Utils\Collection
+     * @var \CharlotteDunois\Collect\Collection
      */
     protected $commands;
     
@@ -76,7 +76,7 @@ class CommandGroup implements \Serializable {
         $this->name = $name;
         $this->guarded = $guarded;
         
-        $this->commands = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $this->commands = new \CharlotteDunois\Collect\Collection();
         if(!empty($commands)) {
             foreach($commands as $command) {
                 $this->commands->set($command->name, $command);
@@ -124,7 +124,7 @@ class CommandGroup implements \Serializable {
         $vars = \get_object_vars($this);
         
         unset($vars['client']);
-        $vars['commands'] = new \CharlotteDunois\Yasmin\Utils\Collection();
+        $vars['commands'] = new \CharlotteDunois\Collect\Collection();
         
         return \serialize($vars);
     }
