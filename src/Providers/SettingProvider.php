@@ -17,6 +17,27 @@ namespace CharlotteDunois\Livia\Providers;
  */
 abstract class SettingProvider {
     /**
+     * The Provider state, idling waiting to have a connection.
+     * @var int
+     * @source
+     */
+    const STATE_IDLE = 0;
+    
+    /**
+     * The Provider state, ready to get work done.
+     * @var int
+     * @source
+     */
+    const STATE_READY = 1;
+    
+    /**
+     * The current provider state.
+     * Implementations must set this state accordingly.
+     * @var int
+     */
+    protected $providerState = 0;
+    
+    /**
      * The client this provider is for.
      * @var \CharlotteDunois\Livia\LiviaClient
      */
@@ -27,6 +48,14 @@ abstract class SettingProvider {
      * @property array
      */
     protected $setup = array();
+    
+    /**
+     * Returns the provider state.
+     * @return int
+     */
+    function getState() {
+        return $this->providerState;
+    }
     
     /**
      * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.

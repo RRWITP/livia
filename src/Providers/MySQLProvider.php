@@ -31,8 +31,18 @@ class MySQLProvider extends SettingProvider {
      */
     function __construct(\React\MySQL\ConnectionInterface $db) {
         $this->db = $db;
+        $this->providerState = \CharlotteDunois\Livia\Providers\SettingProvider::STATE_READY;
         
         $this->settings = new \CharlotteDunois\Collect\Collection();
+    }
+    
+    /**
+     * Resets the state.
+     * @return void
+     * @internal
+     */
+    function __sleep() {
+        $this->providerState = \CharlotteDunois\Livia\Providers\SettingProvider::STATE_IDLE;
     }
     
     /**
