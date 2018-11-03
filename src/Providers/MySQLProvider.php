@@ -20,12 +20,6 @@ class MySQLProvider extends SettingProvider {
     protected $db;
     
     /**
-     * The provider's listeners, mapped by event name.
-     * @var \Closure[]
-     */
-    protected $listeners = array();
-    
-    /**
      * A collection of a guild's settings, mapped by guild ID.
      * @var \CharlotteDunois\Collect\Collection
      */
