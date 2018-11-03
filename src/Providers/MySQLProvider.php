@@ -37,7 +37,7 @@ class MySQLProvider extends SettingProvider {
     
     /**
      * Returns the MySQL connection.
-     * @return \React\MySQL\Connection
+     * @return \React\MySQL\ConnectionInterface
      */
     function getDB() {
         return $this->db;
