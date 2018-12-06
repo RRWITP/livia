@@ -115,7 +115,7 @@ return function ($client) {
                                 return $cmd->isUsable($message);
                             }));
                             
-                            return "__{$group->name}__".\PHP_EOL.\implode(\PHP_EOL, $cmds->sort(function ($a, $b) {
+                            return "__{$group->name}__".\PHP_EOL.\implode(\PHP_EOL, $cmds->sortCustom(function ($a, $b) {
                                 return $a->name <=> $b->name;
                             })->map(function ($cmd) {
                                 return "**{$cmd->name}:** {$cmd->description}";
@@ -128,7 +128,7 @@ return function ($client) {
                             }
                             
                             return false;
-                        })->sort(function ($a, $b) {
+                        })->sortCustom(function ($a, $b) {
                             return $a->name <=> $b->name;
                         })->all() : $groups->filter(function ($group) use ($message) {
                             foreach($group->commands as $cmd) {
@@ -138,7 +138,7 @@ return function ($client) {
                             }
                             
                             return false;
-                        })->sort(function ($a, $b) {
+                        })->sortCustom(function ($a, $b) {
                             return $a->name <=> $b->name;
                         })->all())));
                 
