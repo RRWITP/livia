@@ -42,7 +42,7 @@ A Setting Provider sits as middle-man between Livia and the DBMS. The job of the
 
 There are two providers included in Livia:
 
-###### MySQL/MariaDB (react/mysql)
+#### MySQL/MariaDB (react/mysql)
 `MySQLProvider` - a provider for MySQL/MariaDB, which utilizes [`react/mysql`](https://github.com/friends-of-reactphp/mysql).
 
 Usage:
@@ -54,7 +54,7 @@ $factory->createConnection('user:password@localhost/database')->done(function (\
 });
 ```
 
-###### Plasma
+#### Plasma
 `PlasmaProvider` - a provider for Plasma [`plasma/plasma`](https://github.com/PlasmaPHP/plasma).
 
 Plasma is a non-blocking, asychronous data-access database abstraction layer. To use plasma you also need a driver, which communicates with the database server.<br>
