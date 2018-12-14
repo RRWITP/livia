@@ -38,8 +38,12 @@ The following commands are coming with Livia:
 * prefix (gets or sets the bot's prefix in the guild/globally)
 
 # Setting Provider
-A Setting Provider sits as middle-man between Livia and the DBMS. The job of the Setting Provider is to permanently store the settings, such as guild prefixes.<br>
-Included in Livia is a provider for MySQL/MariaDB, which utilizes [`react/mysql`](https://github.com/friends-of-reactphp/mysql).
+A Setting Provider sits as middle-man between Livia and the DBMS. The job of the Setting Provider is to permanently store the settings, such as guild prefixes.
+
+There are two providers included in Livia:
+
+###### MySQL/MariaDB (react/mysql)
+`MySQLProvider` - a provider for MySQL/MariaDB, which utilizes [`react/mysql`](https://github.com/friends-of-reactphp/mysql).
 
 Usage:
 ```php
@@ -48,6 +52,20 @@ $factory->createConnection('user:password@localhost/database')->done(function (\
     $provider = new \CharlotteDunois\Livia\Providers\MySQLProvider($db);
     $your_livia_client->setProvider($provider);
 });
+```
+
+###### Plasma
+`PlasmaProvider` - a provider for Plasma [`plasma/plasma`](https://github.com/PlasmaPHP/plasma).
+
+Plasma is a non-blocking, asychronous data-access database abstraction layer. To use plasma you also need a driver, which communicates with the database server.<br>
+For MySQL/MariaDB there is [`plasma/driver-mysql`](https://github.com/PlasmaPHP/driver-mysql), which supports Prepared Statements.
+
+Usage:
+```php
+// See the plasma project for how to create a plasma client
+
+$provider = new \CharlotteDunois\Livia\Providers\PlasmaProvider($plasma_client);
+$your_livia_client->setProvider($provider);
 ```
 
 # Making Commands
