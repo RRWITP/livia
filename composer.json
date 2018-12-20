@@ -17,9 +17,11 @@
         "symfony/var-dumper": "^4.1"
     },
     "require-dev": {
+        "plasma/core": "^0.1.0|dev-master",
         "react/mysql": "^0.4.1"
     },
     "suggest": {
+        "plasma/core": "Required for Plasma Provider",
         "react/mysql": "Required for MySQL Provider"
     },
     "autoload": {
