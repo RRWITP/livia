@@ -637,7 +637,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             return array($argString);
         }
         
-        $regex = '/\s*(?:"((?>(?:(?>[^"\\\\]+)|\\\\.)*))")'.($allowSingleQuotes ? '|(?:\'((?>(?:(?>[^\'\\\\]+)|\\\\.)*))\')' : '').'\s*/u';
+        $regex = '/(?:(['.($allowSingleQuotes ? "'" : '').'"])(.*?)(?<!\\\\)(?>\\\\\\\)*\1|([^\\s]+))/Su';
         $results = array();
         
         $argString = \trim($argString);
@@ -648,13 +648,14 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         $content = $argString;
         \preg_match_all($regex, $argString, $matches);
+        
         foreach($matches[0] as $key => $val) {
             $argCount--;
             if($argCount === 0) {
                 break;
             }
             
-            $val = \trim((!empty($matches[2][$key]) ? $matches[2][$key] : $matches[1][$key]));
+            $val = \trim(($matches[3][$key] !== '' ? $matches[3][$key] : ($matches[2][$key] !== '' ? $matches[2][$key] : $matches[1][$key])));
             $results[] = $val;
             
             $content = \trim(\preg_replace('/'.\preg_quote($val, '/').'/u', '', $content, 1));
