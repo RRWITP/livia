@@ -111,15 +111,11 @@ return function ($client) {
                     return eval($evalcode);
                 })();
                 
-                if($result instanceof \GuzzleHttp\Promise\PromiseInterface) {
-                    $result = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($result) {
-                        $result->then($resolve, $reject);
-                    });
-                } elseif(!($result instanceof \React\Promise\PromiseInterface)) {
+                if(!($result instanceof \React\Promise\PromiseInterface)) {
                     $endtime = $timer();
                     $result = \React\Promise\resolve($result);
                 }
-                    
+                
                 return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer) {
                     if($endtime === null) {
                         $endtime = $timer();

@@ -14,7 +14,7 @@ namespace CharlotteDunois\Livia\Arguments;
  *
  * @property \CharlotteDunois\Livia\LiviaClient           $client       The client which initiated the instance.
  * @property \CharlotteDunois\Livia\Arguments\Argument[]  $args         Arguments for the collector.
- * @property int|double                                   $promptLimit  Maximum number of times to prompt for a single argument.
+ * @property int|float                                    $promptLimit  Maximum number of times to prompt for a single argument.
  */
 class ArgumentCollector implements \Serializable {
     /**
@@ -30,6 +30,12 @@ class ArgumentCollector implements \Serializable {
     protected $args = array();
     
     /**
+     * The num of arguments.
+     * @var int
+     */
+    protected $argsCount;
+    
+    /**
      * Maximum number of times to prompt for a single argument.
      * @var int|float
      */
@@ -39,7 +45,7 @@ class ArgumentCollector implements \Serializable {
      * Constructs a new Argument Collector.
      * @param \CharlotteDunois\Livia\LiviaClient    $client
      * @param array                                 $args
-     * @param int|double                            $promptLimit
+     * @param int|float                             $promptLimit
      * @throws \InvalidArgumentException
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $args, $promptLimit = \INF) {
@@ -47,6 +53,7 @@ class ArgumentCollector implements \Serializable {
         
         $hasInfinite = false;
         $hasOptional = false;
+        
         foreach($args as $key => $arg) {
             if(!empty($arg['infinite'])) {
                 $hasInfinite = true;
@@ -67,6 +74,7 @@ class ArgumentCollector implements \Serializable {
             $this->args[] = new \CharlotteDunois\Livia\Arguments\Argument($this->client, $arg);
         }
         
+        $this->argsCount = \count($this->args);
         $this->promptLimit = $promptLimit;
     }
     
@@ -136,7 +144,7 @@ class ArgumentCollector implements \Serializable {
      * Obtains values for the arguments, prompting if necessary.
      * @param \CharlotteDunois\Livia\CommandMessage  $message
      * @param array                                  $provided
-     * @param int|double                             $promptLimit
+     * @param int|float                              $promptLimit
      * @return \React\Promise\ExtendedPromiseInterface
      */
     function obtain(\CharlotteDunois\Livia\CommandMessage $message, $provided = array(), $promptLimit = null) {
@@ -160,10 +168,10 @@ class ArgumentCollector implements \Serializable {
                 return array(
                     'values' => $values,
                     'cancelled' => null,
-                    'prompts' => \array_merge(array(), ...\array_map(function ($res) {
+                    'prompts' => \array_merge(array(), ...\array_map(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $res) {
                         return $res->prompts;
                     }, $results)),
-                    'answers' => \array_merge(array(), ...\array_map(function ($res) {
+                    'answers' => \array_merge(array(), ...\array_map(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $res) {
                         return $res->answers;
                     }, $results))
                 );
@@ -183,7 +191,7 @@ class ArgumentCollector implements \Serializable {
      * Obtains and collects the next argument.
      * @param \CharlotteDunois\Livia\CommandMessage           $message
      * @param array                                           $provided
-     * @param int|double                                      $promptLimit
+     * @param int|float                                       $promptLimit
      * @param array                                           $values
      * @param array                                           $results
      * @param int                                             $current
@@ -196,18 +204,25 @@ class ArgumentCollector implements \Serializable {
         
         $bag = new \CharlotteDunois\Livia\Arguments\ArgumentBag($this->args[$current], $promptLimit);
         
-        return $this->args[$current]->obtain($message, (isset($provided[$current]) ? ($this->args[$current]->infinite ? \array_slice($provided, $current) : $provided[$current]) : null), $bag)
-            ->then(function ($result) use ($message, &$provided, $bag, $promptLimit, &$values, &$results, $current) {
+        $providedArg = (isset($provided[$current]) ?
+            ($this->args[$current]->infinite ?
+                \array_slice($provided, $current) :
+                ($this->argsCount < \count($provided) && ($this->argsCount - 1) === $current ? \implode(' ', \array_slice($provided, $current)) : $provided[$current])
+            ) : null
+        );
+        
+        return $this->args[$current]->obtain($message, $providedArg, $bag)
+            ->then(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $result) use ($message, &$provided, $bag, $promptLimit, &$values, &$results, $current) {
                 $results[] = $result;
                 
                 if($bag->cancelled) {
                     return array(
                         'values' => null,
                         'cancelled' => $result->cancelled,
-                        'prompts' => \array_merge(array(), ...\array_map(function ($res) {
+                        'prompts' => \array_merge(array(), ...\array_map(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $res) {
                             return $res->prompts;
                         }, $results)),
-                        'answers' => \array_merge(array(), ...\array_map(function ($res) {
+                        'answers' => \array_merge(array(), ...\array_map(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $res) {
                             return $res->answers;
                         }, $results))
                     );

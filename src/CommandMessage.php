@@ -52,7 +52,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     
     /**
      * Command responses, as multidimensional array (channelID|dm => Message[]).
-     * @var \CharlotteDunois\Yasmin\Models\Message[]
+     * @var array
      */
     protected $responses = array();
     
@@ -127,7 +127,9 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         $cmd = $this->command;
         $this->command = null;
         
-        $this->internalCommand = $cmd->groupID.':'.$cmd->name;
+        if($cmd !== null) {
+            $this->internalCommand = $cmd->groupID.':'.$cmd->name;
+        }
         
         $str = parent::serialize();
         $this->command = $cmd;
@@ -146,18 +148,26 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         parent::unserialize($data);
         
+        /** @var \CharlotteDunois\Livia\LiviaClient  $this->client */
         $this->client = self::$serializeClient;
         
-        $this->command = $this->client->registry->resolveCommand($this->internalCommand);
-        $this->internalCommand = null;
+        if($this->internalCommand !== null) {
+            $this->command = $this->client->registry->resolveCommand($this->internalCommand);
+            $this->internalCommand = null;
+        }
     }
     
     /**
      * Parses the argString into usable arguments, based on the argsType and argsCount of the command.
      * @return string|string[]
+     * @throws \LogicException
      * @throws \RangeException
      */
     function parseCommandArgs() {
+        if($this->command === null) {
+            throw new \LogicException('This message has no command');
+        }
+        
         switch($this->command->argsType) {
             case 'single':
                 $args = $this->argString;
@@ -172,8 +182,13 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
     /**
      * Runs the command. Resolves with an instance of Message or an array of Message instances.
      * @return \React\Promise\ExtendedPromiseInterface
+     * @throws \LogicException
      */
     function run() {
+        if($this->command === null) {
+            throw new \LogicException('This message has no command');
+        }
+        
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) {
             $promises = array();
             
@@ -298,11 +313,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             \React\Promise\all($promises)->then(function () use (&$args, &$argmsgs) {
                 $promise = $this->command->run($this, $args, ($this->patternMatches !== null));
                 
-                if($promise instanceof \GuzzleHttp\Promise\PromiseInterface) {
-                    $promise = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($promise) {
-                        $promise->then($resolve, $reject);
-                    });
-                } elseif(!($promise instanceof \React\Promise\PromiseInterface)) {
+                if(!($promise instanceof \React\Promise\PromiseInterface)) {
                     $promise = \React\Promise\resolve($promise);
                 }
                 
@@ -566,7 +577,9 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         if(\is_array($responses)) {
             foreach($responses as $response) {
+                /** @var \CharlotteDunois\Yasmin\Models\Message  $msg */
                 $msg = (\is_array($response) ? $response[0] : $response);
+                
                 if(!($msg instanceof \CharlotteDunois\Yasmin\Models\Message)) {
                     continue;
                 }
