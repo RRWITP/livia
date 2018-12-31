@@ -65,8 +65,9 @@ return function ($client) {
                     return 'Unable to identify command. Use '.$this->usage('', ($message->message->channel->type === 'dm' ? null : $this->client->getGuildPrefix($message->message->guild)), ($message->message->channel->type === 'dm' ? null : $this->client->user)).' to view the list of all commands.';
                 }
                 
+                /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */
                 foreach($commands as $key => $cmd) {
-                    if(!empty($cmd->ownerOnly) && $cmd->hasPermission($message) !== true) {
+                    if($cmd->ownerOnly && $cmd->hasPermission($message) !== true) {
                         unset($commands[$key]);
                     }
                 }
@@ -108,21 +109,23 @@ return function ($client) {
                         'Use '.$this->usage('<command>', null, null).' to view detailed information about a specific command.'.\PHP_EOL.
                         'Use '.$this->usage('all', null, null).' to view a list of *all* commands, not just available ones.'.\PHP_EOL.\PHP_EOL.
                         '__**'.($showAll ? 'All commands' : 'Available commands in '.($message->message->guild !== null ? $message->message->guild->name : 'this DM')).'**__'.\PHP_EOL.\PHP_EOL.
-                        \implode(\PHP_EOL.\PHP_EOL, \array_map(function ($group) use ($message, $showAll) {
-                            $cmds = ($showAll ? $group->commands->filter(function ($cmd) use ($message) {
-                                return (!$cmd->ownerOnly || $this->client->isOwner($message->author));
-                            }) : $group->commands->filter(function ($cmd) use ($message) {
-                                return $cmd->isUsable($message);
+                        \implode(\PHP_EOL.\PHP_EOL, \array_map(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($message, $showAll) {
+                            $cmds = ($showAll ? $group->commands->filter(function (\CharlotteDunois\Livia\Commands\Command $cmd) use ($message) {
+                                return (!$cmd->hidden && (!$cmd->ownerOnly || $this->client->isOwner($message->author)));
+                            }) : $group->commands->filter(function (\CharlotteDunois\Livia\Commands\Command $cmd) use ($message) {
+                                return (!$cmd->hidden && $cmd->isUsable($message));
                             }));
                             
-                            return "__{$group->name}__".\PHP_EOL.\implode(\PHP_EOL, $cmds->sortCustom(function ($a, $b) {
-                                return $a->name <=> $b->name;
-                            })->map(function ($cmd) {
-                                return "**{$cmd->name}:** {$cmd->description}";
-                            })->all());
-                        }, ($showAll ? $groups->filter(function ($group) use ($message) {
+                            return "__{$group->name}__".\PHP_EOL.
+                                \implode(\PHP_EOL, $cmds->sortCustom(function (\CharlotteDunois\Livia\Commands\Command $a, \CharlotteDunois\Livia\Commands\Command $b) {
+                                    return $a->name <=> $b->name;
+                                })->map(function (\CharlotteDunois\Livia\Commands\Command $cmd) {
+                                    return "**{$cmd->name}:** {$cmd->description}";
+                                })->all());
+                        }, ($showAll ? $groups->filter(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($message) {
+                            /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */
                             foreach($group->commands as $cmd) {
-                                if(!$cmd->ownerOnly || $this->client->isOwner($message->author)) {
+                                if(!$cmd->hidden && (!$cmd->ownerOnly || $this->client->isOwner($message->author))) {
                                     return true;
                                 }
                             }
@@ -130,7 +133,8 @@ return function ($client) {
                             return false;
                         })->sortCustom(function ($a, $b) {
                             return $a->name <=> $b->name;
-                        })->all() : $groups->filter(function ($group) use ($message) {
+                        })->all() : $groups->filter(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($message) {
+                            /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */
                             foreach($group->commands as $cmd) {
                                 if($cmd->isUsable($message)) {
                                     return true;

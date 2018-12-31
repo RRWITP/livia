@@ -35,6 +35,7 @@ namespace CharlotteDunois\Livia\Commands;
  * @property int                                                $argsCount          Maximum number of arguments that will be split.
  * @property string[]                                           $patterns           Regular expression triggers.
  * @property bool                                               $guarded            Whether the command is protected from being disabled.
+ * @property bool                                               $hidden             Whether the command is hidden in the `help` command overview.
  */
 abstract class Command {
     /**
@@ -170,6 +171,12 @@ abstract class Command {
     protected $guarded = false;
     
     /**
+     * Whether the command is hidden in the `help` command overview.
+     * @var bool
+     */
+    protected $hidden = false;
+    
+    /**
      * Whether the command is globally enabled.
      * @var bool
      */
@@ -219,6 +226,7 @@ abstract class Command {
      *   'argsSingleQuotes' => bool, (optional)
      *   'patterns' => string[], (Regular Expression strings, pattern matches don't get parsed for arguments, optional)
      *   'guarded' => bool, (defaults to false)
+     *   'hidden' => bool, (defaults to false)
      * )
      * ```
      *
@@ -229,7 +237,7 @@ abstract class Command {
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $info) {
         $this->client = $client;
         
-        $validator = \CharlotteDunois\Validation\Validator::make($info, array(
+        \CharlotteDunois\Validation\Validator::make($info, array(
             'name' => 'required|string|lowercase|nowhitespace',
             'group' => 'required|string',
             'description' => 'required|string',
@@ -250,14 +258,9 @@ abstract class Command {
             'argsPromptLimit' => 'integer|float',
             'argsCount' => 'integer|min:2',
             'patterns' => 'array:string',
-            'guarded' => 'boolean'
-        ));
-        
-        try {
-            $validator->throw();
-        } catch (\RuntimeException $e) {
-            throw new \InvalidArgumentException($e->getMessage());
-        }
+            'guarded' => 'boolean',
+            'hidden' => 'boolean'
+        ))->throw(\InvalidArgumentException::class);
         
         $this->name = $info['name'];
         $this->groupID = $info['group'];
@@ -336,6 +339,7 @@ abstract class Command {
         
         $this->patterns = $info['patterns'] ?? $this->patterns;
         $this->guarded = $info['guarded'] ?? $this->guarded;
+        $this->hidden = $info['hidden'] ?? $this->hidden;
         
         $this->throttles = new \CharlotteDunois\Collect\Collection();
     }

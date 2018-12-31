@@ -26,6 +26,12 @@ interface LiviaClientEvents {
     function commandBlocked(\CharlotteDunois\Livia\CommandMessage $message, string $reason);
     
     /**
+     * Emitted when a command was cancelled.
+     * @return void
+     */
+    function commandCancelled(\CharlotteDunois\Livia\CommandMessage $message, string $reason);
+    
+    /**
      * Emitted when a command produces an error while running.
      * @return void
      */

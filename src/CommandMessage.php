@@ -287,6 +287,8 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
                         }
                         
                         $argmsgs = $result['prompts'];
+                        $this->client->emit('commandCancelled', $this, $result['cancelled']);
+                        
                         throw new \CharlotteDunois\Livia\Exceptions\FriendlyException('Cancelled Command.');
                     }
                     
