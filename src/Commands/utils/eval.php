@@ -45,6 +45,7 @@ return function ($client) {
             $this->xdebug = \extension_loaded('xdebug');
             
             $this->cloner->setMinDepth(1);
+            $this->cloner->setMaxItems(0);
             $this->dumper->setColors(false);
         }
         
@@ -174,13 +175,12 @@ return function ($client) {
                 $old = \ini_get('xdebug.var_display_max_depth');
                 \ini_set('xdebug.var_display_max_depth', 1);
                 
-                \var_dump($result);
+                \xdebug_var_dump($result);
                 \ini_set('xdebug.var_display_max_depth', $old);
                 $result = \ob_get_clean();
                 
-                $result = \explode("\n", \str_replace("\r", "", $result));
-                \array_shift($result);
-                $result = \implode(\PHP_EOL, $result);
+                $result = \substr($result, (\strpos($result, "\n") + 1));
+                $result = \preg_replace("/#(\d+) \((\d+)\) {\n\s*...\n\s*}/u", '#$1 ($2) { }', $result);
             } else {
                 $output = \fopen('php://memory', 'r+b');
                 if(!$output) {
@@ -209,8 +209,8 @@ return function ($client) {
          * @throws \ErrorException
          */
         function errorCallback($errno, $errstr, $errfile, $errline) {
-            // Fixing bug
-            if(\mb_stripos($errstr, 'Cannot modify header information') !== false) {
+            // Latter fixes a bug
+            if(\error_reporting() === 0 || \mb_stripos($errstr, 'Cannot modify header information') !== false) {
                 return true;
             }
             

@@ -43,14 +43,14 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      *
      * ```
      * array(
-     *   'commandPrefix' => string|null, (Default command prefix, null means only mentions will trigger the handling, defaults to l$)
-     *   'commandBlockedMessagePattern' => bool, (Whether command pattern maatches will send command blocked messages, defaults to true)
-     *   'commandEditableDuration' => int, (Time in seconds that command messages should be editable, defaults to 30)
-     *   'commandThrottlingMessagePattern' => bool, (Whether command pattern matches will send command throttling messages, defaults to true)
-     *   'nonCommandEditable' => bool, (Whether messages without commands can be edited to a command, defaults to true)
-     *   'unknownCommandResponse' => bool, (Whether the bot should respond to an unknown command, defaults to true)
+     *   'commandPrefix' => string|null, (default command prefix, null means only mentions will trigger the handling, defaults to l$)
+     *   'commandBlockedMessagePattern' => bool, (whether command pattern maatches will send command blocked messages, defaults to true)
+     *   'commandEditableDuration' => int, (time in seconds that command messages should be editable, defaults to 30)
+     *   'commandThrottlingMessagePattern' => bool, (whether command pattern matches will send command throttling messages, defaults to true)
+     *   'nonCommandEditable' => bool, (whether messages without commands can be edited to a command, defaults to true)
+     *   'unknownCommandResponse' => bool, (whether the bot should respond to an unknown command, defaults to true)
      *   'owners' => string[], (array of user IDs)
-     *   'invite' => string, (Invite URL to the bot's support server)
+     *   'invite' => string, (invite URL to the bot's support server)
      * )
      * ```
      *
