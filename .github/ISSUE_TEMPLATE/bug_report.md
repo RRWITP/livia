@@ -1,6 +1,9 @@
-<!--
-If you need help with Livia, please visit the Discord guild! The issue tracker is only for bug reports and enhancement suggestions.
--->
+---
+name: Bug report
+about: Create a report to help us improve
+
+---
+
 **Please describe the issue you are having:**
 
 
@@ -14,10 +17,21 @@ If you need help with Livia, please visit the Discord guild! The issue tracker i
 
 ```
 
+**Please include the expected output of the MCVE:**
+```php
+
+```
+
+**Please include the actual output of the MCVE:**
+```php
+
+```
+
 **Further details:**
 
-- Yasmin version:
-- PHP version:
-- Operating System:
+- Yasmin version: 
+- Livia version: 
+- PHP version: 
+- Operating System: 
 
 - [ ] I have also tested the issue on latest master with commit hash:
