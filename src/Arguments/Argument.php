@@ -16,7 +16,7 @@ namespace CharlotteDunois\Livia\Arguments;
  * @property string                                           $key           Key for the argument.
  * @property string                                           $label         Label for the argument.
  * @property string                                           $prompt        Question prompt for the argument.
- * @property \CharlotteDunois\Livia\Types\ArgumentType|null   $type          Type of the argument.
+ * @property string|null                                      $typeID        Type name of the argument.
  * @property int|float|null                                   $max           If type is integer or float, this is the maximum value of the number. If type is string, this is the maximum length of the string.
  * @property int|float|null                                   $min           If type is integer or float, this is the minimum value of the number. If type is string, this is the minimum length of the string.
  * @property mixed|null                                       $default       The default value for the argument.
@@ -25,6 +25,8 @@ namespace CharlotteDunois\Livia\Arguments;
  * @property callable|null                                    $parse         Parser function to parse a value for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::parse})
  * @property callable|null                                    $emptyChecker  Empty checker function for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::isEmpty})
  * @property int                                              $wait          How long to wait for input (in seconds).
+ *
+ * @property \CharlotteDunois\Livia\Types\ArgumentType|null   $type          Type of the argument.
  */
 class Argument implements \Serializable {
     /**
@@ -50,12 +52,6 @@ class Argument implements \Serializable {
      * @var string
      */
     protected $prompt;
-    
-    /**
-     * Type of the argument.
-     * @var \CharlotteDunois\Livia\Types\ArgumentType|null
-     */
-    protected $type;
     
     /**
      * If type is integer or float, this is the maximum value of the number. If type is string, this is the maximum length of the string.
@@ -106,6 +102,12 @@ class Argument implements \Serializable {
     protected $wait;
     
     /**
+     * Type name of the argument.
+     * @var string|null
+     */
+    protected $typeID;
+    
+    /**
      * Constructs a new Argument. Info is an array as following:
      *
      * ```
@@ -113,7 +115,7 @@ class Argument implements \Serializable {
      *   'key' => string, (Key for the argument)
      *   'label' => string, (Label for the argument, defaults to key)
      *   'prompt' => string, (First prompt for the argument when it wasn't specified)
-     *   'type' => string, (Type of the argument, must be the ID of one of the registered argument types)
+     *   'type' => string|null, (Type of the argument, must be the ID of one of the registered argument types)
      *   'max' => int|float, (If type is integer or float this is the maximum value, if type is string this is the maximum length, optional)
      *   'min' => int|float, (If type is integer or float this is the minimum value, if type is string this is the minimum length, optional)
      *   'default' => mixed, (Default value for the argumen, must not be null, optional)
@@ -132,10 +134,10 @@ class Argument implements \Serializable {
     function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $info) {
         $this->client = $client;
         
-        $validator = \CharlotteDunois\Validation\Validator::make($info, array(
+        \CharlotteDunois\Validation\Validator::make($info, array(
             'key' => 'required|string|min:1',
             'prompt' => 'required|string|min:1',
-            'type' => 'string',
+            'type' => 'string|min:1|nullable',
             'max' => 'integer|float',
             'min' => 'integer|float',
             'infinite' => 'boolean',
@@ -143,26 +145,20 @@ class Argument implements \Serializable {
             'parse' => 'callable',
             'emptyChecker' => 'callable',
             'wait' => 'integer|min:1'
-        ));
-        
-        try {
-            $validator->throw();
-        } catch (\RuntimeException $e) {
-            throw new \InvalidArgumentException($e->getMessage());
-        }
+        ))->throw(\InvalidArgumentException::class);
         
         if(empty($info['type']) && (empty($info['validate']) || empty($info['parse']))) {
-            throw new \InvalidArgumentException('Argument type can not be empty if you don\'t implement and validate and parse function');
+            throw new \InvalidArgumentException('Argument type can\'t be empty if you don\'t implement validate and parse function');
         }
         
         if(!empty($info['type']) && !$this->client->registry->types->has($info['type'])) {
             throw new \InvalidArgumentException('Argument type "'.$info['type'].'" is not registered');
         }
         
-        $this->key = (string) $info['key'];
+        $this->key = $info['key'];
         $this->label = (!empty($info['label']) ? $info['label'] : $info['key']);
-        $this->prompt = (string) $info['prompt'];
-        $this->type = (!empty($info['type']) ? $this->client->registry->types->get($info['type']) : null);
+        $this->prompt = $info['prompt'];
+        $this->typeID = $info['type'] ?? null;
         $this->max = $info['max'] ?? null;
         $this->min = $info['min'] ?? null;
         $this->default = $info['default'] ?? null;
@@ -170,7 +166,7 @@ class Argument implements \Serializable {
         $this->validate = (!empty($info['validate']) ? $info['validate'] : null);
         $this->parse = (!empty($info['parse']) ? $info['parse'] : null);;
         $this->emptyChecker = (!empty($info['emptyChecker']) ? $info['emptyChecker'] : null);
-        $this->wait = (int) ($info['wait'] ?? 30);
+        $this->wait = $info['wait'] ?? 30;
     }
     
     /**
@@ -200,6 +196,12 @@ class Argument implements \Serializable {
     function __get($name) {
         if(\property_exists($this, $name)) {
             return $this->$name;
+        }
+        
+        switch($name) {
+            case 'type':
+                return $this->client->registry->types->get($this->typeID);
+            break;
         }
         
         throw new \RuntimeException('Unknown property '.\get_class($this).'::$'.$name);

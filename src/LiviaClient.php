@@ -43,14 +43,14 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      *
      * ```
      * array(
-     *   'commandPrefix' => string|null, (default command prefix, null means only mentions will trigger the handling, defaults to l$)
-     *   'commandBlockedMessagePattern' => bool, (whether command pattern maatches will send command blocked messages, defaults to true)
-     *   'commandEditableDuration' => int, (time in seconds that command messages should be editable, defaults to 30)
-     *   'commandThrottlingMessagePattern' => bool, (whether command pattern matches will send command throttling messages, defaults to true)
-     *   'nonCommandEditable' => bool, (whether messages without commands can be edited to a command, defaults to true)
-     *   'unknownCommandResponse' => bool, (whether the bot should respond to an unknown command, defaults to true)
-     *   'owners' => string[], (array of user IDs)
-     *   'invite' => string, (invite URL to the bot's support server)
+     *   'commandPrefix' => string|null, (Default command prefix, null means only mentions will trigger the handling, defaults to l$)
+     *   'commandBlockedMessagePattern' => bool, (Whether command pattern maatches will send command blocked messages, defaults to true)
+     *   'commandEditableDuration' => int, (Time in seconds that command messages should be editable, defaults to 30)
+     *   'commandThrottlingMessagePattern' => bool, (Whether command pattern matches will send command throttling messages, defaults to true)
+     *   'nonCommandEditable' => bool, (Whether messages without commands can be edited to a command, defaults to true)
+     *   'unknownCommandResponse' => bool, (Whether the bot should respond to an unknown command, defaults to true)
+     *   'owners' => string[], (Array of user IDs)
+     *   'invite' => string, (Invite URL to the bot's support server)
      * )
      * ```
      *
@@ -288,7 +288,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     protected function validateClientOptions(array $options) {
         parent::validateClientOptions($options);
         
-        $validator = \CharlotteDunois\Validation\Validator::make($options, array(
+        \CharlotteDunois\Validation\Validator::make($options, array(
             'commandPrefix' => 'string|nullable',
             'commandBlockedMessagePattern' => 'boolean',
             'commandEditableDuration' => 'integer',
@@ -297,15 +297,6 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
             'unknownCommandResponse' => 'boolean',
             'owners' => 'array:string|array:integer',
             'invite' => 'string'
-        ));
-        
-        if($validator->fails()) {
-            $errors = $validator->errors();
-            
-            $name = \array_keys($errors)[0];
-            $error = $errors[$name];
-            
-            throw new \InvalidArgumentException('Client Option '.$name.' '.\lcfirst($error));
-        }
+        ))->throw(\InvalidArgumentException::class);
     }
 }
