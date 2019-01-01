@@ -13,7 +13,7 @@
     "require": {
         "php": ">=7.1",
         "charlottedunois/yasmin": "^0.6.0|dev-master",
-        "charlottedunois/validator": "^0.2.0",
+        "charlottedunois/validator": "^0.3.0|^0.2.0",
         "symfony/var-dumper": "^4.1"
     },
     "require-dev": {
