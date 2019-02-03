@@ -182,16 +182,8 @@ return function ($client) {
                 $result = \substr($result, (\strpos($result, "\n") + 1));
                 $result = \preg_replace("/#(\d+) \((\d+)\) {\n\s*...\n\s*}/u", '#$1 ($2) { }', $result);
             } else {
-                $output = \fopen('php://memory', 'r+b');
-                if(!$output) {
-                    throw new \RuntimeException('Unable to open memory file handle to dump variables');
-                }
-                
                 $data = $this->cloner->cloneVar($result);
-                $this->dumper->dump($data->withMaxDepth(1), $output);
-                
-                $result = \stream_get_contents($output, -1, 0);
-                \fclose($output);
+                $result = $this->dumper->dump($data->withMaxDepth(1), true);
             }
             
             $email = $this->client->user->email;
