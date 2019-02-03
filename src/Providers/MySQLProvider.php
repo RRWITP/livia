@@ -97,10 +97,10 @@ class MySQLProvider extends SettingProvider {
      * @return \React\Promise\ExtendedPromiseInterface
      * @throws \InvalidArgumentException
      */
-    function create($guild, &$settings = array()): \React\Promise\ExtendedPromiseInterface {
+    function create($guild, $settings = array()): \React\Promise\ExtendedPromiseInterface {
         $guild = $this->getGuildID($guild);
         
-        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, &$settings) {
+        return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, $settings) {
             if(empty($result->resultRows)) {
                 $this->settings->set($guild, $settings);
                 return $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)));

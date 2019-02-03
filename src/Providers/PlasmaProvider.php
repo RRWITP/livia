@@ -11,6 +11,8 @@ namespace CharlotteDunois\Livia\Providers;
 
 /**
  * Loads and stores settings associated with guilds in a database using Plasma. Requires the composer package `plasma/core` **and** a driver of your choice.
+ *
+ * `plasma/schemas` is not supported by this provider. The underlying plasma client must be passed instead to this provider.
  */
 class PlasmaProvider extends SettingProvider {
     /**
@@ -100,12 +102,12 @@ class PlasmaProvider extends SettingProvider {
      * @return \React\Promise\ExtendedPromiseInterface
      * @throws \InvalidArgumentException
      */
-    function create($guild, &$settings = array()): \React\Promise\ExtendedPromiseInterface {
+    function create($guild, $settings = array()): \React\Promise\ExtendedPromiseInterface {
         $guild = $this->getGuildID($guild);
         
         return $this->db->execute('SELECT * FROM settings WHERE guild = ?', array($guild))
             ->then(function ($result) use ($guild, &$settings) {
-                return $result->all()->then(function (\Plasma\QueryResultInterface $result) use ($guild, &$settings) {
+                return $result->all()->then(function (\Plasma\QueryResultInterface $result) use ($guild, $settings) {
                     $rows = $result->getRows();
                     
                     if(empty($rows)) {

@@ -77,7 +77,7 @@ abstract class SettingProvider {
      * @return \React\Promise\ExtendedPromiseInterface
      * @throws \InvalidArgumentException
      */
-    abstract function create($guild, &$settings = array()): \React\Promise\ExtendedPromiseInterface;
+    abstract function create($guild, $settings = array()): \React\Promise\ExtendedPromiseInterface;
     
     /**
      * Gets a setting from a guild.
