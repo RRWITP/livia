@@ -11,8 +11,6 @@ namespace CharlotteDunois\Livia\Providers;
 
 /**
  * Loads and stores settings associated with guilds in a database using Plasma. Requires the composer package `plasma/core` **and** a driver of your choice.
- *
- * `plasma/schemas` is not supported by this provider. The underlying plasma client must be passed instead to this provider.
  */
 class PlasmaProvider extends SettingProvider {
     /**
