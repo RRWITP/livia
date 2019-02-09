@@ -40,7 +40,10 @@ class CommandOrGroupArgumentType extends ArgumentType {
             return false;
         }
         
-        return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name').\PHP_EOL.\CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($groups, 'groups', 'name');
+        $cmds = (!empty($commands) ? \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name') : '');
+        $grps = (!empty($groups) ? \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($groups, 'groups', 'name') : '');
+        
+        return $cmds.(!empty($cmds) && !empty($grps) ? \PHP_EOL : '').$grps.\PHP_EOL;
     }
     
     /**
