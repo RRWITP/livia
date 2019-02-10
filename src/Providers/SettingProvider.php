@@ -158,11 +158,10 @@ abstract class SettingProvider {
      * This method will remove the attached event listeners from the client.
      * Providers extending this class must call this method when destroying the provider (in the `destroy` method).
      * @return void
-     * @throws \BadMethodCallException
      */
     function removeListeners() {
         if(!($this->client instanceof \CharlotteDunois\Livia\LiviaClient)) {
-            throw new \BadMethodCallException('The client property is not set or not a valid instance of LiviaClient');
+            return;
         }
         
         $this->client->removeListener('commandPrefixChange', array($this, 'callbackCommandPrefixChange'));
