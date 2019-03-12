@@ -36,13 +36,13 @@ return function ($client) {
         
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
             return $message->direct($this->renderHelpMessage($message, $args), array('split' => true))->then(function ($msg) use ($message) {
-                if($message->message->channel->type !== 'dm') {
+                if(!($message->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
                     return $message->reply('Sent you a DM with information.');
                 }
                 
                 return $msg;
             }, function () use ($message) {
-                if($message->message->channel->type !== 'dm') {
+                if(!($message->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
                     return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
                 }
             });
@@ -56,13 +56,15 @@ return function ($client) {
         function renderHelpMessage(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args) {
             $groups = $this->client->registry->groups;
             $commands = (!empty($args['command']) ? $this->client->registry->findCommands($args['command'], false, $message->message) : $this->client->registry->commands->all());
+            
+            $isDM = ($message->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface);
             $showAll = (!empty($args['command']) && \mb_strtolower($args['command']) === 'all');
             
             if(!empty($args['command']) && !$showAll) {
                 $countCommands = \count($commands);
                 
                 if($countCommands === 0) {
-                    return 'Unable to identify command. Use '.$this->usage('', ($message->message->channel->type === 'dm' ? null : $this->client->getGuildPrefix($message->message->guild)), ($message->message->channel->type === 'dm' ? null : $this->client->user)).' to view the list of all commands.';
+                    return 'Unable to identify command. Use '.$this->usage('', ($isDM ? null : $this->client->getGuildPrefix($message->message->guild)), ($isDM ? null : $this->client->user)).' to view the list of all commands.';
                 }
                 
                 /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */

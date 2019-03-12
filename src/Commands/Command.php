@@ -402,7 +402,7 @@ abstract class Command {
         }
         
         // Ensure the user has the proper permissions
-        if($message->message->channel->type === 'text' && !empty($this->userPermissions)) {
+        if($message->message->guild !== null && !empty($this->userPermissions)) {
             $perms = $message->channel->permissionsFor($message->message->member);
             
             $missing = array();

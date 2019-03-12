@@ -193,7 +193,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             $promises = array();
             
             // Obtain the member if we don't have it
-            if($this->message->channel->type === 'text' && !$this->message->guild->members->has($this->message->author->id) && $this->message->webhookID === null) {
+            if($this->message->guild !== null && !$this->message->guild->members->has($this->message->author->id) && $this->message->webhookID === null) {
                 $promises[] = $this->message->guild->fetchMember($this->message->author->id);
             }
             
@@ -228,7 +228,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             }
             
             // Ensure the client user has the required permissions
-            if($this->message->channel->type === 'text' && !empty($this->command->clientPermissions)) {
+            if($this->message->channel !== null && !empty($this->command->clientPermissions)) {
                 $perms = $this->message->channel->permissionsFor($this->message->guild->me);
                 
                 $missing = array();
@@ -397,7 +397,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      * @throws \InvalidArgumentException
      */
     protected function respond(string $type, string $content, array $options = array(), bool $fromEdit = false) {
-        if($type === 'reply' && $this->message->channel->type === 'dm') {
+        if($type === 'reply' && $this->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\GuildChannelInterface) {
             $type = 'plain';
         }
         
@@ -637,7 +637,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      * @return string|int
      */
     protected function getChannelIDOrDM(\CharlotteDunois\Yasmin\Interfaces\TextChannelInterface $channel) {
-        if($channel->type !== 'dm') {
+        if(!($channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
             return $channel->id;
         }
         
