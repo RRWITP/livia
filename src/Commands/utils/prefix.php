@@ -43,10 +43,10 @@ return function ($client) {
             }
             
             if($message->message->guild !== null) {
-                if($message->message->member->permissions->has('ADMINISTRATOR') === false && $this->client->isOwner($message->message->author) === false) {
+                if(!$message->message->member->permissions->has('ADMINISTRATOR') && !$this->client->isOwner($message->message->author)) {
                     return $message->reply('Only administrators may change the command prefix.');
                 }
-            } elseif($this->client->isOwner($message->message->author) === false) {
+            } elseif(!$this->client->isOwner($message->message->author)) {
                 return $message->reply('Only the bot owner may change the command prefix.');
             }
             

@@ -193,12 +193,12 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             $promises = array();
             
             // Obtain the member if we don't have it
-            if($this->message->channel->type === 'text' && $this->message->guild->members->has($this->message->author->id) === false && $this->message->webhookID === null) {
+            if($this->message->channel->type === 'text' && !$this->message->guild->members->has($this->message->author->id) && $this->message->webhookID === null) {
                 $promises[] = $this->message->guild->fetchMember($this->message->author->id);
             }
             
             // Obtain the member for the client user if we don't have it
-            if($this->message->channel->type === 'text' && $this->message->guild->me === null) {
+            if($this->message->guild !== null && $this->message->guild->me === null) {
                 $promises[] = $this->message->guild->fetchMember($this->client->user->id);
             }
             
@@ -401,7 +401,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             $type = 'plain';
         }
         
-        if($type !== 'direct' && $this->message->guild && $this->message->channel->permissionsFor($this->client->user)->has('SEND_MESSAGES') === false) {
+        if($type !== 'direct' && $this->message->guild !== null && !$this->message->channel->permissionsFor($this->client->user)->has('SEND_MESSAGES')) {
             $type = 'direct';
         }
         
@@ -410,7 +410,15 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
         }
         
         $channelID = $this->getChannelIDOrDM($this->message->channel);
-        $shouldEdit = (!empty($this->responses) && (($type === 'direct' && !empty($this->responses['dm'])) || ($type !== 'direct' && !empty($this->responses[$channelID]))) && $fromEdit === false && empty($options['files']));
+        $shouldEdit = (
+            !empty($this->responses) &&
+            (
+                ($type === 'direct' && !empty($this->responses['dm'])) ||
+                ($type !== 'direct' && !empty($this->responses[$channelID]))
+            ) &&
+            !$fromEdit &&
+            empty($options['files'])
+        );
         
         switch($type) {
             case 'plain':

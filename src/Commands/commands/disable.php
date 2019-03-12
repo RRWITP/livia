@@ -38,7 +38,7 @@ return function ($client) {
         function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
             $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
             
-            if($args['commandOrGroup']->isEnabledIn($message->message->guild) === false) {
+            if(!$args['commandOrGroup']->isEnabledIn($message->message->guild)) {
                 return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already disabled.');
             }
             

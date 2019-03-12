@@ -295,7 +295,7 @@ abstract class SettingProvider {
      */
     function callbackCommandRegister(\CharlotteDunois\Livia\Commands\Command $command) {
         foreach($this->settings as $guild => $settings) {
-            if($guild !== 'global' && $this->client->guilds->has($guild) === false) {
+            if($guild !== 'global' && !$this->client->guilds->has($guild)) {
                 continue;
             }
             
@@ -310,7 +310,7 @@ abstract class SettingProvider {
      */
     function callbackGroupRegister(\CharlotteDunois\Livia\Commands\CommandGroup $group) {
         foreach($this->settings as $guild => $settings) {
-            if($guild !== 'global' && $this->client->guilds->has($guild) === false) {
+            if($guild !== 'global' && !$this->client->guilds->has($guild)) {
                 continue;
             }
             

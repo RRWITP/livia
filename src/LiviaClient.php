@@ -187,7 +187,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
         
         $this->options['commandPrefix'] = $prefix;
         
-        if($fromProvider === false) {
+        if(!$fromProvider) {
             $this->emit('commandPrefixChange', null, $prefix);
         }
         
