@@ -46,6 +46,12 @@ class CommandDispatcher implements \Serializable {
     protected $results;
     
     /**
+     * Contains an array of authorID-channelID-command => timestamps, used for throttling throttling or other some sort of "failure" messages.
+     * @var array
+     */
+    protected $negativeResponseThrottling = array();
+    
+    /**
      * @internal
      */
     function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
@@ -442,6 +448,47 @@ class CommandDispatcher implements \Serializable {
         $key = \array_search($message->message->author->id.$message->message->channel->id, $this->awaiting, true);
         if($key !== false) {
             unset($this->awaiting[$key]);
+        }
+    }
+    
+    /**
+     * Throttles negative response messages (such as throttling, not a nsfw channel, command blocked, etc.). Used exclusively for and by `CommandMessage`.
+     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @param string                                 $response
+     * @param callable                               $resolve
+     * @param callable                               $reject
+     * @return void
+     */
+    function throttleNegativeResponseMessage(\CharlotteDunois\Livia\CommandMessage $message, string $response, callable $resolve, callable $reject) {
+        if($message->command === null) {
+            return $resolve(array());
+        }
+        
+        $key = $message->message->author->id.'-'.$message->message->channel->id.'-'.$message->command->name;
+        $timestamp = $this->negativeResponseThrottling[$key] ?? 0;
+        $timeout = (int) $this->client->getOption('negativeResponseThrottlingDuration');
+        
+        if($timeout >= (\time() - $timestamp)) {
+            return $resolve(array());
+        }
+        
+        $this->negativeResponseThrottling[$key] = \time();
+        $message->reply($response)->done($resolve, $reject);
+    }
+    
+    /**
+     * Cleans up too hold negative response messages (5 * duration).
+     * @return void
+     * @internal
+     */
+    function cleanupNegativeResponseMessages() {
+        $current = \time();
+        $timeout = 5 * ((int) $this->client->getOption('negativeResponseThrottlingDuration'));
+        
+        foreach($this->negativeResponseThrottling as $key => $time) {
+            if(($current - $time) >= $timeout) {
+                unset($this->negativeResponseThrottling[$key]);
+            }
         }
     }
 }

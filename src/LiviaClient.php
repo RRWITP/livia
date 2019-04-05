@@ -47,6 +47,7 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
      *   'commandBlockedMessagePattern' => bool, (Whether command pattern maatches will send command blocked messages, defaults to true)
      *   'commandEditableDuration' => int, (Time in seconds that command messages should be editable, defaults to 30)
      *   'commandThrottlingMessagePattern' => bool, (Whether command pattern matches will send command throttling messages, defaults to true)
+     *   'negativeResponseThrottlingDuration' => int, (Time in seconds how long negative responses should be not repeated during that time (determined by authorID-channelID-command), defaults to 15)
      *   'nonCommandEditable' => bool, (Whether messages without commands can be edited to a command, defaults to true)
      *   'unknownCommandResponse' => bool, (Whether the bot should respond to an unknown command, defaults to true)
      *   'owners' => string[], (Array of user IDs)
@@ -67,6 +68,10 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
         
         if(!isset($options['commandEditableDuration'])) {
             $options['commandEditableDuration'] = 30;
+        }
+        
+        if(!isset($options['negativeResponseThrottlingDuration'])) {
+            $options['negativeResponseThrottlingDuration'] = 15;
         }
         
         if(!isset($options['nonCommandEditable'])) {
@@ -265,6 +270,20 @@ class LiviaClient extends \CharlotteDunois\Yasmin\Client {
     function setGuildPrefix(?\CharlotteDunois\Yasmin\Models\Guild $guild, string $prefix = null) {
         $this->emit('commandPrefixChange', $guild, $prefix);
         return true;
+    }
+    
+    /**
+     * Login into Discord. Opens a WebSocket Gateway connection. Resolves once a WebSocket connection has been successfully established (does not mean the client is ready).
+     * @param string $token  Your token.
+     * @param bool   $force  Forces the client to get the gateway address from Discord.
+     * @return \React\Promise\ExtendedPromiseInterface
+     * @throws \RuntimeException
+     * @internal
+     */
+    function login(string $token, bool $force = false) {
+        $this->addPeriodicTimer(300, array($this->dispatcher, 'cleanupNegativeResponseMessages'));
+        
+        return parent::login($token, $force);
     }
     
     /**
