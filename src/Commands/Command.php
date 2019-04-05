@@ -384,26 +384,26 @@ abstract class Command {
     
     /**
      * Checks if the user has permission to use the command.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
-     * @param bool                                   $ownerOverride  Whether the bot owner(s) will always have permission.
+     * @param \CharlotteDunois\Livia\Commands\Context  $context
+     * @param bool                                     $ownerOverride  Whether the bot owner(s) will always have permission.
      * @return bool|string  Whether the user has permission, or an error message to respond with if they don't.
      */
-    function hasPermission(\CharlotteDunois\Livia\CommandMessage $message, bool $ownerOverride = true) {
+    function hasPermission(\CharlotteDunois\Livia\Commands\Context $context, bool $ownerOverride = true) {
         if($this->ownerOnly === false && empty($this->userPermissions)) {
             return true;
         }
         
-        if($ownerOverride && $this->client->isOwner($message->message->author)) {
+        if($ownerOverride && $this->client->isOwner($context->message->author)) {
             return true;
         }
         
-        if($this->ownerOnly && ($ownerOverride || !$this->client->isOwner($message->message->author))) {
+        if($this->ownerOnly && ($ownerOverride || !$this->client->isOwner($context->message->author))) {
             return 'The command `'.$this->name.'` can only be used by the bot owner.';
         }
         
         // Ensure the user has the proper permissions
-        if($message->message->guild !== null && !empty($this->userPermissions)) {
-            $perms = $message->channel->permissionsFor($message->message->member);
+        if($context->message->guild !== null && !empty($this->userPermissions)) {
+            $perms = $context->message->channel->permissionsFor($context->message->member);
             
             $missing = array();
             foreach($this->userPermissions as $perm) {
@@ -413,7 +413,7 @@ abstract class Command {
             }
             
             if(\count($missing) > 0) {
-                $this->client->emit('commandBlocked', $message, 'userPermissions');
+                $this->client->emit('commandBlocked', $context, 'userPermissions');
                 
                 if(\count($missing) === 1) {
                     $msg = 'The command `'.$this->name.'` requires you to have the `'.$missing[0].'` permission.';
@@ -433,12 +433,12 @@ abstract class Command {
     
     /**
      * Runs the command. The method must return null, an array of Message instances or an instance of Message, a Promise that resolves to an instance of Message, or an array of Message instances. The array can contain Promises which each resolves to an instance of Message.
-     * @param \CharlotteDunois\Livia\CommandMessage $message      The message the command is being run for.
-     * @param \ArrayObject                          $args         The arguments for the command, or the matches from a pattern. If args is specified on the command, thise will be the argument values object. If argsType is single, then only one string will be passed. If multiple, an array of strings will be passed. When fromPattern is true, this is the matches array from the pattern match.
-     * @param bool                                  $fromPattern  Whether or not the command is being run from a pattern match.
+     * @param \CharlotteDunois\Livia\Commands\Context  $context      The context the command is being run for.
+     * @param \ArrayObject                             $args         The arguments for the command, or the matches from a pattern. If args is specified on the command, this will be the argument values object. If argsType is single, then only one string will be passed. If multiple, an array of strings will be passed. When fromPattern is true, this is the matches array from the pattern match.
+     * @param bool                                     $fromPattern  Whether or not the command is being run from a pattern match.
      * @return \React\Promise\ExtendedPromiseInterface|\React\Promise\ExtendedPromiseInterface[]|\CharlotteDunois\Yasmin\Models\Message|\CharlotteDunois\Yasmin\Models\Message[]|null|void
      */
-    abstract function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern);
+    abstract function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern);
     
     /**
      * Reloads the command.
@@ -555,19 +555,19 @@ abstract class Command {
     
     /**
      * Checks if the command is usable for a message.
-     * @param \CharlotteDunois\Livia\CommandMessage|null  $message
+     * @param \CharlotteDunois\Livia\Commands\Context|null  $context
      * @return bool
      */
-    function isUsable(?\CharlotteDunois\Livia\CommandMessage $message = null) {
-        if($message === null) {
+    function isUsable(?\CharlotteDunois\Livia\Commands\Context $context = null) {
+        if($context === null) {
             return $this->globalEnabled;
         }
         
-        if($this->guildOnly && $message->guild === null) {
+        if($this->guildOnly && $context->message->guild === null) {
             return false;
         }
         
-        return ($this->isEnabledIn($message->guild) && $this->hasPermission($message) === true);
+        return ($this->isEnabledIn($context->message->guild) && $this->hasPermission($context) === true);
     }
     
     /**

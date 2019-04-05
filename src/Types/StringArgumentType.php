@@ -25,7 +25,7 @@ class StringArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         if(\mb_strlen($value) === 0) {
             return false;
         }
@@ -45,7 +45,7 @@ class StringArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         return $value;
     }
 }

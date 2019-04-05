@@ -25,7 +25,7 @@ class CommandOrGroupArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $groups = $this->client->registry->findGroups($value);
         if(\count($groups) === 1) {
             return true;
@@ -50,7 +50,7 @@ class CommandOrGroupArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $groups = $this->client->registry->findGroups($value);
         if(\count($groups) > 0) {
             return $groups[0];

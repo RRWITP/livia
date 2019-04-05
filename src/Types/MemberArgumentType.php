@@ -25,14 +25,14 @@ class MemberArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
-        if($message->message->guild === null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+        if($context->message->guild === null) {
             return 'Invalid place (not a guild channel) for argument type.';
         }
         
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
-            return $message->message->guild->fetchMember($matches[1])->then(function () {
+            return $context->message->guild->fetchMember($matches[1])->then(function () {
                 return true;
             }, function () {
                 return false;
@@ -41,7 +41,7 @@ class MemberArgumentType extends ArgumentType {
         
         $search = \mb_strtolower($value);
         
-        $inexactMembers = $message->message->guild->members->filter(function ($member) use ($search) {
+        $inexactMembers = $context->message->guild->members->filter(function ($member) use ($search) {
             return (\mb_stripos($member->user->tag, $search) !== false || \mb_stripos($member->displayName, $search) !== false);
         });
         $inexactLength = $inexactMembers->count();
@@ -53,7 +53,7 @@ class MemberArgumentType extends ArgumentType {
             return true;
         }
         
-        $exactMembers = $message->message->guild->members->filter(function ($member) use ($search) {
+        $exactMembers = $context->message->guild->members->filter(function ($member) use ($search) {
             return (\mb_strtolower($member->user->tag) === $search || \mb_strtolower($member->displayName) === $search);
         });
         $exactLength = $exactMembers->count();
@@ -79,15 +79,15 @@ class MemberArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
-            return $message->message->guild->members->get($matches[1]);
+            return $context->message->guild->members->get($matches[1]);
         }
         
         $search = \mb_strtolower($value);
         
-        $inexactMembers = $message->message->guild->members->filter(function ($member) use ($search) {
+        $inexactMembers = $context->message->guild->members->filter(function ($member) use ($search) {
             return (\mb_stripos($member->user->tag, $search) !== false || \mb_stripos($member->displayName, $search) !== false);
         });
         $inexactLength = $inexactMembers->count();
@@ -99,7 +99,7 @@ class MemberArgumentType extends ArgumentType {
             return $inexactMembers->first();
         }
         
-        $exactMembers = $message->message->guild->members->filter(function ($member) use ($search) {
+        $exactMembers = $context->message->guild->members->filter(function ($member) use ($search) {
             return (\mb_strtolower($member->user->tag) === $search || \mb_strtolower($member->displayName) === $search);
         });
         $exactLength = $exactMembers->count();

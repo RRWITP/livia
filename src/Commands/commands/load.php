@@ -49,9 +49,9 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             $this->client->registry->registerCommand($args['command']);
-            return $message->reply('Loaded the command `'.$args['command'].'`.');
+            return $context->reply('Loaded the command `'.$args['command'].'`.');
         }
     });
 };

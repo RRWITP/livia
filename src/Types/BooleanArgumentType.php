@@ -37,7 +37,7 @@ class BooleanArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $value = \mb_strtolower($value);
         return (\in_array($value, $this->truthy) || \in_array($value, $this->falsey));
     }
@@ -46,7 +46,7 @@ class BooleanArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $value = \mb_strtolower($value);
         if(\in_array($value, $this->truthy)) {
             return true;

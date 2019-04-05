@@ -49,7 +49,7 @@ return function ($client) {
             $this->dumper->setColors(false);
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             $messages = array();
             $prev = null;
             
@@ -64,7 +64,7 @@ return function ($client) {
                 $code = \implode(';', $code);
             }
             
-            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $args, $code, &$messages, &$prev) {
+            return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($context, $args, $code, &$messages, &$prev) {
                 $time = null;
                 
                 $timer = function (bool $callback = false) {
@@ -72,7 +72,7 @@ return function ($client) {
                     return $this->timer($hrtime, $callback);
                 };
                 
-                $doCallback = function ($result) use ($code, $message, &$messages, &$time, &$timer) {
+                $doCallback = function ($result) use ($code, $context, &$messages, &$time, &$timer) {
                     $endtime = $timer(true);
                     
                     $previous = \set_error_handler(array($this, 'errorCallback'));
@@ -96,7 +96,7 @@ return function ($client) {
                     }
                     $exectime = \ceil($exectime);
                     
-                    $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
+                    $messages[] = $context->say($context->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed callback after '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                 };
                 
                 $prev = \set_error_handler(array($this, 'errorCallback'));
@@ -107,7 +107,7 @@ return function ($client) {
                 $evalcode = 'namespace CharlotteDunois\\Livia\\Commands\\EvalNamespace\\'.\preg_replace('/[^a-z]/i', '', \bin2hex(\random_bytes(10)).\sha1(\time())).';'.
                                 \PHP_EOL.$code;
                 
-                $result = (function () use ($evalcode, $message, &$doCallback) {
+                $result = (function () use ($evalcode, $context, &$doCallback) {
                     $client = $this->client;
                     return eval($evalcode);
                 })();
@@ -117,7 +117,7 @@ return function ($client) {
                     $result = \React\Promise\resolve($result);
                 }
                 
-                return $result->then(function ($result) use ($code, $message, &$messages, &$prev, &$endtime, $time, &$timer) {
+                return $result->then(function ($result) use ($code, $context, &$messages, &$prev, &$endtime, $time, &$timer) {
                     if($endtime === null) {
                         $endtime = $timer();
                     }
@@ -144,10 +144,10 @@ return function ($client) {
                     }
                     $exectime = \ceil($exectime);
                     
-                    $messages[] = $message->say($message->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
+                    $messages[] = $context->say($context->message->author.\CharlotteDunois\Yasmin\Models\Message::$replySeparator.'Executed in '.$exectime.$this->timeformats[$format].'.'.\PHP_EOL.\PHP_EOL.'```php'.\PHP_EOL.$result.\PHP_EOL.'```'.($len > $maxlen ? \PHP_EOL.'Original length: '.$len : ''));
                     return $messages;
                 })->done($resolve, $reject);
-            }))->otherwise(function ($e) use ($code, $message, &$messages, &$prev) {
+            }))->otherwise(function ($e) use ($code, $context, &$messages, &$prev) {
                 \set_error_handler($prev);
                 
                 $e = (string) $e;
@@ -158,7 +158,7 @@ return function ($client) {
                     $e = \mb_substr($e, 0, $maxlen).\PHP_EOL.'...';
                 }
                 
-                $messages[] = $message->say($message->message->author.\PHP_EOL.'```php'.\PHP_EOL.$code.\PHP_EOL.'```'.\PHP_EOL.'Error: ```'.\PHP_EOL.$e.\PHP_EOL.'```');
+                $messages[] = $context->say($context->message->author.\PHP_EOL.'```php'.\PHP_EOL.$code.\PHP_EOL.'```'.\PHP_EOL.'Error: ```'.\PHP_EOL.$e.\PHP_EOL.'```');
                 return $messages;
             });
         }

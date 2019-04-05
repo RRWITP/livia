@@ -255,13 +255,13 @@ class Argument implements \Serializable {
     
     /**
      * Prompts the user and obtains the value for the argument. Resolves with an array of ('value' => mixed, 'cancelled' => string|null, 'prompts' => Message[], 'answers' => Message[]). Cancelled can be one of user, time and promptLimit.
-     * @param \CharlotteDunois\Livia\CommandMessage         $message  Message that triggered the command.
+     * @param \CharlotteDunois\Livia\Commands\Context       $message  Message that triggered the command.
      * @param string|string[]                               $value    Pre-provided value(s).
      * @param \CharlotteDunois\Livia\Arguments\ArgumentBag  $bag      The argument bag.
      * @param bool|string|null                              $valid    Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    function obtain(\CharlotteDunois\Livia\CommandMessage $message, $value, \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, $valid = null) {
+    function obtain(\CharlotteDunois\Livia\Commands\Context $message, $value, \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, $valid = null) {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message, $value, $bag, $valid) {
             $empty = ($this->emptyChecker !== null ? $this->emptyChecker($value, $message, $this) : ($this->type !== null ? $this->type->isEmpty($value, $message, $this) : $value === null));
             if($empty && $this->default !== null) {
@@ -383,13 +383,13 @@ class Argument implements \Serializable {
     
     /**
      * Prompts the user infinitely and obtains the values for the argument. Resolves with an array of ('values' => mixed, 'cancelled' => string|null, 'prompts' => Message[], 'answers' => Message[]). Cancelled can be one of user, time and promptLimit.
-     * @param \CharlotteDunois\Livia\CommandMessage         $message      Message that triggered the command.
+     * @param \CharlotteDunois\Livia\Commands\Context       $message      Message that triggered the command.
      * @param string[]                                      $values       Pre-provided values.
      * @param \CharlotteDunois\Livia\Arguments\ArgumentBag  $bag          The argument bag.
      * @param bool|string|null                              $valid        Whether the last retrieved value was valid.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function obtainInfinite(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, bool $valid = null) {
+    protected function obtainInfinite(\CharlotteDunois\Livia\Commands\Context $message, array $values = array(), \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, bool $valid = null) {
         $value = null;
         if(!empty($values)) {
             $value = \array_shift($values);
@@ -408,7 +408,7 @@ class Argument implements \Serializable {
     /**
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function infiniteObtain(\CharlotteDunois\Livia\CommandMessage $message, $value, \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, $valid = null) {
+    protected function infiniteObtain(\CharlotteDunois\Livia\Commands\Context $message, $value, \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, $valid = null) {
         if($value === null) {
             $reply = $message->reply($this->prompt.\PHP_EOL.
                 'Respond with `cancel` to cancel the command, or `finish` to finish entry up to this point.'.\PHP_EOL.
@@ -486,13 +486,13 @@ class Argument implements \Serializable {
     
     /**
      * Parses the provided infinite arguments.
-     * @param \CharlotteDunois\Livia\CommandMessage         $message      Message that triggered the command.
+     * @param \CharlotteDunois\Livia\Commands\Context       $message      Message that triggered the command.
      * @param string[]                                      $values       Pre-provided values.
      * @param \CharlotteDunois\Livia\Arguments\ArgumentBag  $bag          The argument bag.
      * @param int                                           $i            Current index of current argument value.
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function parseInfiniteProvided(\CharlotteDunois\Livia\CommandMessage $message, array $values = array(), \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, int $i = 0) {
+    protected function parseInfiniteProvided(\CharlotteDunois\Livia\Commands\Context $message, array $values = array(), \CharlotteDunois\Livia\Arguments\ArgumentBag $bag, int $i = 0) {
         if(empty($values)) {
             return $this->obtainInfinite($message, array(), $bag);
         }

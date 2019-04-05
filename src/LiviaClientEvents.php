@@ -23,31 +23,31 @@ interface LiviaClientEvents {
      * Emitted when a command is prevented from running.
      * @return void
      */
-    function commandBlocked(\CharlotteDunois\Livia\CommandMessage $message, string $reason);
+    function commandBlocked(\CharlotteDunois\Livia\Commands\Context $context, string $reason);
     
     /**
      * Emitted when a command was cancelled.
      * @return void
      */
-    function commandCancelled(\CharlotteDunois\Livia\CommandMessage $message, string $reason);
+    function commandCancelled(\CharlotteDunois\Livia\Commands\Context $context, string $reason);
     
     /**
      * Emitted when a command produces an error while running.
      * @return void
      */
-    function commandError(\CharlotteDunois\Livia\Commands\Command $command, \Throwable $error, \CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern);
+    function commandError(\CharlotteDunois\Livia\Commands\Command $command, \Throwable $error, \CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern);
     
     /**
      * Emitted when running a command.
      * @return void
      */
-    function commandRun(\CharlotteDunois\Livia\Commands\Command $command, \React\Promise\PromiseInterface $promise, \CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern);
+    function commandRun(\CharlotteDunois\Livia\Commands\Command $command, \React\Promise\PromiseInterface $promise, \CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern);
     
     /**
      * Emitted when an user tries to use an unknown command.
      * @return void
      */
-    function unknownCommand(\CharlotteDunois\Livia\CommandMessage $message);
+    function unknownCommand(\CharlotteDunois\Livia\Commands\Context $context);
     
     /**
      * Emitted when a command is registered.

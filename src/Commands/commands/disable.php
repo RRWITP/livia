@@ -35,19 +35,19 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
             
-            if(!$args['commandOrGroup']->isEnabledIn($message->message->guild)) {
-                return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already disabled.');
+            if(!$args['commandOrGroup']->isEnabledIn($context->message->guild)) {
+                return $context->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already disabled.');
             }
             
             if($args['commandOrGroup']->guarded) {
-                return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` can not be disabled.');
+                return $context->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` can not be disabled.');
             }
             
-            $args['commandOrGroup']->setEnabledIn($message->message->guild, false);
-            return $message->reply('Disabled the '.$type.' `'.$args['commandOrGroup']->name.'`.');
+            $args['commandOrGroup']->setEnabledIn($context->message->guild, false);
+            return $context->reply('Disabled the '.$type.' `'.$args['commandOrGroup']->name.'`.');
         }
     });
 };

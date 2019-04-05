@@ -130,7 +130,7 @@ class CommandDispatcher implements \Serializable {
      *
      * Callable specification:
      * ```
-     * function (\CharlotteDunois\Livia\CommandMessage $message): array|string|false|ExtendedPromiseInterface
+     * function (\CharlotteDunois\Livia\Commands\Context $message): array|string|false|ExtendedPromiseInterface
      * ```
      *
      * @param callable  $inhibitor
@@ -293,10 +293,10 @@ class CommandDispatcher implements \Serializable {
     
     /**
      * Inhibits a command message. Resolves with false or array (reason, ?response (Promise (-> Message), Message instance or null)).
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @param \CharlotteDunois\Livia\Commands\Context  $message
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function inhibit(\CharlotteDunois\Livia\CommandMessage $message) {
+    protected function inhibit(\CharlotteDunois\Livia\Commands\Context $message) {
         return (new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($message) {
             $promises = array();
             
@@ -329,19 +329,19 @@ class CommandDispatcher implements \Serializable {
      * Caches a command message to be editable.
      * @param \CharlotteDunois\Yasmin\Models\Message         $message     Triggering message.
      * @param \CharlotteDunois\Yasmin\Models\Message|null    $oldMessage  Triggering message's old version.
-     * @param \CharlotteDunois\Livia\CommandMessage|null     $cmdMsg      Command message to cache.
+     * @param \CharlotteDunois\Livia\Commands\Context|null   $cmdContext  Command context to cache.
      * @param \CharlotteDunois\Yasmin\Models\Message[]|null  $responses   Responses to the message.
      * @return void
      */
-    protected function cacheCommandMessage($message, $oldMessage, $cmdMsg, $responses) {
+    protected function cacheCommandMessage($message, $oldMessage, $cmdContext, $responses) {
         $duration = (int) $this->client->getOption('commandEditableDuration', 0);
         
-        if($duration <= 0 || $cmdMsg === null) {
+        if($duration <= 0 || $cmdContext === null) {
             return;
         }
         
         if($responses !== null) {
-            $this->results->set($message->id, $cmdMsg);
+            $this->results->set($message->id, $cmdContext);
             if($oldMessage === null) {
                 $this->client->addTimer($duration, function () use ($message) {
                     $this->results->delete($message->id);
@@ -355,7 +355,7 @@ class CommandDispatcher implements \Serializable {
     /**
      * Parses a message to find details about command usage in it.
      * @param \CharlotteDunois\Yasmin\Models\Message  $message
-     * @return \CharlotteDunois\Livia\CommandMessage|null
+     * @return \CharlotteDunois\Livia\Commands\Context|null
      */
     protected function parseMessage(\CharlotteDunois\Yasmin\Models\Message $message) {
         // Find the command to run by patterns
@@ -367,7 +367,7 @@ class CommandDispatcher implements \Serializable {
             foreach($command->patterns as $ptrn) {
                 \preg_match($ptrn, $message->content, $matches);
                 if(!empty($matches)) {
-                    return (new \CharlotteDunois\Livia\CommandMessage($this->client, $message, $command, null, $matches));
+                    return (new \CharlotteDunois\Livia\Commands\Context($this->client, $message, $command, null, $matches));
                 }
             }
         }
@@ -390,18 +390,18 @@ class CommandDispatcher implements \Serializable {
      * @param \CharlotteDunois\Yasmin\Models\Message  $message
      * @param string                                  $pattern           The pattern to match against.
      * @param int                                     $commandNameIndex  The index of the command name in the pattern matches.
-     * @return \CharlotteDunois\Livia\CommandMessage|null
+     * @return \CharlotteDunois\Livia\Commands\Context|null
      */
     protected function matchDefault(\CharlotteDunois\Yasmin\Models\Message $message, string $pattern, int $commandNameIndex = 1) {
         \preg_match($pattern, $message->content, $matches);
         if(!empty($matches)) {
             $commands = $this->client->registry->findCommands($matches[$commandNameIndex], true);
             if(\count($commands) !== 1 || $commands[0]->defaultHandling === false) {
-                return (new \CharlotteDunois\Livia\CommandMessage($this->client, $message, null));
+                return (new \CharlotteDunois\Livia\Commands\Context($this->client, $message, null));
             }
             
             $argString = (string) \mb_substr($message->content, (\mb_strlen($matches[1]) + (!empty($matches[2]) ? \mb_strlen($matches[2]) : 0)));
-            return (new \CharlotteDunois\Livia\CommandMessage($this->client, $message, $commands[0], $argString));
+            return (new \CharlotteDunois\Livia\Commands\Context($this->client, $message, $commands[0], $argString));
         }
         
         return null;
@@ -430,21 +430,21 @@ class CommandDispatcher implements \Serializable {
     
     /**
      * Sets the awaiting context for the message.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @param \CharlotteDunois\Livia\Commands\Context  $message
      * @return void
      * @internal
      */
-    function setAwaiting(\CharlotteDunois\Livia\CommandMessage $message) {
+    function setAwaiting(\CharlotteDunois\Livia\Commands\Context $message) {
         $this->awaiting[] = $message->message->author->id.$message->message->channel->id;
     }
     
     /**
      * Removes the awaiting context for the message.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @param \CharlotteDunois\Livia\Commands\Context  $message
      * @return void
      * @internal
      */
-    function unsetAwaiting(\CharlotteDunois\Livia\CommandMessage $message) {
+    function unsetAwaiting(\CharlotteDunois\Livia\Commands\Context $message) {
         $key = \array_search($message->message->author->id.$message->message->channel->id, $this->awaiting, true);
         if($key !== false) {
             unset($this->awaiting[$key]);
@@ -452,14 +452,14 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
-     * Throttles negative response messages (such as throttling, not a nsfw channel, command blocked, etc.). Used exclusively for and by `CommandMessage`.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
-     * @param string                                 $response
-     * @param callable                               $resolve
-     * @param callable                               $reject
+     * Throttles negative response messages (such as throttling, not a nsfw channel, command blocked, etc.). Used exclusively for and by `Commands\Context`.
+     * @param \CharlotteDunois\Livia\Commands\Context  $message
+     * @param string                                   $response
+     * @param callable                                 $resolve
+     * @param callable                                 $reject
      * @return void
      */
-    function throttleNegativeResponseMessage(\CharlotteDunois\Livia\CommandMessage $message, string $response, callable $resolve, callable $reject) {
+    function throttleNegativeResponseMessage(\CharlotteDunois\Livia\Commands\Context $message, string $response, callable $resolve, callable $reject) {
         if($message->command === null) {
             return $resolve(array());
         }

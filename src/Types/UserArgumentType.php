@@ -25,10 +25,10 @@ class UserArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
-            return $message->client->fetchUser($matches[1])->then(function () {
+            return $context->client->fetchUser($matches[1])->then(function () {
                 return true;
             }, function () {
                 return false;
@@ -75,7 +75,7 @@ class UserArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@!?)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
             return $this->client->users->get($matches[1]);

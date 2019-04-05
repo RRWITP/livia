@@ -25,15 +25,15 @@ class ChannelArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<#)?(\d+)>?/', $value, $matches);
         if($prg === 1) {
-            return $message->message->guild->channels->has($matches[1]);
+            return $context->message->guild->channels->has($matches[1]);
         }
         
         $search = \mb_strtolower($value);
         
-        $inexactChannels = $message->message->guild->channels->filter(function ($channel) use ($search) {
+        $inexactChannels = $context->message->guild->channels->filter(function ($channel) use ($search) {
             return (\mb_stripos($channel->name, $search) !== false);
         });
         $inexactLength = $inexactChannels->count();
@@ -45,7 +45,7 @@ class ChannelArgumentType extends ArgumentType {
             return true;
         }
         
-        $exactChannels = $message->message->guild->channels->filter(function ($channel) use ($search) {
+        $exactChannels = $context->message->guild->channels->filter(function ($channel) use ($search) {
             return ($channel->name === $search);
         });
         $exactLength = $exactChannels->count();
@@ -71,15 +71,15 @@ class ChannelArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<#)?(\d+)>?/', $value, $matches);
         if($prg === 1) {
-            return $message->message->guild->channels->get($matches[1]);
+            return $context->message->guild->channels->get($matches[1]);
         }
         
         $search = \mb_strtolower($value);
         
-        $inexactChannels = $message->message->guild->channels->filter(function ($channel) use ($search) {
+        $inexactChannels = $context->message->guild->channels->filter(function ($channel) use ($search) {
             return (\mb_stripos($channel->name, $search) !== false);
         });
         $inexactLength = $inexactChannels->count();
@@ -91,7 +91,7 @@ class ChannelArgumentType extends ArgumentType {
             return $inexactChannels->first();
         }
         
-        $exactChannels = $message->message->guild->channels->filter(function ($channel) use ($search) {
+        $exactChannels = $context->message->guild->channels->filter(function ($channel) use ($search) {
             return ($channel->name === $search);
         });
         $exactLength = $exactChannels->count();

@@ -101,30 +101,30 @@ abstract class ArgumentType implements \Serializable {
     /**
      * Validates a value against the type. If the return is a promise, the promise has to resolve with one of the other return types.
      * @param string                                          $value    Value to validate.
-     * @param \CharlotteDunois\Livia\CommandMessage           $message  Message the value was obtained from.
-     * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg      Argument the value obtained from.
+     * @param \CharlotteDunois\Livia\Commands\Context         $context  Message the value was obtained from.
+     * @param \CharlotteDunois\Livia\Arguments\Argument|null  $arg      Argument the value obtained from.
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    abstract function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
+    abstract function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
     
     /**
      * Parses a value into an usable value. If the return is a promise, the promise has to resolve with one of the other return types.
      * @param string                                          $value    Value to parse.
-     * @param \CharlotteDunois\Livia\CommandMessage           $message  Message the value was obtained from.
-     * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg      Argument the value obtained from.
+     * @param \CharlotteDunois\Livia\Commands\Context         $context  Message the value was obtained from.
+     * @param \CharlotteDunois\Livia\Arguments\Argument|null  $arg      Argument the value obtained from.
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      * @throws \RangeException
      */
-    abstract function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
+    abstract function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null);
     
     /**
      * Checks whether a value is considered to be empty. This determines whether the default value for an argument should be used and changes the response to the user under certain circumstances.
      * @param mixed                                           $value    Value to check.
-     * @param \CharlotteDunois\Livia\CommandMessage           $message  Message the value was obtained from.
-     * @param \CharlotteDUnois\Livia\Arguments\Argument|null  $arg      Argument the value obtained from.
+     * @param \CharlotteDunois\Livia\Commands\Context         $context  Message the value was obtained from.
+     * @param \CharlotteDunois\Livia\Arguments\Argument|null  $arg      Argument the value obtained from.
      * @return bool
      */
-    function isEmpty($value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function isEmpty($value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         if(\is_array($value) || \is_object($value)) {
             return (empty($value));
         }

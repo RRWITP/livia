@@ -142,12 +142,12 @@ class ArgumentCollector implements \Serializable {
     
     /**
      * Obtains values for the arguments, prompting if necessary.
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
-     * @param array                                  $provided
-     * @param int|float                              $promptLimit
+     * @param \CharlotteDunois\Livia\Commands\Context  $message
+     * @param array                                    $provided
+     * @param int|float                                $promptLimit
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    function obtain(\CharlotteDunois\Livia\CommandMessage $message, $provided = array(), $promptLimit = null) {
+    function obtain(\CharlotteDunois\Livia\Commands\Context $message, $provided = array(), $promptLimit = null) {
         if($promptLimit === null) {
             $promptLimit = $this->promptLimit;
         }
@@ -189,7 +189,7 @@ class ArgumentCollector implements \Serializable {
     
     /**
      * Obtains and collects the next argument.
-     * @param \CharlotteDunois\Livia\CommandMessage           $message
+     * @param \CharlotteDunois\Livia\Commands\Context         $message
      * @param array                                           $provided
      * @param int|float                                       $promptLimit
      * @param array                                           $values
@@ -197,7 +197,7 @@ class ArgumentCollector implements \Serializable {
      * @param int                                             $current
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function obtainNext(\CharlotteDunois\Livia\CommandMessage $message, array &$provided, $promptLimit, array &$values, array &$results, int $current) {
+    protected function obtainNext(\CharlotteDunois\Livia\Commands\Context $message, array &$provided, $promptLimit, array &$values, array &$results, int $current) {
         if(empty($this->args[$current])) {
             return \React\Promise\resolve();
         }

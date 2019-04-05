@@ -7,10 +7,10 @@
  * License: https://github.com/CharlotteDunois/Livia/blob/master/LICENSE
 */
 
-namespace CharlotteDunois\Livia;
+namespace CharlotteDunois\Livia\Commands;
 
 /**
- * A command message.
+ * Represents a command invocation context.
  *
  * @property \CharlotteDunois\Livia\LiviaClient            $client          The client which initiated the instance.
  * @property \CharlotteDunois\Yasmin\Models\Message        $message         The message that triggers the command.
@@ -19,7 +19,7 @@ namespace CharlotteDunois\Livia;
  * @property string|null                                   $argString       Argument string for the command.
  * @property string[]|null                                 $patternMatches  Pattern matches (if from a pattern trigger).
  */
-class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
+class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
     /**
      * The client which initiated the instance.
      * @var \CharlotteDunois\Livia\LiviaClient

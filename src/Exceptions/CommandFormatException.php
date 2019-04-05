@@ -14,13 +14,13 @@ namespace CharlotteDunois\Livia\Exceptions;
  */
 class CommandFormatException extends FriendlyException {
     /**
-     * @param \CharlotteDunois\Livia\CommandMessage  $message
+     * @param \CharlotteDunois\Livia\Commands\Context  $context
      * @internal
      */
-    function __construct(\CharlotteDunois\Livia\CommandMessage $message) {
-        $prefix = $message->client->getGuildPrefix($message->message->guild);
+    function __construct(\CharlotteDunois\Livia\Commands\Context $context) {
+        $prefix = $context->client->getGuildPrefix($context->message->guild);
         
-        parent::__construct('Invalid command usage. The `'.$message->command->name.'` command\'s accepted format is: '.
-        $message->command->usage($message->command->format, $prefix).'. Use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('help '.$message->command->name, $prefix).' for more information.');
+        parent::__construct('Invalid command usage. The `'.$context->command->name.'` command\'s accepted format is: '.
+        $context->command->usage($context->command->format, $prefix).'. Use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('help '.$context->command->name, $prefix).' for more information.');
     }
 }

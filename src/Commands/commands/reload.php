@@ -31,14 +31,14 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             if($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup) {
                 $args['commandOrGroup']->reload();
-                return $message->reply('Reloaded the group `'.$args['commandOrGroup']->name.'`.');
+                return $context->reply('Reloaded the group `'.$args['commandOrGroup']->name.'`.');
             }
             
             $args['commandOrGroup']->reload();
-            return $message->reply('Reloaded the command `'.$args['commandOrGroup']->name.'`.');
+            return $context->reply('Reloaded the command `'.$args['commandOrGroup']->name.'`.');
         }
     });
 };

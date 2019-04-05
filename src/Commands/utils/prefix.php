@@ -35,24 +35,24 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             if(empty($args['prefix'])) {
-                $prefix = $this->client->getGuildPrefix($message->message->guild);
+                $prefix = $this->client->getGuildPrefix($context->message->guild);
                 $msg = ($prefix !== null ? 'The command prefix is `'.$prefix.'`.' : 'There is no command prefix set.').\PHP_EOL.'To run commands, use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user).'.';
-                return $message->say($msg);
+                return $context->say($msg);
             }
             
-            if($message->message->guild !== null) {
-                if(!$message->message->member->permissions->has('ADMINISTRATOR') && !$this->client->isOwner($message->message->author)) {
-                    return $message->reply('Only administrators may change the command prefix.');
+            if($context->message->guild !== null) {
+                if(!$context->message->member->permissions->has('ADMINISTRATOR') && !$this->client->isOwner($context->message->author)) {
+                    return $context->reply('Only administrators may change the command prefix.');
                 }
-            } elseif(!$this->client->isOwner($message->message->author)) {
-                return $message->reply('Only the bot owner may change the command prefix.');
+            } elseif(!$this->client->isOwner($context->message->author)) {
+                return $context->reply('Only the bot owner may change the command prefix.');
             }
             
             $prefixLc = \mb_strtolower($args['prefix']);
             $prefix = ($prefixLc === 'none' ? null : $args['prefix']);
-            $guild = $message->message->guild;
+            $guild = $context->message->guild;
             
             if($prefixLc === 'default') {
                 if($guild !== null) {
@@ -74,7 +74,7 @@ return function ($client) {
                 $response = ($prefix ? 'Set the command prefix to `'.$prefix.'`.' : 'Removed the command prefix entirely.');
             }
             
-            return $message->reply($response.' To run commands use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user));
+            return $context->reply($response.' To run commands use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command', $prefix, $this->client->user));
         }
     });
 };

@@ -25,15 +25,15 @@ class RoleArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return bool|string|\React\Promise\ExtendedPromiseInterface
      */
-    function validate(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function validate(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@&)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
-            return $message->message->guild->roles->has($matches[1]);
+            return $context->message->guild->roles->has($matches[1]);
         }
         
         $search = \mb_strtolower($value);
         
-        $inexactRoles = $message->message->guild->roles->filter(function ($role) use ($search) {
+        $inexactRoles = $context->message->guild->roles->filter(function ($role) use ($search) {
             return (\mb_stripos($role->name, $search) !== false);
         });
         $inexactLength = $inexactRoles->count();
@@ -45,7 +45,7 @@ class RoleArgumentType extends ArgumentType {
             return true;
         }
         
-        $exactRoles = $message->message->guild->roles->filter(function ($role) use ($search) {
+        $exactRoles = $context->message->guild->roles->filter(function ($role) use ($search) {
             return ($role->name === $search);
         });
         $exactLength = $exactRoles->count();
@@ -71,15 +71,15 @@ class RoleArgumentType extends ArgumentType {
      * {@inheritdoc}
      * @return mixed|null|\React\Promise\ExtendedPromiseInterface
      */
-    function parse(string $value, \CharlotteDunois\Livia\CommandMessage $message, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
+    function parse(string $value, \CharlotteDunois\Livia\Commands\Context $context, ?\CharlotteDunois\Livia\Arguments\Argument $arg = null) {
         $prg = \preg_match('/(?:<@&)?(\d{15,})>?/', $value, $matches);
         if($prg === 1) {
-            return $message->message->guild->roles->get($matches[1]);
+            return $context->message->guild->roles->get($matches[1]);
         }
         
         $search = \mb_strtolower($value);
         
-        $inexactRoles = $message->message->guild->roles->filter(function ($role) use ($search) {
+        $inexactRoles = $context->message->guild->roles->filter(function ($role) use ($search) {
             return (\mb_stripos($role->name, $search) !== false);
         });
         $inexactLength = $inexactRoles->count();
@@ -91,7 +91,7 @@ class RoleArgumentType extends ArgumentType {
             return $inexactRoles->first();
         }
         
-        $exactRoles = $message->message->guild->roles->filter(function ($role) use ($search) {
+        $exactRoles = $context->message->guild->roles->filter(function ($role) use ($search) {
             return ($role->name === $search);
         });
         $exactLength = $exactRoles->count();

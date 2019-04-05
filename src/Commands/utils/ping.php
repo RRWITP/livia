@@ -24,16 +24,16 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return $message->say('Pinging...')->then(function ($msg) use ($message) {
-                $time = \CharlotteDunois\Yasmin\Utils\Snowflake::deconstruct($msg->id)->timestamp - \CharlotteDunois\Yasmin\Utils\Snowflake::deconstruct($message->id)->timestamp;
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
+            return $context->say('Pinging...')->then(function ($msg) use ($context) {
+                $time = \CharlotteDunois\Yasmin\Utils\Snowflake::deconstruct($msg->id)->timestamp - \CharlotteDunois\Yasmin\Utils\Snowflake::deconstruct($context->message->id)->timestamp;
                 
                 $ping = $this->client->getPing();
                 if(!\is_int($ping)) {
                     $ping = 0;
                 }
                 
-                return $msg->edit($message->author.' Pong! The message round-trip took '.\ceil(($time * 1000)).'ms. The WS heartbeat is '.$ping.'ms.');
+                return $msg->edit($context->message->author.' Pong! The message round-trip took '.\ceil(($time * 1000)).'ms. The WS heartbeat is '.$ping.'ms.');
             });
         }
     });

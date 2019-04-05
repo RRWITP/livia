@@ -34,42 +34,42 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
-            return $message->direct($this->renderHelpMessage($message, $args), array('split' => true))->then(function ($msg) use ($message) {
-                if(!($message->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
-                    return $message->reply('Sent you a DM with information.');
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
+            return $context->direct($this->renderHelpMessage($context, $args), array('split' => true))->then(function ($msg) use ($context) {
+                if(!($context->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
+                    return $context->reply('Sent you a DM with information.');
                 }
                 
                 return $msg;
-            }, function () use ($message) {
-                if(!($message->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
-                    return $message->reply('Unable to send you the help DM. You probably have DMs disabled.');
+            }, function () use ($context) {
+                if(!($context->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface)) {
+                    return $context->reply('Unable to send you the help DM. You probably have DMs disabled.');
                 }
             });
         }
         
         /**
-         * @param \CharlotteDunois\Livia\CommandMessage  $message
-         * @param \ArrayObject                           $args
+         * @param \CharlotteDunois\Livia\Commands\Context  $context
+         * @param \ArrayObject                             $args
          * @return string
          */
-        function renderHelpMessage(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args) {
+        function renderHelpMessage(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args) {
             $groups = $this->client->registry->groups;
-            $commands = (!empty($args['command']) ? $this->client->registry->findCommands($args['command'], false, $message->message) : $this->client->registry->commands->all());
+            $commands = (!empty($args['command']) ? $this->client->registry->findCommands($args['command'], false, $context->message) : $this->client->registry->commands->all());
             
-            $isDM = ($message->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface);
+            $isDM = ($context->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface);
             $showAll = (!empty($args['command']) && \mb_strtolower($args['command']) === 'all');
             
             if(!empty($args['command']) && !$showAll) {
                 $countCommands = \count($commands);
                 
                 if($countCommands === 0) {
-                    return 'Unable to identify command. Use '.$this->usage('', ($isDM ? null : $this->client->getGuildPrefix($message->message->guild)), ($isDM ? null : $this->client->user)).' to view the list of all commands.';
+                    return 'Unable to identify command. Use '.$this->usage('', ($isDM ? null : $this->client->getGuildPrefix($context->message->guild)), ($isDM ? null : $this->client->user)).' to view the list of all commands.';
                 }
                 
                 /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */
                 foreach($commands as $key => $cmd) {
-                    if($cmd->ownerOnly && $cmd->hasPermission($message) !== true) {
+                    if($cmd->ownerOnly && $cmd->hasPermission($context) !== true) {
                         unset($commands[$key]);
                     }
                 }
@@ -103,19 +103,19 @@ return function ($client) {
                     return \CharlotteDunois\Livia\Utils\DataHelpers::disambiguation($commands, 'commands', 'name');
                 }
             } else {
-                $help = 'To run a command in '.($message->message->guild !== null ? $message->message->guild->name : 'any server').', use '.
-                        \CharlotteDunois\Livia\Commands\Command::anyUsage('command', $this->client->getGuildPrefix($message->message->guild), $this->client->user).
+                $help = 'To run a command in '.($context->message->guild !== null ? $context->message->guild->name : 'any server').', use '.
+                        \CharlotteDunois\Livia\Commands\Command::anyUsage('command', $this->client->getGuildPrefix($context->message->guild), $this->client->user).
                         '. For example, '.
-                        \CharlotteDunois\Livia\Commands\Command::anyUsage('prefix', $this->client->getGuildPrefix($message->message->guild), $this->client->user).'.'.\PHP_EOL.
+                        \CharlotteDunois\Livia\Commands\Command::anyUsage('prefix', $this->client->getGuildPrefix($context->message->guild), $this->client->user).'.'.\PHP_EOL.
                         'To run a command in this DM, simply use '.\CharlotteDunois\Livia\Commands\Command::anyUsage('command').' with no prefix.'.\PHP_EOL.\PHP_EOL.
                         'Use '.$this->usage('<command>', null, null).' to view detailed information about a specific command.'.\PHP_EOL.
                         'Use '.$this->usage('all', null, null).' to view a list of *all* commands, not just available ones.'.\PHP_EOL.\PHP_EOL.
-                        '__**'.($showAll ? 'All commands' : 'Available commands in '.($message->message->guild !== null ? $message->message->guild->name : 'this DM')).'**__'.\PHP_EOL.\PHP_EOL.
-                        \implode(\PHP_EOL.\PHP_EOL, \array_map(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($message, $showAll) {
-                            $cmds = ($showAll ? $group->commands->filter(function (\CharlotteDunois\Livia\Commands\Command $cmd) use ($message) {
-                                return (!$cmd->hidden && (!$cmd->ownerOnly || $this->client->isOwner($message->author)));
-                            }) : $group->commands->filter(function (\CharlotteDunois\Livia\Commands\Command $cmd) use ($message) {
-                                return (!$cmd->hidden && $cmd->isUsable($message));
+                        '__**'.($showAll ? 'All commands' : 'Available commands in '.($context->message->guild !== null ? $context->message->guild->name : 'this DM')).'**__'.\PHP_EOL.\PHP_EOL.
+                        \implode(\PHP_EOL.\PHP_EOL, \array_map(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($context, $showAll) {
+                            $cmds = ($showAll ? $group->commands->filter(function (\CharlotteDunois\Livia\Commands\Command $cmd) use ($context) {
+                                return (!$cmd->hidden && (!$cmd->ownerOnly || $this->client->isOwner($context->message->author)));
+                            }) : $group->commands->filter(function (\CharlotteDunois\Livia\Commands\Command $cmd) use ($context) {
+                                return (!$cmd->hidden && $cmd->isUsable($context));
                             }));
                             
                             return "__{$group->name}__".\PHP_EOL.
@@ -124,10 +124,10 @@ return function ($client) {
                                 })->map(function (\CharlotteDunois\Livia\Commands\Command $cmd) {
                                     return "**{$cmd->name}:** {$cmd->description}";
                                 })->all());
-                        }, ($showAll ? $groups->filter(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($message) {
+                        }, ($showAll ? $groups->filter(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($context) {
                             /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */
                             foreach($group->commands as $cmd) {
-                                if(!$cmd->hidden && (!$cmd->ownerOnly || $this->client->isOwner($message->author))) {
+                                if(!$cmd->hidden && (!$cmd->ownerOnly || $this->client->isOwner($context->message->author))) {
                                     return true;
                                 }
                             }
@@ -135,10 +135,10 @@ return function ($client) {
                             return false;
                         })->sortCustom(function ($a, $b) {
                             return $a->name <=> $b->name;
-                        })->all() : $groups->filter(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($message) {
+                        })->all() : $groups->filter(function (\CharlotteDunois\Livia\Commands\CommandGroup $group) use ($context) {
                             /** @var \CharlotteDunois\Livia\Commands\Command  $cmd */
                             foreach($group->commands as $cmd) {
-                                if($cmd->isUsable($message)) {
+                                if($cmd->isUsable($context)) {
                                     return true;
                                 }
                             }

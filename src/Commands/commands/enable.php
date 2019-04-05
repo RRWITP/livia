@@ -35,15 +35,15 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             $type = ($args['commandOrGroup'] instanceof \CharlotteDunois\Livia\Commands\CommandGroup ? 'group' : 'command');
             
-            if($args['commandOrGroup']->isEnabledIn($message->message->guild)) {
-                return $message->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already enabled.');
+            if($args['commandOrGroup']->isEnabledIn($context->message->guild)) {
+                return $context->reply('The '.$type.' `'.$args['commandOrGroup']->name.'` is already enabled.');
             }
             
-            $args['commandOrGroup']->setEnabledIn($message->message->guild, true);
-            return $message->reply('Enabled the '.$type.' `'.$args['commandOrGroup']->name.'`.');
+            $args['commandOrGroup']->setEnabledIn($context->message->guild, true);
+            return $context->reply('Enabled the '.$type.' `'.$args['commandOrGroup']->name.'`.');
         }
     });
 };

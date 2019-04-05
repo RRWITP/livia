@@ -159,7 +159,7 @@ class CommandRegistry implements \Serializable {
         }
         
         if($message !== null) {
-            $cmdmsg = new \CharlotteDunois\Livia\CommandMessage($this->client, $message);
+            $cmdmsg = new \CharlotteDunois\Livia\Commands\Context($this->client, $message);
         }
         
         $matches = array();
@@ -237,7 +237,7 @@ class CommandRegistry implements \Serializable {
     
     /**
      * Resolves a given command, command name or command message to the command.
-     * @param string|\CharlotteDunois\Livia\Commands\Command|\CharlotteDunois\Livia\CommandMessage  $resolvable
+     * @param string|\CharlotteDunois\Livia\Commands\Command|\CharlotteDunois\Livia\Commands\Context  $resolvable
      * @return \CharlotteDunois\Livia\Commands\Command
      * @throws \RuntimeException
      */
@@ -246,7 +246,7 @@ class CommandRegistry implements \Serializable {
             return $resolvable;
         }
         
-        if($resolvable instanceof \CharlotteDunois\Livia\CommandMessage) {
+        if($resolvable instanceof \CharlotteDunois\Livia\Commands\Context) {
             return $resolvable->command;
         }
         
@@ -259,7 +259,7 @@ class CommandRegistry implements \Serializable {
     }
     /**
      * Resolves a given commandgroup, command group name or command message to the command group.
-     * @param string|\CharlotteDunois\Livia\Commands\CommandGroup|\CharlotteDunois\Livia\CommandMessage  $resolvable
+     * @param string|\CharlotteDunois\Livia\Commands\CommandGroup|\CharlotteDunois\Livia\Commands\Context  $resolvable
      * @return \CharlotteDunois\Livia\Commands\CommandGroup
      * @throws \RuntimeException
      */
@@ -268,7 +268,7 @@ class CommandRegistry implements \Serializable {
             return $resolvable;
         }
         
-        if($resolvable instanceof \CharlotteDunois\Livia\CommandMessage) {
+        if($resolvable instanceof \CharlotteDunois\Livia\Commands\Context) {
             return $resolvable->command->group;
         }
         

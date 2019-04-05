@@ -30,9 +30,9 @@ return function ($client) {
             ));
         }
         
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args, bool $fromPattern) {
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args, bool $fromPattern) {
             $args['command']->unload();
-            return $message->reply('Unloaded the command `'.$args['command']->name.'`.');
+            return $context->reply('Unloaded the command `'.$args['command']->name.'`.');
         }
     });
 };
