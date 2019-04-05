@@ -12,7 +12,7 @@ namespace CharlotteDunois\Livia\Commands;
 /**
  * Represents a command invocation context.
  *
- * @property \CharlotteDunois\Livia\LiviaClient            $client          The client which initiated the instance.
+ * @property \CharlotteDunois\Livia\Client                 $client          The client which initiated the instance.
  * @property \CharlotteDunois\Yasmin\Models\Message        $message         The message that triggers the command.
  * @property \CharlotteDunois\Livia\Commands\Command|null  $command         The command that got triggered, if any.
  *
@@ -22,7 +22,7 @@ namespace CharlotteDunois\Livia\Commands;
 class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -65,7 +65,7 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
     /**
      * @internal
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client, \CharlotteDunois\Yasmin\Models\Message $message, \CharlotteDunois\Livia\Commands\Command $command = null, string $argString = null, array $patternMatches = null) {
+    function __construct(\CharlotteDunois\Livia\Client $client, \CharlotteDunois\Yasmin\Models\Message $message, \CharlotteDunois\Livia\Commands\Command $command = null, string $argString = null, array $patternMatches = null) {
         $this->client = $client;
         $this->message = $message;
         $this->command = $command;
@@ -148,7 +148,7 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
         
         parent::unserialize($data);
         
-        /** @var \CharlotteDunois\Livia\LiviaClient  $this->client */
+        /** @var \CharlotteDunois\Livia\Client  $this->client */
         $this->client = self::$serializeClient;
         
         if($this->internalCommand !== null) {

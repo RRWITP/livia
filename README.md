@@ -85,7 +85,7 @@ Example:
 return function ($client) {
     // Extending is required
     return (new class($client) extends \CharlotteDunois\Livia\Commands\Command {
-        function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
+        function __construct(\CharlotteDunois\Livia\Client $client) {
             parent::__construct($client, array(
                 'name' => 'ban',
                 'aliases' => array(),
@@ -108,12 +108,12 @@ return function ($client) {
         
         // Checks if the command is allowed to run - the default method from Command class also checks userPermissions.
         // Even if you don't use all arguments, you are forced to match that method signature.
-        function hasPermission(\CharlotteDunois\Livia\CommandMessage $message, bool $ownerOverride = true) {
-            return $message->member->roles->has('SERVER_STAFF_ROLE_ID');
+        function hasPermission(\CharlotteDunois\Livia\Commands\Context $context, bool $ownerOverride = true) {
+            return $context->message->member->roles->has('SERVER_STAFF_ROLE_ID');
         }
         
         // Even if you don't use all arguments, you are forced to match that method signature.
-        function run(\CharlotteDunois\Livia\CommandMessage $message, \ArrayObject $args,
+        function run(\CharlotteDunois\Livia\Commands\Context $context, \ArrayObject $args,
                       bool $fromPattern) {
             // Do what the command has to do.
             // You are free to return a Promise, or do all-synchronous tasks synchronously.
@@ -122,8 +122,8 @@ return function ($client) {
             // return (resolve) the Message instance, or an array of Message instances.
             // Promises are getting automatically resolved.
             
-            return $args->user->ban()->then(function () use ($message) {
-                return $message->reply('The user got banned!');
+            return $args->user->ban()->then(function () use ($context) {
+                return $context->reply('The user got banned!');
             });
         }
     });
@@ -136,7 +136,7 @@ return function ($client) {
 require_once(__DIR__.'/vendor/autoload.php');
 
 $loop = \React\EventLoop\Factory::create();
-$client = new \CharlotteDunois\Livia\LiviaClient(array(
+$client = new \CharlotteDunois\Livia\Client(array(
     'owners' => array('YOUR_USER_ID'),
     'unknownCommandResponse' => false
 ), $loop);

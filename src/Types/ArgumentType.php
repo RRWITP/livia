@@ -12,13 +12,13 @@ namespace CharlotteDunois\Livia\Types;
 /**
  * An argument type that can be used for argument collecting.
  *
- * @property \CharlotteDunois\Livia\LiviaClient  $client  The client which initiated the instance.
- * @property string                              $id      The argument type ID.
+ * @property \CharlotteDunois\Livia\Client  $client  The client which initiated the instance.
+ * @property string                         $id      The argument type ID.
  */
 abstract class ArgumentType implements \Serializable {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -31,7 +31,7 @@ abstract class ArgumentType implements \Serializable {
     /**
      * @internal
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client, string $id) {
+    function __construct(\CharlotteDunois\Livia\Client $client, string $id) {
         $this->client = $client;
         $this->id = $id;
     }

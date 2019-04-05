@@ -10,9 +10,9 @@
 namespace CharlotteDunois\Livia;
 
 /**
- * Documents all LiviaClient events (exlucing events from Yasmin).
+ * Documents all Client events (exlucing events from Yasmin).
  */
-interface LiviaClientEvents {
+interface ClientEvents {
     /**
      * Emitted when something out of expectation occurres. A warning for you.
      * @return void

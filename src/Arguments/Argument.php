@@ -12,26 +12,26 @@ namespace CharlotteDunois\Livia\Arguments;
 /**
  * A fancy argument.
  *
- * @property \CharlotteDunois\Livia\LiviaClient               $client        The client which initiated the instance.
- * @property string                                           $key           Key for the argument.
- * @property string                                           $label         Label for the argument.
- * @property string                                           $prompt        Question prompt for the argument.
- * @property string|null                                      $typeID        Type name of the argument.
- * @property int|float|null                                   $max           If type is integer or float, this is the maximum value of the number. If type is string, this is the maximum length of the string.
- * @property int|float|null                                   $min           If type is integer or float, this is the minimum value of the number. If type is string, this is the minimum length of the string.
- * @property mixed|null                                       $default       The default value for the argument.
- * @property bool                                             $infinite      Whether the argument accepts an infinite number of values.
- * @property callable|null                                    $validate      Validator function for validating a value for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::validate})
- * @property callable|null                                    $parse         Parser function to parse a value for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::parse})
- * @property callable|null                                    $emptyChecker  Empty checker function for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::isEmpty})
- * @property int                                              $wait          How long to wait for input (in seconds).
+ * @property \CharlotteDunois\Livia\Client  $client        The client which initiated the instance.
+ * @property string                         $key           Key for the argument.
+ * @property string                         $label         Label for the argument.
+ * @property string                         $prompt        Question prompt for the argument.
+ * @property string|null                    $typeID        Type name of the argument.
+ * @property int|float|null                 $max           If type is integer or float, this is the maximum value of the number. If type is string, this is the maximum length of the string.
+ * @property int|float|null                 $min           If type is integer or float, this is the minimum value of the number. If type is string, this is the minimum length of the string.
+ * @property mixed|null                     $default       The default value for the argument.
+ * @property bool                           $infinite      Whether the argument accepts an infinite number of values.
+ * @property callable|null                  $validate      Validator function for validating a value for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::validate})
+ * @property callable|null                  $parse         Parser function to parse a value for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::parse})
+ * @property callable|null                  $emptyChecker  Empty checker function for the argument. ({@see \CharlotteDunois\Livia\Types\ArgumentType::isEmpty})
+ * @property int                            $wait          How long to wait for input (in seconds).
  *
  * @property \CharlotteDunois\Livia\Types\ArgumentType|null   $type          Type of the argument.
  */
 class Argument implements \Serializable {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -127,11 +127,11 @@ class Argument implements \Serializable {
      * )
      * ```
      *
-     * @param \CharlotteDunois\Livia\LiviaClient    $client
-     * @param array                                 $info
+     * @param \CharlotteDunois\Livia\Client    $client
+     * @param array                            $info
      * @throws \InvalidArgumentException
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $info) {
+    function __construct(\CharlotteDunois\Livia\Client $client, array $info) {
         $this->client = $client;
         
         \CharlotteDunois\Validation\Validator::make($info, array(

@@ -12,14 +12,14 @@ namespace CharlotteDunois\Livia\Arguments;
 /**
  * Obtains, validates, and prompts for argument values.
  *
- * @property \CharlotteDunois\Livia\LiviaClient           $client       The client which initiated the instance.
+ * @property \CharlotteDunois\Livia\Client                $client       The client which initiated the instance.
  * @property \CharlotteDunois\Livia\Arguments\Argument[]  $args         Arguments for the collector.
  * @property int|float                                    $promptLimit  Maximum number of times to prompt for a single argument.
  */
 class ArgumentCollector implements \Serializable {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -43,12 +43,12 @@ class ArgumentCollector implements \Serializable {
     
     /**
      * Constructs a new Argument Collector.
-     * @param \CharlotteDunois\Livia\LiviaClient    $client
-     * @param array                                 $args
-     * @param int|float                             $promptLimit
+     * @param \CharlotteDunois\Livia\Client    $client
+     * @param array                            $args
+     * @param int|float                        $promptLimit
      * @throws \InvalidArgumentException
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $args, $promptLimit = \INF) {
+    function __construct(\CharlotteDunois\Livia\Client $client, array $args, $promptLimit = \INF) {
         $this->client = $client;
         
         $hasInfinite = false;

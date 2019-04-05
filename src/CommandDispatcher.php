@@ -12,12 +12,12 @@ namespace CharlotteDunois\Livia;
 /**
  * Handles parsing messages and running commands from them.
  *
- * @property \CharlotteDunois\Livia\LiviaClient  $client  The client which initiated the instance.
+ * @property \CharlotteDunois\Livia\Client  $client  The client which initiated the instance.
  */
 class CommandDispatcher implements \Serializable {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -54,7 +54,7 @@ class CommandDispatcher implements \Serializable {
     /**
      * @internal
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
+    function __construct(\CharlotteDunois\Livia\Client $client) {
         $this->client = $client;
         
         $this->results = new \CharlotteDunois\Collect\Collection();

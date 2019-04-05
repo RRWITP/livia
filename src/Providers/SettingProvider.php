@@ -13,7 +13,7 @@ namespace CharlotteDunois\Livia\Providers;
  * Loads and stores settings associated with guilds.
  * Classes extending this class must assign the client received in the `init` method to the `client` property.
  *
- * @property \CharlotteDunois\Livia\LiviaClient  $client  The client this provider is for. This property is NOT accessible outside of the class and is only for documentation purpose here (for extending the class).
+ * @property \CharlotteDunois\Livia\Client  $client  The client this provider is for. This property is NOT accessible outside of the class and is only for documentation purpose here (for extending the class).
  */
 abstract class SettingProvider {
     /**
@@ -39,7 +39,7 @@ abstract class SettingProvider {
     
     /**
      * The client this provider is for.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -58,11 +58,11 @@ abstract class SettingProvider {
     }
     
     /**
-     * Initializes the provider by connecting to databases and/or caching all data in memory. LiviaClient::setProvider will automatically call this once the client is ready.
-     * @param \CharlotteDunois\Livia\LiviaClient  $client
+     * Initializes the provider by connecting to databases and/or caching all data in memory. Client::setProvider will automatically call this once the client is ready.
+     * @param \CharlotteDunois\Livia\Client  $client
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    abstract function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface;
+    abstract function init(\CharlotteDunois\Livia\Client $client): \React\Promise\ExtendedPromiseInterface;
     
     /**
      * Destroys the provider, removing any event listeners.
@@ -140,8 +140,8 @@ abstract class SettingProvider {
      * @throws \BadMethodCallException
      */
     function attachListeners() {
-        if(!($this->client instanceof \CharlotteDunois\Livia\LiviaClient)) {
-            throw new \BadMethodCallException('The client property is not set or not a valid instance of LiviaClient');
+        if(!($this->client instanceof \CharlotteDunois\Livia\Client)) {
+            throw new \BadMethodCallException('The client property is not set or not a valid instance of Client');
         }
         
         $this->client->on('commandPrefixChange', array($this, 'callbackCommandPrefixChange'));
@@ -160,7 +160,7 @@ abstract class SettingProvider {
      * @return void
      */
     function removeListeners() {
-        if(!($this->client instanceof \CharlotteDunois\Livia\LiviaClient)) {
+        if(!($this->client instanceof \CharlotteDunois\Livia\Client)) {
             return;
         }
         

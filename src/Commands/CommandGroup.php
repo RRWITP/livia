@@ -12,16 +12,16 @@ namespace CharlotteDunois\Livia\Commands;
 /**
  * A group for commands.
  *
- * @property \CharlotteDunois\Livia\LiviaClient        $client         The client which initiated the instance.
- * @property string                                    $id             The ID of the group.
- * @property string                                    $name           The name of the group.
- * @property bool                                      $guarded        Whether this group is guarded against disabling.
- * @property \CharlotteDunois\Collect\Collection       $commands       The commands that the group contains.
+ * @property \CharlotteDunois\Livia\Client        $client         The client which initiated the instance.
+ * @property string                               $id             The ID of the group.
+ * @property string                               $name           The name of the group.
+ * @property bool                                 $guarded        Whether this group is guarded against disabling.
+ * @property \CharlotteDunois\Collect\Collection  $commands       The commands that the group contains.
  */
 class CommandGroup implements \Serializable {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -63,13 +63,13 @@ class CommandGroup implements \Serializable {
     
     /**
      * Constructs a new Command Group.
-     * @param \CharlotteDunois\Livia\LiviaClient    $client
-     * @param string                                $id
-     * @param string                                $name
-     * @param bool                                  $guarded
-     * @param array|null                            $commands
+     * @param \CharlotteDunois\Livia\Client  $client
+     * @param string                         $id
+     * @param string                         $name
+     * @param bool                           $guarded
+     * @param array|null                     $commands
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client, string $id, string $name, bool $guarded = false, array $commands = null) {
+    function __construct(\CharlotteDunois\Livia\Client $client, string $id, string $name, bool $guarded = false, array $commands = null) {
         $this->client = $client;
         
         $this->id = $id;

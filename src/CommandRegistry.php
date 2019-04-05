@@ -12,7 +12,7 @@ namespace CharlotteDunois\Livia;
 /**
  * Handles registration and searching of commands and groups.
  *
- * @property \CharlotteDunois\Livia\LiviaClient        $client               The client which initiated the instance.
+ * @property \CharlotteDunois\Livia\Client             $client               The client which initiated the instance.
  * @property \CharlotteDunois\Collect\Collection       $commands             Registered commands, mapped by their name.
  * @property string[]                                  $commandsDirectories  List of fully resolved path to the bot's commands directories.
  * @property \CharlotteDunois\Collect\Collection       $groups               Registered command groups, mapped by their id.
@@ -21,7 +21,7 @@ namespace CharlotteDunois\Livia;
 class CommandRegistry implements \Serializable {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -64,7 +64,7 @@ class CommandRegistry implements \Serializable {
     /**
      * @internal
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
+    function __construct(\CharlotteDunois\Livia\Client $client) {
         $this->client = $client;
         $this->basepath = \realpath(__DIR__.'/Commands/');
         
@@ -123,7 +123,7 @@ class CommandRegistry implements \Serializable {
     }
     
     /**
-     * Depends on LiviaClient for command re-registration.
+     * Depends on Client for command re-registration.
      * @return void
      * @internal
      */

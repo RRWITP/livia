@@ -12,7 +12,7 @@ namespace CharlotteDunois\Livia\Commands;
 /**
  * A command that can be run in a client.
  *
- * @property \CharlotteDunois\Livia\LiviaClient                 $client             The client which initiated the instance.
+ * @property \CharlotteDunois\Livia\Client                      $client             The client which initiated the instance.
  * @property string                                             $name               The name of the command.
  * @property string[]                                           $aliases            Aliases of the command.
  * @property \CharlotteDunois\Livia\Commands\CommandGroup|null  $group              The group the command belongs to, assigned upon registration.
@@ -40,7 +40,7 @@ namespace CharlotteDunois\Livia\Commands;
 abstract class Command {
     /**
      * The client which initiated the instance.
-     * @var \CharlotteDunois\Livia\LiviaClient
+     * @var \CharlotteDunois\Livia\Client
      */
     protected $client;
     
@@ -230,11 +230,11 @@ abstract class Command {
      * )
      * ```
      *
-     * @param \CharlotteDunois\Livia\LiviaClient    $client
-     * @param array                                 $info
+     * @param \CharlotteDunois\Livia\Client  $client
+     * @param array                          $info
      * @throws \InvalidArgumentException
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client, array $info) {
+    function __construct(\CharlotteDunois\Livia\Client $client, array $info) {
         $this->client = $client;
         
         \CharlotteDunois\Validation\Validator::make($info, array(

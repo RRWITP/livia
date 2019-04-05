@@ -17,7 +17,7 @@ class GroupArgumentType extends ArgumentType {
     /**
      * @internal
      */
-    function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
+    function __construct(\CharlotteDunois\Livia\Client $client) {
         parent::__construct($client, 'group');
     }
     

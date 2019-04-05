@@ -9,7 +9,7 @@
 
 return function ($client) {
     return (new class($client) extends \CharlotteDunois\Livia\Commands\Command {
-        function __construct(\CharlotteDunois\Livia\LiviaClient $client) {
+        function __construct(\CharlotteDunois\Livia\Client $client) {
             parent::__construct($client, array(
                 'name' => 'help',
                 'aliases' => array('commands'),

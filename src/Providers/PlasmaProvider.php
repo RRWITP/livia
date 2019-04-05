@@ -67,7 +67,7 @@ class PlasmaProvider extends SettingProvider {
      * {@inheritdoc}
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    function init(\CharlotteDunois\Livia\LiviaClient $client): \React\Promise\ExtendedPromiseInterface {
+    function init(\CharlotteDunois\Livia\Client $client): \React\Promise\ExtendedPromiseInterface {
         $this->client = $client;
         $this->attachListeners();
         
