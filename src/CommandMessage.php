@@ -228,7 +228,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
             }
             
             // Ensure the client user has the required permissions
-            if($this->message->channel !== null && !empty($this->command->clientPermissions)) {
+            if($this->message->channel->guild !== null && !empty($this->command->clientPermissions)) {
                 $perms = $this->message->channel->permissionsFor($this->message->guild->me);
                 
                 $missing = array();
@@ -397,7 +397,7 @@ class CommandMessage extends \CharlotteDunois\Yasmin\Models\ClientBase {
      * @throws \InvalidArgumentException
      */
     protected function respond(string $type, string $content, array $options = array(), bool $fromEdit = false) {
-        if($type === 'reply' && $this->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\GuildChannelInterface) {
+        if($type === 'reply' && $this->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface) {
             $type = 'plain';
         }
         

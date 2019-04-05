@@ -19,7 +19,7 @@
     },
     "require-dev": {
         "plasma/core": "^0.1.0|dev-master",
-        "react/mysql": "^0.4.1"
+        "react/mysql": "^0.5"
     },
     "suggest": {
         "plasma/core": "Required for Plasma Provider",

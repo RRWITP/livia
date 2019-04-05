@@ -12,7 +12,7 @@ namespace CharlotteDunois\Livia;
 /**
  * Handles parsing messages and running commands from them.
  *
- * @property \CharlotteDunois\Livia\LiviaClient        $client      The client which initiated the instance.
+ * @property \CharlotteDunois\Livia\LiviaClient  $client  The client which initiated the instance.
  */
 class CommandDispatcher implements \Serializable {
     /**
