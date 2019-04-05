@@ -277,6 +277,11 @@ class CommandDispatcher implements \Serializable {
             return false;
         }
         
+        $editableDuration = (int) $this->client->getOption('commandEditableDuration');
+        if($message->editedTimestamp !== null && ($editableDuration <= 0 || ($message->editedTimestamp - $message->createdTimestamp) >= $editableDuration)) {
+            return false;
+        }
+        
         return true;
     }
     
