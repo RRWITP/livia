@@ -177,7 +177,7 @@ return function ($client) {
                 
                 \xdebug_var_dump($result);
                 \ini_set('xdebug.var_display_max_depth', $old);
-                $result = \ob_get_clean();
+                $result = @\ob_get_clean(); // Fixes a xdebug bug "Cannot modify header information"
                 
                 $result = \substr($result, (\strpos($result, "\n") + 1));
                 $result = \preg_replace("/#(\d+) \((\d+)\) {\n\s*...\n\s*}/u", '#$1 ($2) { }', $result);
@@ -202,7 +202,7 @@ return function ($client) {
          */
         function errorCallback($errno, $errstr, $errfile, $errline) {
             // Latter fixes a bug
-            if(\error_reporting() === 0 || \mb_stripos($errstr, 'Cannot modify header information') !== false) {
+            if(\error_reporting() === 0) {
                 return true;
             }
             
