@@ -275,7 +275,7 @@ class CommandDispatcher implements \Serializable {
         }
         
         // Ignore messages from users that the bot is already waiting for input from
-        if(\in_array($message->author->id.$message->channel->id, $this->awaiting)) {
+        if(\array_key_exists($message->author->id.'-'.$message->channel->id, $this->awaiting)) {
             return false;
         }
         
@@ -429,42 +429,75 @@ class CommandDispatcher implements \Serializable {
     }
     
     /**
-     * Sets the awaiting context for the message.
-     * @param \CharlotteDunois\Livia\Commands\Context  $message
-     * @return void
-     * @internal
+     * Gets the optional value of an awaiting context for the message.
+     * @param \CharlotteDunois\Livia\Commands\Context  $context
+     * @return mixed
+     * @throws \RuntimeException  Thrown if the context does not exist.
      */
-    function setAwaiting(\CharlotteDunois\Livia\Commands\Context $message) {
-        $this->awaiting[] = $message->message->author->id.$message->message->channel->id;
+    function getAwaiting(\CharlotteDunois\Livia\Commands\Context $context) {
+        if(!\array_key_exists($context->message->author->id.'-'.$context->message->channel->id, $this->awaiting)) {
+            throw new \RuntimeException('Context does not exist');
+        }
+        
+        return $this->awaiting[$context->message->author->id.'-'.$context->message->channel->id];
+    }
+    
+    /**
+     * Sets the awaiting context for the message with an optional value.
+     * @param \CharlotteDunois\Livia\Commands\Context  $context
+     * @param mixed                                    $value
+     * @return void
+     * @throws \RuntimeException  Thrown if the context is already awaiting.
+     */
+    function setAwaiting(\CharlotteDunois\Livia\Commands\Context $context, $value = null) {
+        if(isset($this->awaiting[$context->message->author->id.'-'.$context->message->channel->id])) {
+            throw new \RuntimeException('Context is already awaiting');
+        }
+        
+        $this->awaiting[$context->message->author->id.'-'.$context->message->channel->id] = $value;
     }
     
     /**
      * Removes the awaiting context for the message.
-     * @param \CharlotteDunois\Livia\Commands\Context  $message
+     * @param \CharlotteDunois\Livia\Commands\Context  $context
      * @return void
      * @internal
      */
-    function unsetAwaiting(\CharlotteDunois\Livia\Commands\Context $message) {
-        $key = \array_search($message->message->author->id.$message->message->channel->id, $this->awaiting, true);
-        if($key !== false) {
-            unset($this->awaiting[$key]);
+    function unsetAwaiting(\CharlotteDunois\Livia\Commands\Context $context) {
+        unset($this->awaiting[$context->message->author->id.'-'.$context->message->channel->id]);
+    }
+    
+    /**
+     * Get all awaiting context values by a specific ID.
+     * @param string  $id
+     * @return mixed[]
+     */
+    function getAwaitingsByID(string $id) {
+        $objs = array();
+        
+        foreach($this->awaiting as $key => $value) {
+            if(\strpos($key, $id) !== false) {
+                $objs[$key] = $value;
+            }
         }
+        
+        return $objs;
     }
     
     /**
      * Throttles negative response messages (such as throttling, not a nsfw channel, command blocked, etc.). Used exclusively for and by `Commands\Context`.
-     * @param \CharlotteDunois\Livia\Commands\Context  $message
+     * @param \CharlotteDunois\Livia\Commands\Context  $context
      * @param string                                   $response
      * @param callable                                 $resolve
      * @param callable                                 $reject
      * @return void
      */
-    function throttleNegativeResponseMessage(\CharlotteDunois\Livia\Commands\Context $message, string $response, callable $resolve, callable $reject) {
-        if($message->command === null) {
+    function throttleNegativeResponseMessage(\CharlotteDunois\Livia\Commands\Context $context, string $response, callable $resolve, callable $reject) {
+        if($context->command === null) {
             return $resolve(array());
         }
         
-        $key = $message->message->author->id.'-'.$message->message->channel->id.'-'.$message->command->name;
+        $key = $context->message->author->id.'-'.$context->message->channel->id.'-'.$context->command->name;
         $timestamp = $this->negativeResponseThrottling[$key] ?? 0;
         $timeout = (int) $this->client->getOption('negativeResponseThrottlingDuration');
         
@@ -473,7 +506,7 @@ class CommandDispatcher implements \Serializable {
         }
         
         $this->negativeResponseThrottling[$key] = \time();
-        $message->reply($response)->done($resolve, $reject);
+        $context->reply($response)->done($resolve, $reject);
     }
     
     /**

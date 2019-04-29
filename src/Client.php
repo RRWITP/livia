@@ -44,7 +44,7 @@ class Client extends \CharlotteDunois\Yasmin\Client {
      * ```
      * array(
      *   'commandPrefix' => string|null, (Default command prefix, null means only mentions will trigger the handling, defaults to l$)
-     *   'commandBlockedMessagePattern' => bool, (Whether command pattern maatches will send command blocked messages, defaults to true)
+     *   'commandBlockedMessagePattern' => bool, (Whether command pattern matches will send command blocked messages, defaults to true)
      *   'commandEditableDuration' => int, (Time in seconds that command messages should be editable, defaults to 30)
      *   'commandThrottlingMessagePattern' => bool, (Whether command pattern matches will send command throttling messages, defaults to true)
      *   'negativeResponseThrottlingDuration' => int, (Time in seconds how long negative responses should be not repeated during that time (determined by authorID-channelID-command), defaults to 15)

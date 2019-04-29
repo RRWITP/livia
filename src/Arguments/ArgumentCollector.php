@@ -147,19 +147,19 @@ class ArgumentCollector implements \Serializable {
      * @param int|float                                $promptLimit
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    function obtain(\CharlotteDunois\Livia\Commands\Context $message, $provided = array(), $promptLimit = null) {
+    function obtain(\CharlotteDunois\Livia\Commands\Context $context, $provided = array(), $promptLimit = null) {
         if($promptLimit === null) {
             $promptLimit = $this->promptLimit;
         }
-        
-        $this->client->dispatcher->setAwaiting($message);
+    
+        $this->client->dispatcher->setAwaiting($context);
         
         $values = array();
         $results = array();
         
         try {
-            return $this->obtainNext($message, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($message, &$values, &$results) {
-                $this->client->dispatcher->unsetAwaiting($message);
+            $promise = $this->obtainNext($context, $provided, $promptLimit, $values, $results, 0)->then(function ($result = null) use ($context, &$values, &$results) {
+                $this->client->dispatcher->unsetAwaiting($context);
                 
                 if($result !== null) {
                     return $result;
@@ -175,13 +175,16 @@ class ArgumentCollector implements \Serializable {
                         return $res->answers;
                     }, $results))
                 );
-            }, function ($error) use ($message) {
-                $this->client->dispatcher->unsetAwaiting($message);
+            }, function ($error) use ($context) {
+                $this->client->dispatcher->unsetAwaiting($context);
                 
                 throw $error;
             });
+            
+            $this->client->dispatcher->setAwaiting($context, $promise);
+            return $promise;
         } catch (\Throwable $error) {
-            $this->client->dispatcher->unsetAwaiting($message);
+            $this->client->dispatcher->unsetAwaiting($context);
             
             throw $error;
         }
@@ -189,7 +192,7 @@ class ArgumentCollector implements \Serializable {
     
     /**
      * Obtains and collects the next argument.
-     * @param \CharlotteDunois\Livia\Commands\Context         $message
+     * @param \CharlotteDunois\Livia\Commands\Context         $context
      * @param array                                           $provided
      * @param int|float                                       $promptLimit
      * @param array                                           $values
@@ -197,7 +200,7 @@ class ArgumentCollector implements \Serializable {
      * @param int                                             $current
      * @return \React\Promise\ExtendedPromiseInterface
      */
-    protected function obtainNext(\CharlotteDunois\Livia\Commands\Context $message, array &$provided, $promptLimit, array &$values, array &$results, int $current) {
+    protected function obtainNext(\CharlotteDunois\Livia\Commands\Context $context, array &$provided, $promptLimit, array &$values, array &$results, int $current) {
         if(empty($this->args[$current])) {
             return \React\Promise\resolve();
         }
@@ -211,8 +214,8 @@ class ArgumentCollector implements \Serializable {
             ) : null
         );
         
-        return $this->args[$current]->obtain($message, $providedArg, $bag)
-            ->then(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $result) use ($message, &$provided, $bag, $promptLimit, &$values, &$results, $current) {
+        return $this->args[$current]->obtain($context, $providedArg, $bag)
+            ->then(function (\CharlotteDunois\Livia\Arguments\ArgumentBag $result) use ($context, &$provided, $bag, $promptLimit, &$values, &$results, $current) {
                 $results[] = $result;
                 
                 if($bag->cancelled) {
@@ -231,7 +234,7 @@ class ArgumentCollector implements \Serializable {
                 $values[$this->args[$current]->key] = ($this->args[$current]->infinite ? $result->values : $result->values[0]);
                 $current++;
                 
-                return $this->obtainNext($message, $provided, $promptLimit, $values, $results, $current);
+                return $this->obtainNext($context, $provided, $promptLimit, $values, $results, $current);
             });
     }
 }
