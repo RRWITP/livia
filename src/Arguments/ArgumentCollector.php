@@ -181,8 +181,15 @@ class ArgumentCollector implements \Serializable {
                 throw $error;
             });
             
-            $this->client->dispatcher->unsetAwaiting($context);
-            $this->client->dispatcher->setAwaiting($context, $promise);
+            try {
+                // Try to get it, if successful re-set it
+                $this->client->dispatcher->getAwaiting($context);
+                
+                $this->client->dispatcher->unsetAwaiting($context);
+                $this->client->dispatcher->setAwaiting($context, $promise);
+            } catch (\RuntimeException $e) {
+                /* Ignore error, context was unset before we got here */
+            }
             
             return $promise;
         } catch (\Throwable $error) {
