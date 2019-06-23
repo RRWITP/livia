@@ -3,6 +3,13 @@ Livia is a Discord Bot framework, which utilizes [Yasmin](https://github.com/Cha
 
 Commando was used as template for the design of Livia.
 
+# Getting Started
+Use [composer](https://packagist.org/packages/charlottedunois/livia) to install Livia and its dependencies.
+
+```
+composer require charlottedunois/livia
+```
+
 # Built-in Argument Types
 Livia ships with a few argument types you can use for your command arguments. Here's a list:
 
