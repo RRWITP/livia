@@ -1,6 +1,6 @@
 {
     "name": "charlottedunois/livia",
-    "description": "Livia is a Discord Bot framework, which utilizes Yasmin, the Discord API library.",
+    "description": "Livia is a Discord Bot framework for PHP.",
     "type": "library",
     "license": "Apache-2.0",
     "authors": [
