@@ -413,9 +413,7 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
     protected function respond(string $type, string $content, array $options = array(), bool $fromEdit = false) {
         if($type === 'reply' && $this->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\DMChannelInterface) {
             $type = 'plain';
-        }
-        
-        if($type !== 'direct' && $this->message->guild !== null && !$this->message->channel->permissionsFor($this->client->user)->has('SEND_MESSAGES')) {
+        } elseif($type !== 'direct' && $this->message->guild !== null && !$this->message->channel->permissionsFor($this->client->user)->has('SEND_MESSAGES')) {
             $type = 'direct';
         }
         
