@@ -228,7 +228,11 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
             }
             
             // Ensure the client user has the required permissions
-            if($this->message->channel->guild !== null && !empty($this->command->clientPermissions)) {
+            if(
+                $this->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\GuildChannelInterface &&
+                $this->message->channel->guild !== null &&
+                !empty($this->command->clientPermissions)
+            ) {
                 $perms = $this->message->channel->permissionsFor($this->message->guild->me);
                 
                 $missing = array();
@@ -327,7 +331,12 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 $this->client->emit('commandRun', $this->command, $promise, $this, $args, ($this->patternMatches !== null));
                 
                 return $promise->then(function ($response) use (&$argmsgs) {
-                    if(!($response instanceof \CharlotteDunois\Yasmin\Models\Message || $response instanceof \CharlotteDunois\Collect\Collection || \is_array($response) || $response === null)) {
+                    if(!(
+                        $response instanceof \CharlotteDunois\Yasmin\Models\Message ||
+                        $response instanceof \CharlotteDunois\Collect\Collection ||
+                        \is_array($response) ||
+                        $response === null
+                    )) {
                         throw new \RuntimeException('Command '.$this->command->name.'\'s run() resolved with an unknown type ('.\gettype($response).'). Command run methods must return a Promise that resolve with a Message, an array of Messages, a Collection of Messages, or null.');
                     }
                     
@@ -349,7 +358,7 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
                         return \array_merge($argmsgs, $msgs);
                     });
                 });
-            })->otherwise(function ($error) use (&$args, $typingCount, &$argmsgs) {
+            })->then(null, function (\Throwable $error) use (&$args, $typingCount, &$argmsgs) {
                 if($this->message->channel->typingCount() > $typingCount) {
                     $this->message->channel->stopTyping();
                 }
@@ -368,7 +377,7 @@ class Context extends \CharlotteDunois\Yasmin\Models\ClientBase {
                 
                 if($ownersLength > 0) {
                     $index = 0;
-                    $owners = \array_map(function ($user) use ($index, $ownersLength) {
+                    $owners = \array_map(function ($user) use (&$index, $ownersLength) {
                         $or = ($ownersLength > 1 && $index === ($ownersLength - 1) ? 'or ' : '');
                         $index++;
                         

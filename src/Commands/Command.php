@@ -402,7 +402,11 @@ abstract class Command {
         }
         
         // Ensure the user has the proper permissions
-        if($context->message->guild !== null && !empty($this->userPermissions)) {
+        if(
+            $context->message->channel instanceof \CharlotteDunois\Yasmin\Interfaces\GuildChannelInterface &&
+            $context->message->guild !== null &&
+            !empty($this->userPermissions)
+        ) {
             $perms = $context->message->channel->permissionsFor($context->message->member);
             
             $missing = array();
