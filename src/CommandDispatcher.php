@@ -461,7 +461,6 @@ class CommandDispatcher implements \Serializable {
      * Removes the awaiting context for the message.
      * @param \CharlotteDunois\Livia\Commands\Context  $context
      * @return void
-     * @internal
      */
     function unsetAwaiting(\CharlotteDunois\Livia\Commands\Context $context) {
         unset($this->awaiting[$context->message->author->id.'-'.$context->message->channel->id]);
