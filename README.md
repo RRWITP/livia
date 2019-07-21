@@ -49,7 +49,7 @@ A Setting Provider sits as middle-man between Livia and the DBMS. The job of the
 
 There are two providers included in Livia:
 
-#### MySQL/MariaDB (react/mysql)
+#### MySQL/MariaDB (react/mysql) -- Deprecated
 `MySQLProvider` - a provider for MySQL/MariaDB, which utilizes [`react/mysql`](https://github.com/friends-of-reactphp/mysql).
 
 Usage:
