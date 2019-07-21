@@ -30,8 +30,6 @@ class MySQLProvider extends SettingProvider {
      * @param \React\MySQL\ConnectionInterface  $db
      */
     function __construct(\React\MySQL\ConnectionInterface $db) {
-        \trigger_error('The MySQLProvider is deprecated in v0.5 and to be removed in v0.6, migrate to Plasma instead', \E_USER_DEPRECATED);
-        
         $this->db = $db;
         $this->providerState = \CharlotteDunois\Livia\Providers\SettingProvider::STATE_READY;
         
