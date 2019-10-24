@@ -41,7 +41,7 @@ class PlasmaProvider extends SettingProvider {
      * @return void
      * @internal
      */
-    function __sleep() {
+    function __wakeup() {
         $this->providerState = \CharlotteDunois\Livia\Providers\SettingProvider::STATE_IDLE;
     }
     
@@ -109,6 +109,10 @@ class PlasmaProvider extends SettingProvider {
                     $rows = $result->getRows();
                     
                     if(empty($rows)) {
+                        if(!($settings instanceof \ArrayObject)) {
+                            $settings = new \ArrayObject($settings, \ArrayObject::ARRAY_AS_PROPS);
+                        }
+                        
                         $this->settings->set($guild, $settings);
                         
                         return $this->db->execute(

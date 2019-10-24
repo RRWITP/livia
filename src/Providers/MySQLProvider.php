@@ -41,7 +41,7 @@ class MySQLProvider extends SettingProvider {
      * @return void
      * @internal
      */
-    function __sleep() {
+    function __wakeup() {
         $this->providerState = \CharlotteDunois\Livia\Providers\SettingProvider::STATE_IDLE;
     }
     
@@ -102,6 +102,10 @@ class MySQLProvider extends SettingProvider {
         
         return $this->runQuery('SELECT * FROM `settings` WHERE `guild` = ?', array($guild))->then(function ($result) use ($guild, $settings) {
             if(empty($result->resultRows)) {
+                if(!($settings instanceof \ArrayObject)) {
+                    $settings = new \ArrayObject($settings, \ArrayObject::ARRAY_AS_PROPS);
+                }
+                
                 $this->settings->set($guild, $settings);
                 return $this->runQuery('INSERT INTO `settings` (`guild`, `settings`) VALUES (?, ?)', array($guild, \json_encode($settings)));
             } else {
