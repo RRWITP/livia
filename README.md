@@ -169,4 +169,4 @@ $loop->run();
 ```
 
 # Documentation
-https://livia.neko.run
+https://charlottedunois.github.io/Livia/
