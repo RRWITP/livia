@@ -12,9 +12,9 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.1",
-        "charlottedunois/collection": "^0.2.0",
-        "charlottedunois/validator": "^0.3.0|^0.2.0",
-        "charlottedunois/yasmin": "^0.6.0|dev-master",
+        "valzargaming/collection": "^0.2.0",
+        "valzargaming/validator": "^0.3.0|^0.2.0",
+        "valzargaming/yasmin": "^0.6.0|dev-master",
         "symfony/var-dumper": "^4.1"
     },
     "require-dev": {
